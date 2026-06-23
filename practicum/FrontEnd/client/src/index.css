@@ -1,0 +1,16 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Heebo", "Assistant", "Segoe UI", Arial, sans-serif;
+  background: #f1f2f4;
+  color: #1f2937;
+}

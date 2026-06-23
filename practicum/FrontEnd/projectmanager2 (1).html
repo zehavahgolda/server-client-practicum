@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>אב-טיפוס אפיון - תכנון קיבולת והקצאת עובדים</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+  <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+          --bg: #ffffff;
+          --bg2: #f5f5f3;
+          --bg3: #eeede9;
+          --text: #1a1a18;
+          --muted: #6b6b67;
+          --line: rgba(0,0,0,0.1);
+          --line-strong: rgba(0,0,0,0.2);
+          --brand: #185FA5;
+          --brand-soft: #E6F1FB;
+          --ok: #0F6E56;
+          --ok-soft: #E1F5EE;
+          --warn: #854F0B;
+          --warn-soft: #FAEEDA;
+          --danger: #A32D2D;
+          --danger-soft: #FBE8EA;
+          --radius: 8px;
+          --radius-lg: 12px;
+
+          --cat-dev: #0d5e9e;
+          --cat-front: #0d8f8a;
+          --cat-dba: #6e4bb3;
+          --cat-devops: #6b7415;
+          --cat-ux: #c26410;
+          --cat-impl: #38744c;
+          --cat-pm: #9c3655;
+        }
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --bg: #1e1e1c;
+            --bg2: #2a2a27;
+            --bg3: #333330;
+            --text: #f0efe9;
+            --muted: #a0a09a;
+            --line: rgba(255,255,255,0.1);
+            --line-strong: rgba(255,255,255,0.2);
+            --brand-soft: #0c3460;
+            --ok-soft: #083428;
+            --warn-soft: #3d2800;
+            --danger-soft: #3d1010;
+          }
+        }
+        body {
+          background: var(--bg3);
+          color: var(--text);
+          font-family: "Heebo", "Assistant", "Segoe UI", Arial, sans-serif;
+          font-size: 14px;
+          min-height: 100vh;
+          line-height: 1.35;
+        }
+        .app { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px; }
+        .topbar-title { font-size: 20px; font-weight: 600; color: var(--text); }
+        .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+        .topbar-badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .topbar-badge { background: var(--bg); border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: background 0.15s; }
+        .topbar-badge:hover { background: var(--bg2); }
+        button { font-family: inherit; cursor: pointer; }
+        .btn { font-size: 13px; padding: 7px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg); color: var(--text); display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+        .btn:hover { background: var(--bg2); }
+        .btn:active { transform: scale(0.98); }
+        .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+        .btn.primary:hover { background: #0C447C; border-color: #0C447C; }
+        .btn.soft { background: var(--bg2); border-color: var(--line); }
+        .tabs { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; }
+        .tab { border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg); color: var(--muted); font-size: 13px; font-weight: 700; padding: 7px 12px; white-space: nowrap; }
+        .tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+        .screen-toolbar { display: grid; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 12px; }
+        .toolbar-filters, .toolbar-actions, .toolbar-views { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .toolbar-filters { padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+        .toolbar-label { font-size: 11px; color: var(--muted); font-weight: 700; min-width: 46px; }
+        .toolbar-select, .toolbar-input { font-size: 13px; font-family: inherit; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg); color: var(--text); direction: rtl; min-width: 140px; }
+        .toolbar-input { min-width: 220px; flex: 1; }
+        .toolbar-select:focus, .toolbar-input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(24,95,165,0.15); }
+        .field { display: flex; flex-direction: column; gap: 4px; }
+        .field label { font-size: 11px; color: var(--muted); font-weight: 700; }
+        .field input, .field select, .modal-field input, .modal-field select, .modal-field textarea { font-size: 13px; font-family: inherit; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg); color: var(--text); direction: rtl; }
+        .field input:focus, .field select:focus, .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(24,95,165,0.15); }
+        .control-actions { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; grid-column: 1 / -1; }
+        .screen { display: none; animation: riseIn 0.22s ease; }
+        .screen.active { display: block; }
+        @keyframes riseIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
+        .kpi, .panel, .matrix-wrap, .card, .cat-panel, .timeline { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); }
+        .kpi { padding: 12px; }
+        .kpi .label { font-size: 12px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+        .kpi .value { font-size: 28px; font-weight: 800; line-height: 1; }
+        .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+        .progress-bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin: 8px 0 4px; }
+        .progress-fill { height: 100%; background: var(--brand); border-radius: 2px; transition: width 0.3s ease; }
+        .danger { color: var(--danger); }
+        .warn { color: var(--warn); }
+        .ok { color: var(--ok); }
+        .dash-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12px; }
+        .panel { overflow: hidden; }
+        .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid var(--line); background: var(--bg2); font-size: 14px; font-weight: 700; }
+        .alert-list, .mini-list { list-style: none; }
+        .alert-item, .mini-item { padding: 10px 13px; border-bottom: 1px dashed var(--line); font-size: 13px; }
+        .alert-item:last-child, .mini-item:last-child { border-bottom: none; }
+        .tag { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; margin-left: 7px; }
+        .tag.danger { background: var(--danger-soft); color: var(--danger); }
+        .tag.warn { background: var(--warn-soft); color: var(--warn); }
+        .tag.ok { background: var(--ok-soft); color: var(--ok); }
+        .section-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .section-title { font-size: 15px; font-weight: 800; color: #27384c; }
+        .section-search { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+        .section-search input {
+          font-size: 13px;
+          font-family: inherit;
+          padding: 8px 10px;
+          border: 1px solid var(--line-strong);
+          border-radius: var(--radius);
+          background: var(--bg);
+          color: var(--text);
+          direction: rtl;
+          min-width: 240px;
+          flex: 1;
+        }
+        .section-search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(24,95,165,0.15); }
+        .matrix-wrap { overflow: auto; max-height: 70vh; }
+        table { border-collapse: collapse; width: 100%; min-width: 1120px; font-size: 13px; }
+        th, td { border-bottom: 1px solid var(--line); border-left: 1px solid #edf2f6; padding: 8px; text-align: center; vertical-align: middle; white-space: nowrap; }
+        th { position: sticky; top: 0; z-index: 3; background: #f7fafc; font-weight: 800; color: #243141; }
+        .sticky-col { position: sticky; right: 0; z-index: 4; background: #fff; text-align: right; min-width: 230px; box-shadow: -8px 0 10px -10px rgba(20,30,40,0.45); }
+        .group-row td { background: #f4f8fd; color: #36506d; font-weight: 800; text-align: right; }
+        .sys-h-servicenow { background: #e5f1fd; }
+        .sys-h-gis { background: #e3f4ef; }
+        .sys-h-internal { background: #f5ebfc; }
+        .sys-h-bi { background: #fff2df; }
+        .sys-h-cyber { background: #fde8ee; }
+        .alloc-cell.warn { background: #fff4e7; color: #915a10; font-weight: 700; }
+        .alloc-cell.danger { background: #fdeff2; color: #a82738; font-weight: 800; }
+        .alloc-cell.ok { background: #edf8f3; color: #136a47; font-weight: 700; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 11px; }
+        .card { border-radius: var(--radius-lg); padding: 12px; transition: border-color 0.15s, box-shadow 0.15s; }
+        .card:hover { border-color: var(--line-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .card h4 { font-size: 16px; margin-bottom: 4px; }
+        .meta { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+        .kv { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px dashed #ebf0f5; font-size: 13px; }
+        .kv:last-child { border-bottom: none; }
+        .status-pill { display: inline-flex; border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 800; margin-bottom: 8px; }
+        .status-ok { background: var(--ok-soft); color: var(--ok); }
+        .status-short { background: var(--danger-soft); color: var(--danger); }
+        .status-excess { background: var(--brand-soft); color: var(--brand); }
+        .status-risk { background: var(--warn-soft); color: var(--warn); }
+        .cat-panel { margin-bottom: 10px; overflow: hidden; }
+        .cat-head { padding: 11px 13px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: 800; }
+        .cat-body { border-top: 1px solid var(--line); padding: 8px 13px 13px; display: none; }
+        .cat-panel.open .cat-body { display: block; }
+        .cat-kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #ecf1f6; font-size: 13px; }
+        .cat-kv:last-child { border-bottom: none; }
+        .timeline { padding: 10px 12px; }
+        .event { border-right: 3px solid #d7e0ea; padding: 8px 11px 9px; margin: 5px 0; background: #fbfdff; border-radius: 8px; }
+        .event .date { font-size: 11px; color: var(--muted); margin-bottom: 3px; font-weight: 700; }
+        .event .title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .event .impact { font-size: 12px; color: #344758; }
+        .event.danger { border-right-color: var(--danger); }
+        .event.warn { border-right-color: var(--warn); }
+        .event.ok { border-right-color: var(--ok); }
+        .event.info { border-right-color: var(--brand); }
+        .legend { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 5px; vertical-align: middle; }
+        .small-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+        .empty-state { padding: 2.5rem 1rem; text-align: center; color: var(--muted); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); background: var(--bg); }
+        .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.4; }
+        .empty-state p { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+        .empty-state span { font-size: 12px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(14,24,36,0.42); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 150; }
+        .modal-overlay.show { display: flex; }
+        .modal { width: min(640px, 100%); max-height: 90vh; overflow: auto; background: var(--bg); border-radius: var(--radius-lg); border: 1px solid var(--line-strong); box-shadow: 0 8px 32px rgba(0,0,0,0.18); padding: 1rem; }
+        .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .modal-title { font-size: 18px; font-weight: 800; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+        .modal-grid .full { grid-column: 1 / -1; }
+        .modal-field { display: flex; flex-direction: column; gap: 4px; }
+        .modal-field label { font-size: 12px; color: var(--muted); font-weight: 700; }
+        .modal-field textarea { min-height: 90px; resize: vertical; }
+        .modal-foot { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .icon-btn { width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font-size: 20px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+        .icon-btn:hover { background: var(--bg2); color: var(--text); }
+        .form-section { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 4px; margin-top: 6px; border-top: 1px solid var(--line); }
+        .form-section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+        .form-section-title { font-size: 13px; font-weight: 800; color: #344758; }
+        .form-section-note { font-size: 11px; color: var(--muted); }
+        .dialog-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+        .toolbar-note { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+        .kpi.clickable { cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+        .kpi.clickable:hover { border-color: var(--line-strong); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+        .kpi.active-drill { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+        .dashboard-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 12px; margin-top: 12px; }
+        .dashboard-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .chart-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+        .chart-bar-label { min-width: 96px; max-width: 96px; color: var(--muted); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .chart-bar-track { flex: 1; height: 10px; background: var(--bg3); border-radius: 5px; overflow: hidden; }
+        .chart-bar-fill { height: 100%; border-radius: 5px; background: var(--brand); transition: width 0.3s; }
+        .chart-bar-val { min-width: 28px; text-align: left; font-weight: 700; color: var(--text); font-size: 12px; }
+        .donut-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .donut-legend { display: flex; flex-direction: column; gap: 7px; font-size: 12px; }
+        .donut-legend-item { display: flex; align-items: center; gap: 6px; }
+        .donut-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        @media (max-width: 1100px) { .dashboard-charts { grid-template-columns: 1fr; } }
+        .kpi-grid.management { grid-template-columns: repeat(4, minmax(160px, 1fr)); margin-top: 10px; }
+        .kpi.critical { border-color: var(--danger); background: var(--danger-soft); }
+        .kpi.critical .label, .kpi.critical .value { color: var(--danger); }
+        .kpi.healthy { border-color: var(--ok); background: var(--ok-soft); }
+        .kpi.healthy .label, .kpi.healthy .value { color: var(--ok); }
+        .collapsible { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; }
+        .collapsible summary { cursor: pointer; font-size: 12px; color: var(--muted); font-weight: 700; }
+        .summary-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .summary-pill { background: var(--bg2); color: #304154; border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 700; }
+        .budget-block { margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+        .budget-grid { display: grid; grid-template-columns: repeat(4, minmax(90px, 1fr)); }
+        .budget-cell { padding: 7px 8px; border-left: 1px solid var(--line); text-align: center; }
+        .budget-cell:last-child { border-left: none; }
+        .budget-cell .label { display: block; font-size: 10px; color: #4a4a46; font-weight: 700; margin-bottom: 2px; }
+        .budget-cell .value { display: block; font-size: 14px; font-weight: 800; line-height: 1.1; }
+        .budget-cell.total { background: var(--brand-soft); color: var(--brand); }
+        .budget-cell.total .label { color: var(--brand); opacity: .9; }
+        .budget-cell.used { background: var(--bg2); }
+        .budget-cell.remaining { background: var(--ok-soft); }
+        .budget-cell.diff { background: var(--warn-soft); }
+        .budget-cell.diff .value.over { color: var(--danger); }
+        .budget-cell.diff .value.under { color: var(--ok); }
+        .budget-cell.diff .value.even { color: var(--text); }
+        .detail-budget-wrap { margin-top: 12px; }
+        .segmented { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+        .seg-btn { border: 1px solid var(--line-strong); background: var(--bg); color: var(--muted); border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 700; }
+        .seg-btn.active { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); }
+        .group-stack { display: grid; gap: 10px; }
+        .group-panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; }
+        .group-head { width: 100%; border: none; background: var(--bg); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: right; }
+        .group-head:hover { background: var(--bg2); }
+        .group-title { font-size: 14px; font-weight: 800; color: var(--text); }
+        .group-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+        .group-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .group-body { padding: 0 14px 14px; border-top: 1px solid var(--line); background: #fcfcfb; }
+        .entity-list { display: grid; gap: 8px; margin-top: 12px; }
+        .entity-row { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); padding: 11px 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+        .entity-row:hover { border-color: var(--line-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .entity-row.selected { border-color: var(--brand); background: var(--brand-soft); }
+        .entity-row-top, .detail-top, .detail-actions, .entity-stats { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+        .entity-name { font-size: 14px; font-weight: 800; color: var(--text); }
+        .entity-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        .entity-stats { margin-top: 10px; }
+        .metric-mini { min-width: 0; flex: 1; }
+        .metric-mini .label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+        .metric-mini .value { font-size: 14px; font-weight: 800; margin-top: 2px; white-space: nowrap; }
+        .card-metrics { display: flex; gap: 0; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--line); }
+        .card-metrics .metric-mini { text-align: center; padding: 0 4px; border-left: 1px dashed var(--line); }
+        .card-metrics .metric-mini:last-child { border-left: none; }
+        .group-head-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; cursor: pointer; border: none; width: 100%; background: var(--bg); text-align: right; border-radius: var(--radius-lg); }
+        .group-head-bar:hover { background: var(--bg2); }
+        .group-head-left { display: flex; align-items: center; gap: 10px; }
+        .group-status-bar { width: 4px; height: 36px; border-radius: 3px; flex-shrink: 0; }
+        .group-head-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        .detail-panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); padding: 16px; margin-top: 12px; }
+        .detail-hero { display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: start; }
+        .detail-avatar { width: 64px; height: 64px; border-radius: 18px; background: var(--brand-soft); color: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
+        .detail-name { font-size: 20px; font-weight: 800; color: var(--text); }
+        .detail-sub { font-size: 13px; color: var(--muted); margin-top: 5px; }
+        .detail-grid { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px; margin-top: 14px; }
+        .detail-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg2); padding: 10px; }
+        .detail-card .label { font-size: 11px; color: var(--muted); }
+        .detail-card .value { font-size: 18px; font-weight: 800; margin-top: 2px; }
+        .detail-section { margin-top: 16px; }
+        .detail-section-title { font-size: 13px; font-weight: 800; color: #344758; margin-bottom: 8px; }
+        .linked-list { display: grid; gap: 8px; }
+        .linked-item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .linked-item button { border: none; background: none; color: var(--brand); font-size: 12px; font-weight: 700; }
+        .risk-banner { border: 1px solid var(--line); border-radius: var(--radius); background: #fffaf4; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; color: #694814; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .workspace-shell { border: 1px solid var(--line); border-radius: var(--radius-lg); background: linear-gradient(180deg, #fff 0%, #fbfcfe 100%); margin-bottom: 14px; overflow: hidden; }
+        .workspace-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: #f9fbfd; flex-wrap: wrap; }
+        .workspace-eyebrow { font-size: 11px; font-weight: 800; color: var(--brand); text-transform: uppercase; letter-spacing: .04em; }
+        .workspace-title { font-size: 22px; font-weight: 800; color: var(--text); margin-top: 3px; }
+        .workspace-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+        .workspace-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .workspace-body { padding: 16px; }
+        .workspace-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; }
+        .workspace-panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); padding: 12px; }
+        .workspace-panel-title { font-size: 13px; font-weight: 800; color: #344758; margin-bottom: 8px; }
+        .workspace-list { display: grid; gap: 8px; }
+        .workspace-note { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg2); padding: 10px; font-size: 12px; color: #324354; }
+        .workspace-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .workspace-view-switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .workspace-view-note { font-size: 12px; color: var(--muted); }
+        .budget-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; margin-top: 12px; }
+        .budget-list { display: grid; gap: 8px; }
+        .budget-item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .budget-item-main { min-width: 0; }
+        .budget-item-name { font-size: 13px; font-weight: 800; color: var(--text); }
+        .budget-item-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .budget-item-value { font-size: 16px; font-weight: 800; }
+        .budget-matrix { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 10px; }
+        .budget-matrix-row { display: grid; grid-template-columns: 1.4fr repeat(5, minmax(70px, 1fr)); gap: 0; align-items: center; }
+        .budget-matrix-row > div { padding: 8px 10px; border-left: 1px solid var(--line); font-size: 12px; }
+        .budget-matrix-row > div:last-child { border-left: none; }
+        .budget-matrix-head { background: var(--bg2); font-weight: 800; color: #314255; }
+        .budget-matrix-body .budget-matrix-row { border-top: 1px solid var(--line); }
+        .budget-matrix-body .budget-matrix-row:nth-child(even) { background: #fafcfe; }
+        .budget-cell-main { font-weight: 800; color: var(--text); }
+        .budget-cell-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .budget-summary-stack { display: grid; gap: 8px; margin-top: 10px; }
+        .budget-summary-row { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg2); padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; }
+        .budget-summary-row strong { font-size: 15px; color: var(--text); }
+        .budget-summary-row.primary { background: var(--brand-soft); border-color: rgba(24,95,165,0.3); }
+        .budget-summary-row.success { background: var(--ok-soft); border-color: rgba(15,110,86,0.3); }
+        .budget-summary-row.warn { background: var(--warn-soft); border-color: rgba(133,79,11,0.3); }
+        .workspace-item { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; background: var(--bg); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+        .workspace-item-main { min-width: 0; }
+        .assign-drawer-overlay { position: fixed; inset: 0; background: rgba(14,24,36,0.38); z-index: 160; display: none; }
+        .assign-drawer-overlay.show { display: block; }
+        .assign-drawer { position: fixed; top: 0; left: 0; width: min(480px, 100vw); height: 100vh; background: var(--bg); border-right: 1px solid var(--line-strong); box-shadow: 4px 0 24px rgba(0,0,0,0.14); display: flex; flex-direction: column; z-index: 161; transform: translateX(-100%); transition: transform 0.25s ease; }
+        .assign-drawer.show { transform: translateX(0); }
+        .assign-drawer-head { padding: 16px; border-bottom: 1px solid var(--line); background: var(--bg2); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-shrink: 0; }
+        .assign-drawer-title { font-size: 17px; font-weight: 800; }
+        .assign-drawer-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+        .assign-drawer-search { padding: 10px 14px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+        .assign-drawer-search input { width: 100%; font-size: 13px; font-family: inherit; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--bg); color: var(--text); direction: rtl; }
+        .assign-drawer-search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(24,95,165,0.15); }
+        .assign-drawer-list { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+        .assign-row { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); padding: 10px 11px; cursor: pointer; transition: border-color 0.15s, background 0.15s; display: flex; align-items: center; gap: 10px; }
+        .assign-row:hover { border-color: var(--line-strong); background: var(--bg2); }
+        .assign-row.checked { border-color: var(--brand); background: var(--brand-soft); }
+        .assign-check { width: 18px; height: 18px; border: 2px solid var(--line-strong); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .assign-row.checked .assign-check { background: var(--brand); border-color: var(--brand); color: #fff; }
+        .assign-row-info { flex: 1; min-width: 0; }
+        .assign-row-name { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .assign-row-meta { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+        .assign-row-stats { display: flex; gap: 10px; flex-shrink: 0; text-align: center; }
+        .assign-stat { }
+        .assign-stat .label { font-size: 10px; color: var(--muted); }
+        .assign-stat .value { font-size: 13px; font-weight: 800; }
+        .assign-drawer-foot { padding: 12px 14px; border-top: 1px solid var(--line); background: var(--bg2); display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+        .assign-count { font-size: 12px; color: var(--muted); flex: 1; }
+        .toast { position: fixed; left: 16px; bottom: 16px; background: #1a1a18; color: #fff; border-radius: var(--radius); padding: 10px 13px; font-size: 13px; opacity: 0; transform: translateY(10px); transition: 0.2s ease; pointer-events: none; z-index: 100; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        @media (max-width: 1100px) {
+          .kpi-grid { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
+          .dash-layout { grid-template-columns: 1fr; }
+          .dashboard-grid { grid-template-columns: 1fr; }
+          .toolbar-filters { border-bottom: none; padding-bottom: 0; }
+          .detail-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+          .workspace-layout { grid-template-columns: 1fr; }
+          .budget-layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 760px) {
+          .toolbar-input, .toolbar-select { min-width: 100%; }
+          .kpi-grid { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+          .info-grid { grid-template-columns: 1fr; }
+          .detail-hero { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 520px) {
+          .kpi-grid, .modal-grid { grid-template-columns: 1fr; }
+          .app { padding-left: 10px; padding-right: 10px; }
+          .detail-grid { grid-template-columns: 1fr; }
+          .budget-grid { grid-template-columns: 1fr 1fr; }
+        }
+      </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">ניהול קיבולת והקצאת עובדים</div>
+        <div class="topbar-sub">אב-טיפוס אפיון ניהולי להחלפת תהליך Excel מורכב</div>
+      </div>
+      <div class="topbar-badges">
+        <span class="topbar-badge">RTL עברית מלאה</span>
+        <span class="topbar-badge">נתוני דמה בלבד</span>
+        <span class="topbar-badge">Prototype להצגה</span>
+        <a href="project-manager-takziv.html" class="topbar-badge" style="text-decoration:none;color:var(--brand);border-color:var(--brand);background:var(--brand-soft)">ניהול פרויקטים →</a>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <main>
+      <section class="screen active" id="screen-dashboard"></section>
+      <section class="screen" id="screen-matrix"></section>
+      <section class="screen" id="screen-systems"></section>
+      <section class="screen" id="screen-employees"></section>
+      <section class="screen" id="screen-categories"></section>
+      <section class="screen" id="screen-changes"></section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="formModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title" id="formTitle"></div>
+        <button class="icon-btn" id="closeFormBtn" type="button" aria-label="סגירה">×</button>
+      </div>
+      <form id="mockForm" class="modal-grid"></form>
+      <div class="modal-foot">
+        <button class="btn primary" id="saveFormBtn" type="button">שמירה (דמו)</button>
+        <button class="btn soft" id="cancelFormBtn" type="button">ביטול</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="assign-drawer-overlay" id="assignOverlay"></div>
+  <div class="assign-drawer" id="assignDrawer" dir="rtl">
+    <div class="assign-drawer-head">
+      <div>
+        <div class="assign-drawer-title" id="assignDrawerTitle">שיבוץ עובדים</div>
+        <div class="assign-drawer-sub" id="assignDrawerSub"></div>
+      </div>
+      <button class="icon-btn" id="assignDrawerClose" type="button" aria-label="סגירה">×</button>
+    </div>
+    <div class="assign-drawer-search">
+      <input type="text" id="assignSearch" placeholder="חיפוש עובד לפי שם, תחום או מנהל" autocomplete="off">
+    </div>
+    <div class="assign-drawer-list" id="assignDrawerList"></div>
+    <div class="assign-drawer-foot">
+      <span class="assign-count" id="assignCount"></span>
+      <button class="btn soft" id="assignCancelBtn" type="button">ביטול</button>
+      <button class="btn primary" id="assignConfirmBtn" type="button">שיבוץ נבחרים</button>
+    </div>
+  </div>
+
+  <script>
+    const tabs = [
+      { id: "dashboard", label: "דשבורד ניהולי" },
+      { id: "systems", label: "מערכות" },
+      { id: "employees", label: "עובדים" }
+    ];
+
+    const STORAGE_KEY = "workforce-prototype-v1";
+
+    let systems = [
+      { id: "servicenow", name: "ServiceNow", required: 42, totalBudget: 4843 },
+      { id: "gis", name: "GIS ארגוני", required: 28, totalBudget: 5460 },
+      { id: "internal", name: "מערכת פנים", required: 36, totalBudget: 3478 },
+      { id: "bi", name: "BI ניהולי", required: 23, totalBudget: 2940 },
+      { id: "cyber", name: "מודול סייבר", required: 19, totalBudget: 2380 }
+    ];
+
+    let employees = [
+      { id: 1, name: "נועה ארז", category: "פיתוח", subcategory: "Backend", manager: "עידו טל", yearlyCapacity: 12, futureEvents: "מילואים ברבעון ג׳", allocations: { servicenow: 4, gis: 0, internal: 3, bi: 2, cyber: 1 } },
+      { id: 2, name: "אורן סבג", category: "פיתוח", subcategory: "Frontend", manager: "עידו טל", yearlyCapacity: 12, futureEvents: "זמין מלא", allocations: { servicenow: 2, gis: 2, internal: 4, bi: 2, cyber: 0 } },
+      { id: 3, name: "דנה כץ", category: "פיתוח", subcategory: "DBA", manager: "קרן שגב", yearlyCapacity: 10, futureEvents: "קורס מקצועי ביולי", allocations: { servicenow: 1, gis: 3, internal: 1, bi: 1, cyber: 2 } },
+      { id: 4, name: "יאיר רז", category: "פיתוח", subcategory: "DevOps", manager: "קרן שגב", yearlyCapacity: 12, futureEvents: "החלפת תפקיד בנובמבר", allocations: { servicenow: 3, gis: 1, internal: 2, bi: 0, cyber: 4 } },
+      { id: 5, name: "ליה כהן", category: "UX/UI", subcategory: "Product Design", manager: "תמר לוין", yearlyCapacity: 11, futureEvents: "חופשת לידה החל מאוקטובר", allocations: { servicenow: 2, gis: 1, internal: 3, bi: 2, cyber: 0 } },
+      { id: 6, name: "רותם בר", category: "יישום", subcategory: "Implementation", manager: "תמר לוין", yearlyCapacity: 12, futureEvents: "זמין מלא", allocations: { servicenow: 1, gis: 4, internal: 1, bi: 2, cyber: 1 } },
+      { id: 7, name: "אסף רון", category: "ניהול פרויקטים", subcategory: "Project Manager", manager: "הילה מרום", yearlyCapacity: 12, futureEvents: "מעבר לחצי משרה בדצמבר", allocations: { servicenow: 2, gis: 2, internal: 2, bi: 1, cyber: 1 } },
+      { id: 8, name: "מיכל שחר", category: "פיתוח", subcategory: "Backend", manager: "עידו טל", yearlyCapacity: 12, futureEvents: "היעדרות רפואית באוגוסט", allocations: { servicenow: 5, gis: 1, internal: 2, bi: 1, cyber: 1 } }
+    ];
+
+    let categoryTree = [
+      { title: "Development", colorVar: "--cat-dev", children: ["Backend", "Frontend", "DBA", "DevOps"], required: 95, existing: 82 },
+      { title: "UX/UI", colorVar: "--cat-ux", children: ["Product Design"], required: 18, existing: 11 },
+      { title: "Implementation", colorVar: "--cat-impl", children: ["Implementation"], required: 24, existing: 16 },
+      { title: "Project Managers", colorVar: "--cat-pm", children: ["Project Manager"], required: 20, existing: 14 }
+    ];
+
+    let changes = [
+      { date: "03/01/2026", type: "info", title: "מערכת BI חדשה נוספה", impact: "+8 חודשי עבודה נדרשים, בעיקר אנליסטים ו-DBA" },
+      { date: "22/01/2026", type: "warn", title: "תקציב GIS צומצם", impact: "-3 חודשי הקצאה בתכנון שנתי, נדרש איזון מחדש" },
+      { date: "11/02/2026", type: "danger", title: "עובדת Backend יצאה להיעדרות", impact: "חוסר צפוי של 2 חודשי Backend ברבעון ג׳" },
+      { date: "05/03/2026", type: "ok", title: "הוקצה מחליף זמני", impact: "צמצום הפער מ-2 ל-0.5 חודשי עבודה" },
+      { date: "26/03/2026", type: "info", title: "עובד יישום הועבר בין מערכות", impact: "שיפור זמינות במערכת פנימית, פגיעה קלה ב-ServiceNow" },
+      { date: "14/04/2026", type: "warn", title: "עדכון תוכנית קיבולת", impact: "הוגדרו מחדש מטרות שנתיות ל-2027" }
+    ];
+
+    const state = {
+      activeTab: "dashboard",
+      filters: { year: "2026", category: "all", system: "all", manager: "all", q: "" },
+      activeForm: "",
+      formContext: null,
+      selectedEmployeeId: null,
+      selectedSystemId: null,
+      employeeGroupBy: "all",
+      systemGroupBy: "all",
+      systemWorkspaceView: "employees",
+      systemStatusFilter: "all",
+      employeeGroupsOpen: {},
+      systemGroupsOpen: {},
+      drill: null
+    };
+
+    const formConfigs = {
+      employee: {
+        createTitle: "הוספת עובד",
+        editTitle: "עריכת עובד",
+        subtitle: "מסך דמו לניהול פרופיל עובד, קיבולת וזמינות עתידית.",
+        fields: [
+          { key: "name", label: "שם עובד", type: "text", required: true, section: "פרופיל עובד" },
+          { key: "manager", label: "מנהל", type: "text", required: true, section: "פרופיל עובד" },
+          { key: "category", label: "קטגוריה מקצועית", type: "text", required: true, value: "פיתוח", section: "פרופיל עובד" },
+          { key: "subcategory", label: "תת תחום", type: "text", required: true, value: "Backend", section: "פרופיל עובד" },
+          { key: "yearlyCapacity", label: "קיבולת שנתית", type: "number", required: true, value: "12", section: "קיבולת וזמינות" },
+          { key: "futureEvents", label: "אירועים עתידיים", type: "text", value: "ללא", section: "קיבולת וזמינות", full: true }
+        ]
+      },
+      system: {
+        createTitle: "הוספת מערכת",
+        editTitle: "עריכת מערכת",
+        subtitle: "מסך דמו לניהול דרישת הקיבולת ומצב הסיכון של מערכת.",
+        fields: [
+          { key: "name", label: "שם מערכת", type: "text", required: true, section: "פרטי מערכת" },
+          { key: "required", label: "חודשי עבודה נדרשים", type: "number", required: true, value: "12", section: "פרטי מערכת" },
+          { key: "totalBudget", label: "סה\"כ תקציב", type: "number", required: true, value: "2500", section: "פרטי מערכת" },
+          { key: "statusHint", label: "סטטוס תכנון", type: "select", section: "קיבולת וסיכון", options: [
+            { value: "ok", label: "מאוזן" },
+            { value: "shortage", label: "מחסור" },
+            { value: "excess", label: "עודף" },
+            { value: "risk", label: "בסיכון" }
+          ] }
+        ]
+      },
+      category: {
+        createTitle: "הוספת קטגוריה מקצועית",
+        editTitle: "עריכת קטגוריה מקצועית",
+        subtitle: "דמו להגדרת קבוצת התמחות ונפח קיבולת נדרש.",
+        fields: [
+          { key: "title", label: "שם קטגוריה", type: "text", required: true, section: "מבנה קטגוריה" },
+          { key: "children", label: "תתי תחומים (מופרדים בפסיק)", type: "text", required: true, section: "מבנה קטגוריה", full: true },
+          { key: "required", label: "קיבולת נדרשת", type: "number", required: true, value: "10", section: "מדדי קיבולת" },
+          { key: "existing", label: "קיבולת קיימת", type: "number", required: true, value: "6", section: "מדדי קיבולת" }
+        ]
+      },
+      change: {
+        createTitle: "הוספת שינוי תפעולי",
+        editTitle: "עריכת שינוי תפעולי",
+        subtitle: "דמו לתיעוד שינוי והשפעתו על קיבולת העבודה.",
+        fields: [
+          { key: "date", label: "תאריך", type: "date", required: true, section: "פרטי שינוי" },
+          { key: "title", label: "כותרת שינוי", type: "text", required: true, section: "פרטי שינוי", full: true },
+          { key: "type", label: "סיווג", type: "select", section: "השפעה", options: [
+            { value: "info", label: "מידע" },
+            { value: "warn", label: "אזהרה" },
+            { value: "danger", label: "קריטי" },
+            { value: "ok", label: "שיפור" }
+          ] },
+          { key: "impact", label: "השפעה על קיבולת", type: "textarea", required: true, section: "השפעה", full: true }
+        ]
+      }
+    };
+
+    const fmt = (v) => Number(v).toLocaleString("he-IL");
+    const SYSTEM_BUDGET_MONTH_RATE = {
+      "פיתוח": 260,
+      "UX/UI": 230,
+      "יישום": 210,
+      "ניהול פרויקטים": 220
+    };
+
+    function escHtml(value) {
+      return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+    }
+
+    function toSystemId(name) {
+      return String(name).trim().toLowerCase().replace(/[^a-z0-9\u0590-\u05FF]+/g, "-").replace(/^-+|-+$/g, "") || `sys-${Date.now()}`;
+    }
+
+    function toIsoDateDisplay(dateValue) {
+      if (!dateValue || !dateValue.includes("-")) return dateValue || "";
+      const [yy, mm, dd] = dateValue.split("-");
+      return `${dd}/${mm}/${yy}`;
+    }
+
+    function saveToSession() {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ systems, employees, categoryTree, changes }));
+    }
+
+    function loadFromSession() {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.systems)) systems = parsed.systems;
+        if (Array.isArray(parsed.employees)) employees = parsed.employees;
+        if (Array.isArray(parsed.categoryTree)) categoryTree = parsed.categoryTree;
+        if (Array.isArray(parsed.changes)) changes = parsed.changes;
+      } catch (_) {
+        sessionStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    function getEmployeeTotal(emp) {
+      return systems.reduce((sum, system) => sum + (emp.allocations[system.id] || 0), 0);
+    }
+
+    function getEmployeeGap(emp) {
+      return emp.yearlyCapacity - getEmployeeTotal(emp);
+    }
+
+    function getEmployeeStatus(emp) {
+      const gap = getEmployeeGap(emp);
+      if (gap < 0) return { label: "עומס יתר", cls: "danger" };
+      if (gap <= 1) return { label: "קיבולת נמוכה", cls: "warn" };
+      return { label: "זמינות תקינה", cls: "ok" };
+    }
+
+    function getSystemTotalBudget(system) {
+      const configured = Number(system.totalBudget);
+      if (Number.isFinite(configured) && configured > 0) return configured;
+      return Math.round((Number(system.required) || 0) * 240);
+    }
+
+    function getEmployeeBudgetRate(employee) {
+      return SYSTEM_BUDGET_MONTH_RATE[employee.category] || 230;
+    }
+
+    function getSystemBudget(system) {
+      const total = getSystemTotalBudget(system);
+      const used = employees.reduce((sum, employee) => {
+        const allocated = Number(employee.allocations?.[system.id]) || 0;
+        return sum + (allocated * getEmployeeBudgetRate(employee));
+      }, 0);
+      const remaining = total - used;
+      const difference = used - total;
+      return { total, used, remaining, difference };
+    }
+
+    function getSystemBudgetContributors(system) {
+      return employees
+        .map((employee) => {
+          const months = Number(employee.allocations?.[system.id]) || 0;
+          const rate = getEmployeeBudgetRate(employee);
+          const used = months * rate;
+          return { employee, months, rate, used };
+        })
+        .filter((row) => row.months > 0)
+        .sort((a, b) => b.used - a.used);
+    }
+
+    function getSystemBudgetBreakdown(system) {
+      const grouped = getSystemBudgetContributors(system).reduce((acc, row) => {
+        const key = row.employee.subcategory || row.employee.category;
+        if (!acc[key]) {
+          acc[key] = {
+            key,
+            role: key,
+            employeeCount: 0,
+            months: 0,
+            used: 0,
+            fte: 0,
+            avgRate: 0
+          };
+        }
+        acc[key].employeeCount += 1;
+        acc[key].months += row.months;
+        acc[key].used += row.used;
+        return acc;
+      }, {});
+
+      return Object.values(grouped)
+        .map((item) => {
+          const avgRate = item.months > 0 ? Math.round(item.used / item.months) : 0;
+          const fte = item.months / 12;
+          return { ...item, avgRate, fte };
+        })
+        .sort((a, b) => b.used - a.used);
+    }
+
+    function getSystemBudgetSnapshot(system) {
+      const budget = getSystemBudget(system);
+      const breakdown = getSystemBudgetBreakdown(system);
+      const allocatedMonths = breakdown.reduce((sum, row) => sum + row.months, 0);
+      const requiredMonths = Number(system.required) || 0;
+      const weightedRate = allocatedMonths > 0 ? budget.used / allocatedMonths : 230;
+      const plannedCost = Math.round(requiredMonths * weightedRate);
+      const requiredFte = requiredMonths / 12;
+      const allocatedFte = allocatedMonths / 12;
+      const coveragePct = requiredMonths > 0 ? Math.round((allocatedMonths / requiredMonths) * 100) : 0;
+      const monthlyBurn = allocatedMonths > 0 ? Math.round(budget.used / allocatedMonths) : 0;
+
+      return {
+        ...budget,
+        breakdown,
+        requiredMonths,
+        allocatedMonths,
+        plannedCost,
+        requiredFte,
+        allocatedFte,
+        coveragePct,
+        monthlyBurn
+      };
+    }
+
+    function budgetValueClass(difference) {
+      if (difference > 0) return "over";
+      if (difference < 0) return "under";
+      return "even";
+    }
+
+    function budgetBlockHtml(systemBudget) {
+      return `
+        <div class="budget-block">
+          <div class="budget-grid">
+            <div class="budget-cell total">
+              <span class="label">סה\"כ תקציב</span>
+              <span class="value">${fmt(systemBudget.total)}</span>
+            </div>
+            <div class="budget-cell used">
+              <span class="label">מנוצל</span>
+              <span class="value">${fmt(systemBudget.used)}</span>
+            </div>
+            <div class="budget-cell remaining">
+              <span class="label">נותר</span>
+              <span class="value">${fmt(systemBudget.remaining)}</span>
+            </div>
+            <div class="budget-cell diff">
+              <span class="label">הפרש</span>
+              <span class="value ${budgetValueClass(systemBudget.difference)}">${systemBudget.difference > 0 ? "+" : ""}${fmt(systemBudget.difference)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getSystemStatusFromGap(gap) {
+      if (gap > 4) return { label: "At Risk", cls: "status-risk", key: "risk" };
+      if (gap > 0) return { label: "Shortage", cls: "status-short", key: "shortage" };
+      if (gap < -2) return { label: "Excess", cls: "status-excess", key: "excess" };
+      return { label: "OK", cls: "status-ok", key: "ok" };
+    }
+
+    function getSystemStatusFromHint(hint) {
+      const map = {
+        risk:     { label: "At Risk",  cls: "status-risk",   key: "risk"     },
+        shortage: { label: "Shortage", cls: "status-short",  key: "shortage" },
+        excess:   { label: "Excess",   cls: "status-excess", key: "excess"   },
+        ok:       { label: "OK",       cls: "status-ok",     key: "ok"       }
+      };
+      return map[hint] || map.ok;
+    }
+
+    function getEmployeeAllocations(employee) {
+      return systems.filter((system) => (employee.allocations[system.id] || 0) > 0);
+    }
+
+    function getEmployeeRiskText(employee) {
+      const gap = getEmployeeGap(employee);
+      if (gap < 0) return "העובד בעומס יתר ודורש איזון שיבוצים מיידי.";
+      if (gap <= 1) return "העובד קרוב למיצוי קיבולת. מומלץ להימנע מהוספת הקצאות חדשות.";
+      return "העובד זמין יחסית ויכול לשמש כיעד לאיזון עומסים.";
+    }
+
+    function getSystemRiskText(system) {
+      const hint = system.statusHint || (system.status && system.status.key) || "ok";
+      if (hint === "risk") return "המערכת בסיכון גבוה ודורשת החלטת תגבור או שינוי תכולה.";
+      if (hint === "shortage") return "קיים מחסור שעדיין ניתן לאיזון באמצעות העברת קיבולת.";
+      if (hint === "excess") return "קיים עודף קיבולת שניתן לנתב למערכות לחוצות יותר.";
+      return "תמונת הקיבולת מאוזנת כרגע עבור מערכת זו.";
+    }
+
+    function getRelevantChangesForEmployee(employee) {
+      const keywords = [employee.name, employee.manager, employee.subcategory, employee.category];
+      return changes.filter((change) => keywords.some((keyword) => `${change.title} ${change.impact}`.includes(keyword))).slice(0, 3);
+    }
+
+    function getRelevantChangesForSystem(system) {
+      return changes.filter((change) => `${change.title} ${change.impact}`.includes(system.name)).slice(0, 3);
+    }
+
+    function workspaceShellHtml(type, entity, innerHtml) {
+      const title = type === "employee" ? "סביבת ניהול עובד" : "סביבת ניהול מערכת";
+      const closeAttr = type === "employee" ? 'data-close-workspace="employee"' : 'data-close-workspace="system"';
+      const subtitle = type === "employee"
+        ? "כניסה לניהול קיבולת, שיבוצים, אירועים עתידיים והשפעה רוחבית."
+        : "כניסה לניהול קיבולת, פערים, משאבים משויכים ושינויים משפיעים.";
+      return `
+        <section class="workspace-shell" id="workspace-anchor">
+          <div class="workspace-head">
+            <div>
+              <div class="workspace-eyebrow">${title}</div>
+              <div class="workspace-title">${escHtml(entity.name)}</div>
+              <div class="workspace-subtitle">${subtitle}</div>
+            </div>
+            <div class="workspace-actions">
+              <button class="btn" ${closeAttr}>חזרה לרשימה</button>
+            </div>
+          </div>
+          <div class="workspace-body">
+            ${innerHtml}
+          </div>
+        </section>
+      `;
+    }
+
+    function getFilteredEmployees(options = {}) {
+      const includeSearch = options.includeSearch !== false;
+      const q = includeSearch ? state.filters.q.trim().toLowerCase() : "";
+      return employees.filter((employee) => {
+        if (state.filters.category !== "all" && employee.category !== state.filters.category) return false;
+        if (state.filters.manager !== "all" && employee.manager !== state.filters.manager) return false;
+        if (state.filters.system !== "all" && (employee.allocations[state.filters.system] || 0) === 0) return false;
+        if (q) {
+          const haystack = `${employee.name} ${employee.subcategory} ${employee.manager}`.toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        if (state.drill === "lowCapacityEmployees" && getEmployeeGap(employee) > 1) return false;
+        return true;
+      });
+    }
+
+    function getSystemStats() {
+      const employeeSlice = getFilteredEmployees({ includeSearch: false });
+      const q = state.activeTab === "systems" ? state.filters.q.trim().toLowerCase() : "";
+      let stats = systems.map((system) => {
+        const allocated = employeeSlice.reduce((sum, employee) => sum + (employee.allocations[system.id] || 0), 0);
+        const gap = system.required - allocated;
+        const assignedEmployees = employeeSlice.filter((employee) => (employee.allocations[system.id] || 0) > 0);
+        const status = getSystemStatusFromHint(system.statusHint);
+        const budget = getSystemBudget(system);
+        return {
+          ...system,
+          allocated,
+          gap,
+          assignedEmployees,
+          assigned: assignedEmployees.map((employee) => employee.name),
+          budget,
+          status,
+          cls: status.cls
+        };
+      });
+
+      if (q) stats = stats.filter((system) => system.name.toLowerCase().includes(q));
+      if (state.systemStatusFilter !== "all") stats = stats.filter((system) => system.status.key === state.systemStatusFilter);
+      if (state.drill === "shortageSystems") stats = stats.filter((s) => s.status.key === "shortage");
+      if (state.drill === "riskSystems") stats = stats.filter((s) => s.status.key === "risk");
+      if (state.drill === "surplusSystems") stats = stats.filter((s) => s.status.key === "excess");
+      return stats;
+    }
+
+    function getCategorySummary(employeeSlice) {
+      return categoryTree.map((group) => {
+        const existing = employeeSlice
+          .filter((employee) => group.children.includes(employee.subcategory) || employee.category === group.title || employee.category === group.children[0])
+          .reduce((sum, employee) => sum + employee.yearlyCapacity, 0);
+        const gap = group.required - existing;
+        return { ...group, existing, gap };
+      });
+    }
+
+    function buildTabs() {
+      const wrap = document.getElementById("tabs");
+      wrap.innerHTML = tabs.map((tab) => `
+        <button class="tab ${state.activeTab === tab.id ? "active" : ""}" data-tab="${tab.id}">${tab.label}</button>
+      `).join("");
+
+      wrap.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.activeTab = button.dataset.tab;
+          state.drill = null;
+          state.systemStatusFilter = "all";
+          render();
+        });
+      });
+    }
+
+    function updateToolbar() {}
+
+    function renderDashboard() {
+      const employeeSlice = getFilteredEmployees();
+      const systemStats = getSystemStats();
+      const totalPlanned = employeeSlice.reduce((sum, employee) => sum + getEmployeeTotal(employee), 0);
+      const totalCapacity = employeeSlice.reduce((sum, employee) => sum + employee.yearlyCapacity, 0);
+      const utilizationRate = totalCapacity > 0 ? Math.round((totalPlanned / totalCapacity) * 100) : 0;
+      const shortage = systemStats.filter((system) => system.gap > 0).reduce((sum, system) => sum + system.gap, 0);
+      const surplus = systemStats.filter((system) => system.gap < 0).reduce((sum, system) => sum + Math.abs(system.gap), 0);
+      const systemsAtRisk = systemStats.filter((s) => s.status.key === "risk").length;
+      const systemsInShortage = systemStats.filter((s) => s.status.key === "shortage").length;
+      const systemsBalanced = systemStats.filter((s) => s.status.key === "ok" || s.status.key === "excess").length;
+      const lowCapacityEmployees = employeeSlice.filter((employee) => getEmployeeGap(employee) <= 1).length;
+      const overloadedEmployees = employeeSlice.filter((employee) => getEmployeeGap(employee) < 0).length;
+      const categorySummary = getCategorySummary(employeeSlice);
+      const topIssues = systemStats.filter((system) => system.gap !== 0).sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap)).slice(0, 4);
+      const criticalCategories = categorySummary.filter((cat) => cat.gap > 2).sort((a, b) => b.gap - a.gap);
+      const recentChanges = changes.slice(0, 3);
+      
+      // Calculate health score
+      const healthFactors = [
+        systemsBalanced / (systemStats.length || 1),
+        Math.max(0, 1 - (shortage / (totalCapacity || 1))),
+        Math.max(0, 1 - (lowCapacityEmployees / (employeeSlice.length || 1)))
+      ];
+      const healthScore = Math.round((healthFactors.reduce((a, b) => a + b, 0) / healthFactors.length) * 100);
+
+      document.getElementById("screen-dashboard").innerHTML = `
+        <div class="screen-toolbar">
+          <div class="toolbar-actions">
+            <span class="toolbar-label">פעולות</span>
+            <button class="btn" id="dashboardResetBtn" type="button">איפוס תצוגה</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid management">
+          <article class="kpi ${systemsAtRisk > 0 ? "critical" : "healthy"} clickable ${state.drill === "riskSystems" ? "active-drill" : ""}" data-kpi="riskSystems">
+            <div class="label">מערכות בסיכון</div>
+            <div class="value">${systemsAtRisk}</div>
+            <div class="sub">${systemsAtRisk > 0 ? "דורש החלטה מיידית" : "הכל תקין"}</div>
+          </article>
+
+          <article class="kpi ${shortage > 0 ? "critical" : "healthy"} clickable ${state.drill === "shortageSystems" ? "active-drill" : ""}" data-kpi="shortageSystems">
+            <div class="label">פער קיבולת כולל</div>
+            <div class="value">${fmt(shortage)}</div>
+            <div class="sub">${shortage > 0 ? "חודשי עבודה חסרים" : "אין פער קיבולת"}</div>
+          </article>
+
+          <article class="kpi clickable ${state.drill === "load" ? "active-drill" : ""}" data-kpi="load">
+            <div class="label">ניצול קיבולת</div>
+            <div class="value">${utilizationRate}%</div>
+            <div class="sub" style="color:${utilizationRate > 90 ? "var(--danger)" : utilizationRate > 75 ? "var(--warn)" : "var(--ok)"}">${fmt(totalPlanned)} מתוך ${fmt(totalCapacity)}</div>
+          </article>
+
+          <article class="kpi" style="border-color:var(--brand);background:var(--brand-soft)">
+            <div class="label">מצב כללי</div>
+            <div class="value" style="color:${healthScore >= 75 ? "var(--ok)" : healthScore >= 50 ? "var(--warn)" : "var(--danger)"}">${healthScore}%</div>
+            <div class="sub">${systemsBalanced} מאוזנות/עודף</div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="panel">
+            <header class="panel-head">⚡בעיות שדורשות החלטה</header>
+            <ul class="alert-list">
+              ${topIssues.slice(0, 3).map((system) => {
+                const severity = system.gap > 4 ? "danger" : system.gap > 0 ? "warn" : "ok";
+                return `
+                  <li class="alert-item">
+                    <span class="tag ${severity}">${system.gap > 0 ? `פער: ${system.gap}` : `עודף: ${Math.abs(system.gap)}`}</span>
+                    <strong>${escHtml(system.name)}</strong>
+                    <div class="entity-meta">צריך: ${system.required} | קצוב: ${system.allocated} | כמה זה משפיע: ${system.gap > 0 ? "עובדים חסרים" : "קיבולת עתודה"}</div>
+                  </li>
+                `;
+              }).join("")}
+              ${lowCapacityEmployees > 0 ? `<li class="alert-item"><span class="tag warn">👤 זמינות</span>${lowCapacityEmployees} עובדים עם יתרה קטנה מ-1 חודש - בחנו אפשרות ריכוז או תמיכה.</li>` : ""}
+            </ul>
+          </section>
+
+          <section class="panel">
+            <header class="panel-head">סיכום ניהולי</header>
+            <ul class="mini-list">
+              <li class="mini-item"><strong>מערכות פעילות:</strong> ${systemStats.length}</li>
+              <li class="mini-item"><strong>מחסור מערכתי:</strong> ${systemsInShortage} | <strong>סיכון:</strong> ${systemsAtRisk}</li>
+              <li class="mini-item"><strong>עובדים בזמינות נמוכה:</strong> ${lowCapacityEmployees}</li>
+              <li class="mini-item"><strong>עודף קיבולת:</strong> ${fmt(surplus)}</li>
+            </ul>
+            <details class="collapsible">
+              <summary>הצג פירוט תחומים ושינויים</summary>
+              <ul class="mini-list" style="margin-top:8px">
+                ${criticalCategories.length ? criticalCategories.map((cat) => `
+                  <li class="mini-item">
+                    <strong>${escHtml(cat.title)}</strong> - פער: <span class="danger">${cat.gap}</span> | קיים: ${cat.existing} / נדרש: ${cat.required}
+                  </li>
+                `).join("") : '<li class="mini-item">✓ כל התחומים מאוזנים או בעדכון מקובל</li>'}
+                ${recentChanges.length ? recentChanges.map((change) => `
+                  <li class="mini-item">
+                    <strong>${escHtml(change.title)}</strong>
+                    <div class="entity-meta">${escHtml(change.date)} | ${escHtml(change.impact)}</div>
+                  </li>
+                `).join("") : ""}
+              </ul>
+            </details>
+          </section>
+        </div>
+      `;
+
+      // Charts
+      const allSystemStats = getSystemStats();
+      const top5 = [...allSystemStats].sort((a, b) => b.required - a.required).slice(0, 5);
+      const maxRequired = top5[0]?.required || 1;
+      const barColors = ["var(--brand)", "#0d8f8a", "#6e4bb3", "#6b7415", "#c26410"];
+
+      const catColors = ["var(--brand)", "#0d8f8a", "#6e4bb3", "#c26410"];
+      const catCounts = categoryTree.map((cat, i) => ({
+        title: cat.title,
+        value: employeeSlice.filter((e) => cat.children.includes(e.subcategory) || e.category === cat.title || e.category === cat.children[0]).length,
+        color: catColors[i % catColors.length]
+      }));
+      const catTotal = catCounts.reduce((s, c) => s + c.value, 0) || 1;
+
+      // Donut SVG
+      const r = 46, cx = 56, cy = 56, circ = 2 * Math.PI * r;
+      let offset = 0;
+      const donutSegments = catCounts.map((cat) => {
+        const dash = (cat.value / catTotal) * circ;
+        const seg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${cat.color}" stroke-width="18"
+          stroke-dasharray="${dash.toFixed(2)} ${(circ - dash).toFixed(2)}"
+          stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+        offset += dash;
+        return seg;
+      }).join("");
+
+      const chartsHtml = `
+        <div class="dashboard-charts">
+          <section class="panel">
+            <header class="panel-head">ביקוש כוח עבודה לפי מערכת</header>
+            <div style="padding:14px 16px">
+              ${top5.map((sys, i) => `
+                <div class="chart-bar-row">
+                  <div class="chart-bar-label" title="${escHtml(sys.name)}">${escHtml(sys.name)}</div>
+                  <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((sys.required / maxRequired) * 100)}%;background:${barColors[i]}"></div></div>
+                  <div class="chart-bar-val">${sys.required}</div>
+                </div>
+              `).join("")}
+            </div>
+          </section>
+          <section class="panel">
+            <header class="panel-head">התפלגות עובדים לפי קטגוריה</header>
+            <div style="padding:14px 16px">
+              <div class="donut-wrap">
+                <svg width="112" height="112" viewBox="0 0 112 112" style="flex-shrink:0">
+                  ${donutSegments}
+                  <text x="${cx}" y="${cy + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--text)">${catTotal}</text>
+                </svg>
+                <div class="donut-legend">
+                  ${catCounts.map((cat) => `
+                    <div class="donut-legend-item">
+                      <span class="donut-legend-dot" style="background:${cat.color}"></span>
+                      <span>${escHtml(cat.title)}</span>
+                      <strong style="margin-right:auto;margin-left:6px">${cat.value}</strong>
+                    </div>
+                  `).join("")}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      `;
+
+      document.getElementById("screen-dashboard").insertAdjacentHTML("beforeend", chartsHtml);
+
+      const resetBtn = document.getElementById("dashboardResetBtn");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          state.drill = null;
+          state.filters.q = "";
+          state.systemStatusFilter = "all";
+          render();
+        });
+      }
+    }
+
+    function getEmployeeGroupValue(employee) {
+      if (state.employeeGroupBy === "manager") return employee.manager;
+      if (state.employeeGroupBy === "category") return employee.category;
+      return "all";
+    }
+
+    function getSystemGroupValue(system) {
+      if (state.systemGroupBy === "capacityGap") {
+        // Group by capacity gap: staffing shortage level
+        if (system.gap > 4) return "פער קריטי (מעל 4 חודשים)";
+        if (system.gap > 0) return "פער בינוני (0-4 חודשים)";
+        return "מאוזן או עודף קיבולת";
+      }
+      if (state.systemGroupBy === "all") return "all";
+      // Group by Status: business state
+      const labels = { risk: "בסיכון", shortage: "מחסור", ok: "מאוזן", excess: "עודף" };
+      return labels[system.status.key];
+    }
+
+    function buildGroupedCollection(items, keyFn) {
+      return items.reduce((acc, item) => {
+        const key = keyFn(item);
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(item);
+        return acc;
+      }, {});
+    }
+
+    function statusBorderColor(cls) {
+      return cls === "danger" ? "var(--danger)" : cls === "warn" ? "var(--warn)" : cls === "ok" ? "var(--ok)" : "var(--brand)";
+    }
+
+    function systemStatusColor(key) {
+      return key === "risk" ? "var(--warn)" : key === "shortage" ? "var(--danger)" : key === "excess" ? "var(--brand)" : "var(--ok)";
+    }
+
+    function employeeCardHtml(employee) {
+      const status = getEmployeeStatus(employee);
+      const border = statusBorderColor(status.cls);
+      const activeSystems = systems.filter((s) => (employee.allocations[s.id] || 0) > 0).length;
+      return `
+        <article class="card entity-row ${state.selectedEmployeeId === employee.id ? "selected" : ""}" data-open-employee="${employee.id}" style="cursor:pointer;border-right:3px solid ${border};padding:10px 11px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0">
+            <div style="min-width:0;flex:1;overflow:hidden">
+              <div class="entity-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(employee.name)}</div>
+              <div class="entity-meta" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(employee.subcategory)} · ${escHtml(employee.category)}</div>
+              <div class="entity-meta" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">מנהל: ${escHtml(employee.manager)}</div>
+            </div>
+            <span class="tag ${status.cls}" style="flex-shrink:0">${status.label}</span>
+          </div>
+          <div class="card-metrics">
+            <div class="metric-mini"><div class="label">קיבולת</div><div class="value">${employee.yearlyCapacity}</div></div>
+            <div class="metric-mini"><div class="label">מנוצל</div><div class="value">${getEmployeeTotal(employee)}</div></div>
+            <div class="metric-mini"><div class="label">יתרה</div><div class="value ${status.cls}">${getEmployeeGap(employee)}</div></div>
+            <div class="metric-mini"><div class="label">מערכות</div><div class="value">${activeSystems}</div></div>
+          </div>
+        </article>
+      `;
+    }
+
+    function systemCardHtml(system) {
+      const border = systemStatusColor(system.status.key);
+      const gapCls = system.gap > 0 ? "danger" : system.gap < 0 ? "" : "ok";
+      const gapStyle = system.gap < 0 ? `color:var(--brand)` : "";
+      return `
+        <article class="card entity-row ${state.selectedSystemId === system.id ? "selected" : ""}" data-open-system="${system.id}" style="cursor:pointer;border-right:3px solid ${border};padding:10px 11px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0">
+            <div style="min-width:0;flex:1;overflow:hidden">
+              <div class="entity-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(system.name)}</div>
+              <div class="entity-meta">${system.assignedEmployees.length} עובדים משויכים</div>
+            </div>
+            <span class="status-pill ${system.cls}" style="flex-shrink:0;margin-bottom:0">${system.status.label}</span>
+          </div>
+          <div class="card-metrics">
+            <div class="metric-mini"><div class="label">נדרש</div><div class="value">${system.required}</div></div>
+            <div class="metric-mini"><div class="label">מוקצה</div><div class="value">${system.allocated}</div></div>
+            <div class="metric-mini"><div class="label">פער</div><div class="value ${gapCls}" style="${gapStyle}">${system.gap}</div></div>
+          </div>
+        </article>
+      `;
+    }
+
+    function employeeDetailHtml(employee) {
+      const status = getEmployeeStatus(employee);
+      const allocations = getEmployeeAllocations(employee);
+      const relatedChanges = getRelevantChangesForEmployee(employee);
+      return workspaceShellHtml("employee", employee, `
+        <section class="detail-panel">
+          <div class="detail-top">
+            <div class="detail-hero">
+              <div class="detail-avatar">${escHtml(employee.name.slice(0, 1))}</div>
+              <div>
+                <div class="detail-name">${escHtml(employee.name)}</div>
+                <div class="detail-sub">${escHtml(employee.category)} | ${escHtml(employee.subcategory)} | מנהל: ${escHtml(employee.manager)}</div>
+                <div class="summary-strip">
+                  <span class="tag ${status.cls}">${status.label}</span>
+                  <span class="summary-pill">אירוע עתידי: ${escHtml(employee.futureEvents)}</span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn primary" data-edit-employee="${employee.id}">עריכת עובד</button>
+            </div>
+          </div>
+
+          <div class="risk-banner">${getEmployeeRiskText(employee)}</div>
+
+          <div class="detail-grid">
+            <div class="detail-card"><div class="label">קיבולת שנתית</div><div class="value">${employee.yearlyCapacity}</div></div>
+            <div class="detail-card"><div class="label">מנוצל</div><div class="value">${getEmployeeTotal(employee)}</div></div>
+            <div class="detail-card"><div class="label">יתרה</div><div class="value ${status.cls}">${getEmployeeGap(employee)}</div></div>
+            <div class="detail-card"><div class="label">מערכות פעילות</div><div class="value">${allocations.length}</div></div>
+          </div>
+
+          <div class="workspace-layout detail-section">
+            <div class="workspace-panel">
+              <div class="workspace-panel-title">שיבוצים פעילים</div>
+              <div class="workspace-list">
+                ${allocations.length ? allocations.map((system) => `
+                  <div class="workspace-item">
+                    <div class="workspace-item-main">
+                      <strong>${escHtml(system.name)}</strong>
+                      <div class="entity-meta">${employee.allocations[system.id]} חודשי עבודה מתוכננים</div>
+                    </div>
+                    <button type="button" data-link-system="${system.id}">פתיחת מערכת</button>
+                  </div>
+                `).join("") : '<div class="entity-meta">אין שיבוצים פעילים לעובד זה.</div>'}
+              </div>
+            </div>
+            <div class="workspace-panel">
+              <div class="workspace-panel-title">נקודות בקרה למנהל</div>
+              <div class="workspace-note">${escHtml(employee.futureEvents)}</div>
+              <div class="workspace-strip">
+                <span class="summary-pill">מנהל: ${escHtml(employee.manager)}</span>
+                <span class="summary-pill">תחום: ${escHtml(employee.subcategory)}</span>
+              </div>
+              <div class="workspace-panel-title" style="margin-top:12px">שינויים רלוונטיים</div>
+              <div class="workspace-list">
+                ${relatedChanges.length ? relatedChanges.map((change) => `
+                  <div class="workspace-item">
+                    <div class="workspace-item-main">
+                      <strong>${escHtml(change.title)}</strong>
+                      <div class="entity-meta">${escHtml(change.date)} | ${escHtml(change.impact)}</div>
+                    </div>
+                  </div>
+                `).join("") : '<div class="entity-meta">אין שינויים משויכים כרגע לעובד זה.</div>'}
+              </div>
+            </div>
+          </div>
+        </section>
+      `);
+    }
+
+    function systemDetailHtml(system) {
+      const relatedChanges = getRelevantChangesForSystem(system);
+      const budget = system.budget || getSystemBudget(system);
+      const contributors = getSystemBudgetContributors(system);
+      const topContributors = contributors.slice(0, 6);
+      const budgetSnap = getSystemBudgetSnapshot(system);
+      const budgetStatusText = budget.difference > 0
+        ? "חריגה תקציבית - נדרש צמצום הקצאות או תוספת תקציב."
+        : budget.difference < 0
+          ? "התקציב מאוזן עם יתרה חיובית להמשך תכנון."
+          : "ניצול תקציבי מלא ומדויק.";
+      return workspaceShellHtml("system", system, `
+        <section class="detail-panel">
+          <div class="detail-top">
+            <div class="detail-hero">
+              <div class="detail-avatar">${escHtml(system.name.slice(0, 1))}</div>
+              <div>
+                <div class="detail-name">${escHtml(system.name)}</div>
+                <div class="detail-sub">מצב: ${system.status.label} | עובדים משויכים: ${system.assignedEmployees.length}</div>
+                <div class="summary-strip">
+                  <span class="status-pill ${system.cls}">${system.status.label}</span>
+                  <span class="summary-pill">פער קיבולת: ${system.gap}</span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn ${system.assignedEmployees.length === 0 ? "primary" : ""}" data-assign-system="${system.id}">+ שיבוץ עובדים</button>
+              <button class="btn ${system.assignedEmployees.length > 0 ? "primary" : ""}" data-edit-system="${system.id}">עריכת מערכת</button>
+            </div>
+          </div>
+
+          <div class="risk-banner">${getSystemRiskText(system)}</div>
+
+          <div class="detail-grid">
+            <div class="detail-card"><div class="label">נדרש</div><div class="value">${system.required}</div></div>
+            <div class="detail-card"><div class="label">מוקצה</div><div class="value">${system.allocated}</div></div>
+            <div class="detail-card"><div class="label">פער</div><div class="value ${system.gap > 0 ? "danger" : "ok"}">${system.gap}</div></div>
+            <div class="detail-card"><div class="label">עובדים משויכים</div><div class="value">${system.assignedEmployees.length}</div></div>
+          </div>
+
+          <div class="detail-budget-wrap">
+            ${budgetBlockHtml(budget)}
+          </div>
+
+          <div class="workspace-view-switch">
+            <div class="segmented">
+              <button class="seg-btn ${state.systemWorkspaceView === "employees" ? "active" : ""}" type="button" data-system-view="employees">עובדים</button>
+              <button class="seg-btn ${state.systemWorkspaceView === "budget" ? "active" : ""}" type="button" data-system-view="budget">תקציב</button>
+            </div>
+            <div class="workspace-view-note">מעבר מהיר בין ניהול שיבוצים לבין בקרה תקציבית.</div>
+          </div>
+
+          ${state.systemWorkspaceView === "employees" ? `
+            <div class="workspace-layout detail-section">
+              <div class="workspace-panel">
+                <div class="workspace-panel-title">הקצאות עובדים</div>
+                <div class="workspace-list">
+                  ${system.assignedEmployees.length ? system.assignedEmployees.map((employee) => `
+                    <div class="workspace-item">
+                      <div class="workspace-item-main">
+                        <strong>${escHtml(employee.name)}</strong>
+                        <div class="entity-meta">${employee.allocations[system.id]} חודשי עבודה | ${escHtml(employee.subcategory)}</div>
+                      </div>
+                      <button type="button" data-link-employee="${employee.id}">פתיחת עובד</button>
+                    </div>
+                  `).join("") : '<div class="entity-meta">אין עובדים משויכים למערכת זו.</div>'}
+                </div>
+              </div>
+              <div class="workspace-panel">
+                <div class="workspace-panel-title">תמונת ניהול</div>
+                <div class="workspace-note">${getSystemRiskText(system)}</div>
+                <div class="workspace-strip">
+                  <span class="summary-pill">סטטוס: ${system.status.label}</span>
+                  <span class="summary-pill">פער: ${system.gap}</span>
+                </div>
+                <div class="workspace-panel-title" style="margin-top:12px">שינויים רלוונטיים</div>
+                <div class="workspace-list">
+                  ${relatedChanges.length ? relatedChanges.map((change) => `
+                    <div class="workspace-item">
+                      <div class="workspace-item-main">
+                        <strong>${escHtml(change.title)}</strong>
+                        <div class="entity-meta">${escHtml(change.date)} | ${escHtml(change.impact)}</div>
+                      </div>
+                    </div>
+                  `).join("") : '<div class="entity-meta">אין שינויים משויכים כרגע למערכת זו.</div>'}
+                </div>
+              </div>
+            </div>
+          ` : `
+            <div class="budget-layout detail-section">
+              <div class="workspace-panel">
+                <div class="workspace-panel-title">טבלת תקציב לפי תחומים</div>
+                <div class="budget-matrix">
+                  <div class="budget-matrix-row budget-matrix-head">
+                    <div>תחום מקצועי</div>
+                    <div>עובדים</div>
+                    <div>חודשים</div>
+                    <div>תעריף</div>
+                    <div>עלות</div>
+                    <div>FTE</div>
+                  </div>
+                  <div class="budget-matrix-body">
+                    ${budgetSnap.breakdown.length ? budgetSnap.breakdown.map((row) => `
+                      <div class="budget-matrix-row">
+                        <div>
+                          <div class="budget-cell-main">${escHtml(row.role)}</div>
+                          <div class="budget-cell-sub">${fmt(row.used)} תקציב מנוצל</div>
+                        </div>
+                        <div>${fmt(row.employeeCount)}</div>
+                        <div>${fmt(row.months)}</div>
+                        <div>${fmt(row.avgRate)}</div>
+                        <div>${fmt(row.used)}</div>
+                        <div>${row.fte.toFixed(1)}</div>
+                      </div>
+                    `).join("") : `
+                      <div class="budget-matrix-row">
+                        <div>אין נתוני הקצאה למערכת זו</div>
+                        <div>0</div>
+                        <div>0</div>
+                        <div>0</div>
+                        <div>0</div>
+                        <div>0.0</div>
+                      </div>
+                    `}
+                  </div>
+                </div>
+                <div class="budget-summary-stack">
+                  <div class="budget-summary-row primary"><span>סה\"כ חודשי עבודה מוקצים</span><strong>${fmt(budgetSnap.allocatedMonths)}</strong></div>
+                  <div class="budget-summary-row"><span>סה\"כ חודשי עבודה נדרשים</span><strong>${fmt(budgetSnap.requiredMonths)}</strong></div>
+                  <div class="budget-summary-row"><span>תקן נדרש (FTE)</span><strong>${budgetSnap.requiredFte.toFixed(1)}</strong></div>
+                  <div class="budget-summary-row"><span>תקן מוקצה (FTE)</span><strong>${budgetSnap.allocatedFte.toFixed(1)}</strong></div>
+                </div>
+              </div>
+              <div class="workspace-panel">
+                <div class="workspace-panel-title">בקרת תקציב</div>
+                <div class="workspace-note">${budgetStatusText}</div>
+                <div class="workspace-strip">
+                  <span class="summary-pill">סה\"כ תקציב: ${fmt(budget.total)}</span>
+                  <span class="summary-pill">מנוצל: ${fmt(budget.used)}</span>
+                  <span class="summary-pill">נותר: ${fmt(budget.remaining)}</span>
+                  <span class="summary-pill" style="${budget.difference > 0 ? "background:var(--danger-soft);color:var(--danger)" : budget.difference < 0 ? "background:var(--ok-soft);color:var(--ok)" : ""}">הפרש: ${budget.difference > 0 ? "+" : ""}${fmt(budget.difference)}</span>
+                </div>
+                <div class="budget-summary-stack">
+                  <div class="budget-summary-row success"><span>תקציב מתוכנן לפי דרישה</span><strong>${fmt(budgetSnap.plannedCost)}</strong></div>
+                  <div class="budget-summary-row"><span>ניצול חודשי ממוצע</span><strong>${fmt(budgetSnap.monthlyBurn)}</strong></div>
+                  <div class="budget-summary-row ${budgetSnap.coveragePct < 100 ? "warn" : "success"}"><span>כיסוי הקצאה מול דרישה</span><strong>${budgetSnap.coveragePct}%</strong></div>
+                </div>
+                <div class="workspace-panel-title" style="margin-top:12px">פירוט עובדים מובילים</div>
+                <div class="budget-list">
+                  ${topContributors.length ? topContributors.map((row) => `
+                    <div class="budget-item">
+                      <div class="budget-item-main">
+                        <div class="budget-item-name">${escHtml(row.employee.name)}</div>
+                        <div class="budget-item-sub">${row.months} חודשים × ${fmt(row.rate)} | ${escHtml(row.employee.subcategory)}</div>
+                      </div>
+                      <div class="budget-item-value">${fmt(row.used)}</div>
+                    </div>
+                  `).join("") : '<div class="entity-meta">אין הקצאות עובדים ולכן עדיין לא קיים ניצול תקציבי.</div>'}
+                </div>
+              </div>
+            </div>
+          `}
+        </section>
+      `);
+    }
+
+    function renderEmployees() {
+      const filteredEmployees = getFilteredEmployees();
+      const selectedEmployee = filteredEmployees.find((employee) => employee.id === state.selectedEmployeeId) || null;
+      const listEmployees = selectedEmployee
+        ? filteredEmployees.filter((employee) => employee.id !== selectedEmployee.id)
+        : filteredEmployees;
+      const grouped = buildGroupedCollection(listEmployees, getEmployeeGroupValue);
+      const groupEntries = Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+      const isAllMode = state.employeeGroupBy === "all";
+
+      const allRowsHtml = `
+        <section class="group-panel">
+          <div class="group-head" style="cursor:default">
+            <div>
+              <div class="group-title">כל העובדים</div>
+              <div class="group-meta">${listEmployees.length} עובדים מוצגים כעת</div>
+            </div>
+            <div class="group-badges">
+              <span class="summary-pill">${listEmployees.filter((e) => getEmployeeGap(e) <= 1).length} בלחץ קיבולת</span>
+            </div>
+          </div>
+          <div class="group-body" style="display:block;padding-top:12px">
+            <div class="cards">${listEmployees.map(employeeCardHtml).join("")}</div>
+          </div>
+        </section>
+      `;
+
+      document.getElementById("screen-employees").innerHTML = `
+        <div class="screen-toolbar">
+          <div class="toolbar-filters">
+            <span class="toolbar-label">סינון</span>
+            <select class="toolbar-select" id="employeesYearFilter">
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+            </select>
+            <select class="toolbar-select" id="employeesCategoryFilter"></select>
+            <select class="toolbar-select" id="employeesManagerFilter"></select>
+            <select class="toolbar-select" id="employeesSystemFilter"></select>
+            <input class="toolbar-input" id="employeesTabSearch" type="text" placeholder="חיפוש עובד לפי שם, תת-תחום או מנהל">
+            <button class="btn soft" type="button" data-clear-employee-search>ניקוי</button>
+          </div>
+          <div class="toolbar-actions">
+            <span class="toolbar-label">פעולות</span>
+            <button class="btn primary" data-open-form="employee" type="button">+ הוספת עובד</button>
+          </div>
+          <div class="toolbar-views">
+            <span class="toolbar-label">תצוגה</span>
+            <button class="seg-btn ${state.employeeGroupBy === "all" ? "active" : ""}" data-group-employees="all">כל העובדים</button>
+            <button class="seg-btn ${state.employeeGroupBy === "category" ? "active" : ""}" data-group-employees="category">קיבוץ לפי קטגוריה</button>
+            <button class="seg-btn ${state.employeeGroupBy === "manager" ? "active" : ""}" data-group-employees="manager">קיבוץ לפי מנהל</button>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <div>
+            <div class="section-title">מבט עובדים</div>
+            <div class="toolbar-note">קיבוץ, איתור עובדים בקצה קיבולת, וכניסה לפרופיל עובד מלא.</div>
+          </div>
+          <div></div>
+        </div>
+        ${state.drill === "lowCapacityEmployees" ? '<div class="risk-banner">מוצגים רק עובדים עם יתרה נמוכה או עומס יתר.</div>' : ''}
+        ${selectedEmployee ? employeeDetailHtml(selectedEmployee) : ""}
+        <div class="group-stack">
+          ${isAllMode ? allRowsHtml : groupEntries.map(([groupName, groupEmployees]) => {
+            const open = state.employeeGroupsOpen[groupName] === true;
+            const capacity = groupEmployees.reduce((sum, employee) => sum + employee.yearlyCapacity, 0);
+            const used = groupEmployees.reduce((sum, employee) => sum + getEmployeeTotal(employee), 0);
+            const lowCapacity = groupEmployees.filter((employee) => getEmployeeGap(employee) <= 1).length;
+            const badgeCls = lowCapacity > 0 ? "background:var(--danger-soft);color:var(--danger)" : "background:var(--ok-soft);color:var(--ok)";
+            const barColor = lowCapacity > 0 ? "var(--danger)" : "var(--ok)";
+            return `
+              <section class="group-panel" id="group-employee-${escHtml(groupName.replace(/\s+/g, "-"))}">
+                <button class="group-head-bar" type="button" data-toggle-group="employee:${escHtml(groupName)}">
+                  <div class="group-head-left">
+                    <div class="group-status-bar" style="background:${barColor}"></div>
+                    <div>
+                      <div class="group-title">${escHtml(groupName)}</div>
+                      <div class="group-meta">${groupEmployees.length} עובדים · מנוצל ${used}/${capacity}</div>
+                    </div>
+                  </div>
+                  <div class="group-head-right">
+                    <span class="summary-pill" style="${badgeCls}">${lowCapacity} בלחץ</span>
+                    <span class="summary-pill">${open ? "▲" : "▼"}</span>
+                  </div>
+                </button>
+                ${open ? `
+                  <div class="group-body" style="padding-top:12px">
+                    <div class="cards">${groupEmployees.map(employeeCardHtml).join("")}</div>
+                  </div>
+                ` : ""}
+              </section>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function renderSystems() {
+      const stats = getSystemStats();
+      const selectedSystem = stats.find((system) => system.id === state.selectedSystemId) || stats[0] || null;
+      if (selectedSystem && state.selectedSystemId !== selectedSystem.id) {
+        state.selectedSystemId = selectedSystem.id;
+      }
+      const listSystems = selectedSystem
+        ? stats.filter((system) => system.id !== selectedSystem.id)
+        : stats;
+      const grouped = buildGroupedCollection(listSystems, getSystemGroupValue);
+      const groupEntries = Object.entries(grouped);
+      const isAllMode = state.systemGroupBy === "all";
+
+      const inShortage = listSystems.filter((s) => s.gap > 0).length;
+      const shortBadgeCls = inShortage > 0 ? "background:var(--danger-soft);color:var(--danger)" : "background:var(--ok-soft);color:var(--ok)";
+      const allRowsHtml = `
+        <section class="group-panel">
+          <div class="group-head" style="cursor:default">
+            <div>
+              <div class="group-title">כל המערכות</div>
+              <div class="group-meta">${listSystems.length} מערכות מוצגות כעת</div>
+            </div>
+            <div class="group-badges">
+              <span class="summary-pill" style="${shortBadgeCls}">${inShortage} במחסור</span>
+            </div>
+          </div>
+          <div class="group-body" style="display:block;padding-top:12px">
+            <div class="cards">${listSystems.map(systemCardHtml).join("")}</div>
+          </div>
+        </section>
+      `;
+
+      document.getElementById("screen-systems").innerHTML = `
+        <div class="screen-toolbar">
+          <div class="toolbar-filters">
+            <span class="toolbar-label">סינון</span>
+            <select class="toolbar-select" id="systemsYearFilter">
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+            </select>
+            <select class="toolbar-select" id="systemsCategoryFilter"></select>
+            <select class="toolbar-select" id="systemsManagerFilter"></select>
+            <select class="toolbar-select" id="systemsStatusFilter">
+              <option value="all">כל הסטטוסים</option>
+              <option value="risk">בסיכון</option>
+              <option value="shortage">מחסור</option>
+              <option value="ok">מאוזן</option>
+              <option value="excess">עודף</option>
+            </select>
+            <input class="toolbar-input" id="systemsTabSearch" type="text" placeholder="חיפוש מערכת לפי שם או תחום בעייתי">
+            <button class="btn soft" type="button" data-clear-system-search>ניקוי</button>
+          </div>
+          <div class="toolbar-actions">
+            <span class="toolbar-label">פעולות</span>
+            <button class="btn primary" data-open-form="system" type="button">+ הוספת מערכת</button>
+          </div>
+          <div class="toolbar-views">
+            <span class="toolbar-label">תצוגה</span>
+            <button class="seg-btn ${state.systemGroupBy === "all" ? "active" : ""}" data-group-systems="all">כל המערכות</button>
+            <button class="seg-btn ${state.systemGroupBy === "status" ? "active" : ""}" data-group-systems="status">קיבוץ לפי מצב</button>
+            <button class="seg-btn ${state.systemGroupBy === "capacityGap" ? "active" : ""}" data-group-systems="capacityGap">קיבוץ לפי פער קיבולת</button>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <div>
+            <div class="section-title">מבט מערכות</div>
+            <div class="toolbar-note">סקירת כל המערכות, קיבוץ לפי מצב עסקי או פער קיבולת, וכניסה לפרופיל מערכת.</div>
+          </div>
+          <div></div>
+        </div>
+        ${(state.drill === "shortageSystems" || state.drill === "riskSystems" || state.drill === "surplusSystems") ? `<div class="risk-banner">מוצגת רשימה ממוקדת לפי KPI שנבחר בדשבורד.</div>` : ""}
+        ${selectedSystem ? systemDetailHtml(selectedSystem) : ""}
+        <div class="group-stack">
+          ${isAllMode ? allRowsHtml : groupEntries.map(([groupName, groupSystems]) => {
+            const open = state.systemGroupsOpen[groupName] === true;
+            const required = groupSystems.reduce((sum, system) => sum + system.required, 0);
+            const allocated = groupSystems.reduce((sum, system) => sum + system.allocated, 0);
+            const gap = groupSystems.reduce((sum, system) => sum + system.gap, 0);
+            const gapBadgeCls = gap > 0 ? "background:var(--danger-soft);color:var(--danger)" : gap < 0 ? "background:var(--brand-soft);color:var(--brand)" : "background:var(--ok-soft);color:var(--ok)";
+            const barColor = gap > 0 ? "var(--danger)" : gap < 0 ? "var(--brand)" : "var(--ok)";
+            return `
+              <section class="group-panel" id="group-system-${escHtml(groupName.replace(/\s+/g, "-"))}">
+                <button class="group-head-bar" type="button" data-toggle-group="system:${escHtml(groupName)}">
+                  <div class="group-head-left">
+                    <div class="group-status-bar" style="background:${barColor}"></div>
+                    <div>
+                      <div class="group-title">${escHtml(groupName)}</div>
+                      <div class="group-meta">${groupSystems.length} מערכות · נדרש ${required} מוקצה ${allocated}</div>
+                    </div>
+                  </div>
+                  <div class="group-head-right">
+                    <span class="summary-pill" style="${gapBadgeCls}">פער ${gap}</span>
+                    <span class="summary-pill">${open ? "▲" : "▼"}</span>
+                  </div>
+                </button>
+                ${open ? `
+                  <div class="group-body" style="padding-top:12px">
+                    <div class="cards">${groupSystems.map(systemCardHtml).join("")}</div>
+                  </div>
+                ` : ""}
+              </section>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function renderScreens() {
+      document.querySelectorAll(".screen").forEach((screen) => { screen.classList.remove("active"); screen.innerHTML = ""; });
+      document.getElementById(`screen-${state.activeTab}`).classList.add("active");
+      renderDashboard();
+      renderSystems();
+      renderEmployees();
+      bindDynamicContent();
+    }
+
+    function fillFilters() {
+      const categories = [...new Set(employees.map((employee) => employee.category))].sort();
+      const managers = [...new Set(employees.map((employee) => employee.manager))].sort();
+
+      const employeesCategory = document.getElementById("employeesCategoryFilter");
+      const employeesManager = document.getElementById("employeesManagerFilter");
+      const employeesSystem = document.getElementById("employeesSystemFilter");
+      const employeesYear = document.getElementById("employeesYearFilter");
+
+      const systemsCategory = document.getElementById("systemsCategoryFilter");
+      const systemsManager = document.getElementById("systemsManagerFilter");
+      const systemsStatus = document.getElementById("systemsStatusFilter");
+      const systemsYear = document.getElementById("systemsYearFilter");
+
+      if (employeesCategory) {
+        employeesCategory.innerHTML = '<option value="all">כל הקטגוריות</option>' + categories.map((category) => `<option value="${escHtml(category)}">${escHtml(category)}</option>`).join("");
+        employeesCategory.value = state.filters.category;
+      }
+      if (employeesManager) {
+        employeesManager.innerHTML = '<option value="all">כל המנהלים</option>' + managers.map((manager) => `<option value="${escHtml(manager)}">${escHtml(manager)}</option>`).join("");
+        employeesManager.value = state.filters.manager;
+      }
+      if (employeesSystem) {
+        employeesSystem.innerHTML = '<option value="all">כל המערכות</option>' + systems.map((system) => `<option value="${system.id}">${escHtml(system.name)}</option>`).join("");
+        employeesSystem.value = state.filters.system;
+      }
+      if (employeesYear) employeesYear.value = state.filters.year;
+
+      if (systemsCategory) {
+        systemsCategory.innerHTML = '<option value="all">כל הקטגוריות</option>' + categories.map((category) => `<option value="${escHtml(category)}">${escHtml(category)}</option>`).join("");
+        systemsCategory.value = state.filters.category;
+      }
+      if (systemsManager) {
+        systemsManager.innerHTML = '<option value="all">כל המנהלים</option>' + managers.map((manager) => `<option value="${escHtml(manager)}">${escHtml(manager)}</option>`).join("");
+        systemsManager.value = state.filters.manager;
+      }
+      if (systemsStatus) systemsStatus.value = state.systemStatusFilter;
+      if (systemsYear) systemsYear.value = state.filters.year;
+
+      const employeesSearch = document.getElementById("employeesTabSearch");
+      const systemsSearch = document.getElementById("systemsTabSearch");
+      if (employeesSearch) employeesSearch.value = state.filters.q;
+      if (systemsSearch) systemsSearch.value = state.filters.q;
+    }
+
+    function bindControls() {
+      document.getElementById("closeFormBtn").addEventListener("click", closeForm);
+      document.getElementById("cancelFormBtn").addEventListener("click", closeForm);
+      document.getElementById("saveFormBtn").addEventListener("click", submitForm);
+      document.getElementById("formModal").addEventListener("click", (event) => { if (event.target.id === "formModal") closeForm(); });
+    }
+
+    function bindDynamicContent() {
+      document.querySelectorAll("[data-open-form]").forEach((button) => {
+        button.addEventListener("click", () => openForm(button.getAttribute("data-open-form"), "create"));
+      });
+
+      document.querySelectorAll("[data-kpi]").forEach((card) => {
+        card.addEventListener("click", () => {
+          const drill = card.getAttribute("data-kpi");
+          if (drill === "employees") {
+            state.drill = null;
+            state.activeTab = "employees";
+          } else if (drill === "systems") {
+            state.drill = null;
+            state.activeTab = "systems";
+          } else if (drill === "load") {
+            state.drill = null;
+            state.activeTab = "employees";
+          } else if (drill === "changes") {
+            state.drill = "changes";
+            state.activeTab = "dashboard";
+          } else {
+            state.drill = drill;
+            state.activeTab = drill.includes("Employees") ? "employees" : "systems";
+          }
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-group-employees]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.employeeGroupBy = button.getAttribute("data-group-employees");
+          state.employeeGroupsOpen = {};
+          render();
+        });
+      });
+
+      const employeesYearFilter = document.getElementById("employeesYearFilter");
+      const employeesCategoryFilter = document.getElementById("employeesCategoryFilter");
+      const employeesManagerFilter = document.getElementById("employeesManagerFilter");
+      const employeesSystemFilter = document.getElementById("employeesSystemFilter");
+      const employeesSearchInput = document.getElementById("employeesTabSearch");
+
+      if (employeesYearFilter) {
+        employeesYearFilter.addEventListener("change", (event) => {
+          state.filters.year = event.target.value;
+          render();
+        });
+      }
+      if (employeesCategoryFilter) {
+        employeesCategoryFilter.addEventListener("change", (event) => {
+          state.filters.category = event.target.value;
+          render();
+        });
+      }
+      if (employeesManagerFilter) {
+        employeesManagerFilter.addEventListener("change", (event) => {
+          state.filters.manager = event.target.value;
+          render();
+        });
+      }
+      if (employeesSystemFilter) {
+        employeesSystemFilter.addEventListener("change", (event) => {
+          state.filters.system = event.target.value;
+          render();
+        });
+      }
+
+      if (employeesSearchInput) {
+        employeesSearchInput.addEventListener("input", (event) => {
+          state.filters.q = event.target.value;
+          render();
+        });
+      }
+
+      document.querySelectorAll("[data-clear-employee-search]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.filters.q = "";
+          render();
+        });
+      });
+
+      const systemsYearFilter = document.getElementById("systemsYearFilter");
+      const systemsCategoryFilter = document.getElementById("systemsCategoryFilter");
+      const systemsManagerFilter = document.getElementById("systemsManagerFilter");
+      const systemsStatusFilter = document.getElementById("systemsStatusFilter");
+      const systemsSearchInput = document.getElementById("systemsTabSearch");
+
+      if (systemsYearFilter) {
+        systemsYearFilter.addEventListener("change", (event) => {
+          state.filters.year = event.target.value;
+          render();
+        });
+      }
+      if (systemsCategoryFilter) {
+        systemsCategoryFilter.addEventListener("change", (event) => {
+          state.filters.category = event.target.value;
+          render();
+        });
+      }
+      if (systemsManagerFilter) {
+        systemsManagerFilter.addEventListener("change", (event) => {
+          state.filters.manager = event.target.value;
+          render();
+        });
+      }
+      if (systemsStatusFilter) {
+        systemsStatusFilter.addEventListener("change", (event) => {
+          state.systemStatusFilter = event.target.value;
+          render();
+        });
+      }
+
+      if (systemsSearchInput) {
+        systemsSearchInput.addEventListener("input", (event) => {
+          state.filters.q = event.target.value;
+          render();
+        });
+      }
+
+      document.querySelectorAll("[data-clear-system-search]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.filters.q = "";
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-group-systems]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.systemGroupBy = button.getAttribute("data-group-systems");
+          state.systemGroupsOpen = {};
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-toggle-group]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const [type, key] = button.getAttribute("data-toggle-group").split(":");
+          const wasOpen = type === "employee" ? state.employeeGroupsOpen[key] === true : state.systemGroupsOpen[key] === true;
+          if (type === "employee") state.employeeGroupsOpen[key] = !wasOpen;
+          if (type === "system") state.systemGroupsOpen[key] = !wasOpen;
+          const groupId = `group-${type}-${key.replace(/\s+/g, "-")}`;
+          render();
+          if (!wasOpen) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+              const el = document.getElementById(groupId);
+              if (el) scrollIntoViewIfNeeded(el);
+            }));
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-open-employee]").forEach((row) => {
+        row.addEventListener("click", () => {
+          state.selectedEmployeeId = Number(row.getAttribute("data-open-employee"));
+          render();
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const anchor = document.getElementById("workspace-anchor");
+            if (anchor) scrollIntoViewIfNeeded(anchor);
+          }));
+        });
+      });
+
+      document.querySelectorAll("[data-open-system]").forEach((row) => {
+        row.addEventListener("click", () => {
+          state.selectedSystemId = row.getAttribute("data-open-system");
+          render();
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const anchor = document.getElementById("workspace-anchor");
+            if (anchor) scrollIntoViewIfNeeded(anchor);
+          }));
+        });
+      });
+
+      document.querySelectorAll("[data-link-system]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.activeTab = "systems";
+          state.selectedSystemId = button.getAttribute("data-link-system");
+          render();
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const anchor = document.getElementById("workspace-anchor");
+            if (anchor) scrollIntoViewIfNeeded(anchor);
+          }));
+        });
+      });
+
+      document.querySelectorAll("[data-link-employee]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.activeTab = "employees";
+          state.selectedEmployeeId = Number(button.getAttribute("data-link-employee"));
+          render();
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const anchor = document.getElementById("workspace-anchor");
+            if (anchor) scrollIntoViewIfNeeded(anchor);
+          }));
+        });
+      });
+
+      document.querySelectorAll("[data-edit-employee]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const employee = employees.find((item) => item.id === Number(button.getAttribute("data-edit-employee")));
+          openForm("employee", "edit", employee);
+        });
+      });
+
+      document.querySelectorAll("[data-assign-system]").forEach((button) => {
+        button.addEventListener("click", () => openAssignDrawer(button.getAttribute("data-assign-system")));
+      });
+
+      document.querySelectorAll("[data-edit-system]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const system = systems.find((item) => item.id === button.getAttribute("data-edit-system"));
+          openForm("system", "edit", system);
+        });
+      });
+
+      document.querySelectorAll("[data-system-view]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.systemWorkspaceView = button.getAttribute("data-system-view") || "employees";
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-close-workspace]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const type = button.getAttribute("data-close-workspace");
+          if (type === "employee") state.selectedEmployeeId = null;
+          if (type === "system") state.selectedSystemId = null;
+          render();
+        });
+      });
+    }
+
+    function fieldHtml(field, value) {
+      const fieldClass = `modal-field ${field.full ? "full" : ""}`;
+      if (field.type === "select") {
+        return `
+          <div class="${fieldClass}">
+            <label for="f-${field.key}">${field.label}${field.required ? " *" : ""}</label>
+            <select id="f-${field.key}" name="${field.key}">
+              ${field.options.map((option) => `<option value="${option.value}" ${String(value ?? field.value ?? "") === option.value ? "selected" : ""}>${option.label}</option>`).join("")}
+            </select>
+          </div>
+        `;
+      }
+
+      if (field.type === "textarea") {
+        return `
+          <div class="${fieldClass}">
+            <label for="f-${field.key}">${field.label}${field.required ? " *" : ""}</label>
+            <textarea id="f-${field.key}" name="${field.key}" ${field.required ? "required" : ""}>${escHtml(value ?? field.value ?? "")}</textarea>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="${fieldClass}">
+          <label for="f-${field.key}">${field.label}${field.required ? " *" : ""}</label>
+          <input id="f-${field.key}" name="${field.key}" type="${field.type}" value="${escHtml(value ?? field.value ?? "")}" ${field.required ? "required" : ""}>
+        </div>
+      `;
+    }
+
+    function buildAllocationsHtml(allocations) {
+      return `
+        <div class="form-section full"><div><div class="form-section-title">הקצאות למערכות</div><div class="form-section-note">חודשי עבודה מתוכננים לכל מערכת — יתרה אדומה כשחורג מהקיבולת השנתית</div></div></div>
+        ${systems.map(sys => `
+          <div class="modal-field">
+            <label for="alloc-${escHtml(sys.id)}">${escHtml(sys.name)}</label>
+            <input id="alloc-${escHtml(sys.id)}" type="number" min="0" max="24"
+              value="${Number(allocations[sys.id]) || 0}" oninput="updateAllocTotal()">
+          </div>
+        `).join("")}
+        <div class="full" style="border-top:1px solid var(--line);padding-top:8px;margin-top:2px">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:4px 0">
+            <span style="color:var(--muted)">סה&quot;כ מוקצה</span>
+            <strong id="alloc-total" style="font-size:15px">—</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateAllocTotal() {
+      const totalEl = document.getElementById("alloc-total");
+      if (!totalEl) return;
+      const total = systems.reduce((sum, sys) => {
+        const el = document.getElementById(`alloc-${sys.id}`);
+        return sum + Math.max(0, Number(el?.value) || 0);
+      }, 0);
+      const capEl = document.getElementById("f-yearlyCapacity");
+      const cap = Number(capEl?.value) || 0;
+      totalEl.textContent = cap > 0 ? `${total} / ${cap}` : String(total);
+      totalEl.style.color = cap > 0 && total > cap ? "var(--danger)" : total === cap ? "var(--ok)" : "var(--text)";
+    }
+
+    function buildFormHtml(conf, preset = {}) {
+      let currentSection = "";
+      return conf.fields.map((field) => {
+        const sectionHeader = field.section !== currentSection
+          ? `<div class="form-section full"><div><div class="form-section-title">${field.section}</div><div class="form-section-note">נתוני דמו בלבד להצגה</div></div></div>`
+          : "";
+        currentSection = field.section;
+        return `${sectionHeader}${fieldHtml(field, preset[field.key])}`;
+      }).join("");
+    }
+
+    function openForm(formType, mode = "create", entity = null) {
+      const conf = formConfigs[formType];
+      if (!conf) return;
+      state.activeForm = formType;
+      state.formContext = { formType, mode, entityId: entity?.id || null };
+      document.getElementById("formTitle").innerHTML = `${mode === "edit" ? conf.editTitle : conf.createTitle}<div class="dialog-subtitle">${conf.subtitle}</div>`;
+      document.getElementById("mockForm").innerHTML = buildFormHtml(conf, entity || {});
+      if (formType === "employee") {
+        document.getElementById("mockForm").insertAdjacentHTML("beforeend", buildAllocationsHtml(entity?.allocations || {}));
+        updateAllocTotal();
+        // also update total when capacity changes
+        const capEl = document.getElementById("f-yearlyCapacity");
+        if (capEl) capEl.addEventListener("input", updateAllocTotal);
+      }
+      document.getElementById("saveFormBtn").textContent = mode === "edit" ? "שמירת שינויים" : "שמירה (דמו)";
+      document.getElementById("formModal").classList.add("show");
+    }
+
+    function closeForm() {
+      document.getElementById("formModal").classList.remove("show");
+      document.getElementById("mockForm").innerHTML = "";
+      state.activeForm = "";
+      state.formContext = null;
+    }
+
+    function collectFormData(conf) {
+      const data = {};
+      for (const field of conf.fields) {
+        const element = document.getElementById(`f-${field.key}`);
+        const value = (element?.value || "").trim();
+        if (field.required && !value) {
+          showToast(`שדה חובה חסר: ${field.label}`);
+          return null;
+        }
+        data[field.key] = value;
+      }
+      return data;
+    }
+
+    function submitForm() {
+      const context = state.formContext;
+      const conf = formConfigs[state.activeForm];
+      if (!context || !conf) return;
+      const data = collectFormData(conf);
+      if (!data) return;
+
+      if (context.formType === "employee") {
+        const newAllocations = {};
+        systems.forEach(sys => {
+          const el = document.getElementById(`alloc-${sys.id}`);
+          newAllocations[sys.id] = Math.max(0, Number(el?.value) || 0);
+        });
+        if (context.mode === "edit") {
+          employees = employees.map((employee) => employee.id === context.entityId ? {
+            ...employee,
+            name: data.name,
+            manager: data.manager,
+            category: data.category,
+            subcategory: data.subcategory,
+            yearlyCapacity: Number(data.yearlyCapacity) || 12,
+            futureEvents: data.futureEvents || "ללא",
+            allocations: newAllocations
+          } : employee);
+          state.selectedEmployeeId = context.entityId;
+        } else {
+          const nextId = Math.max(0, ...employees.map((employee) => employee.id || 0)) + 1;
+          employees.push({
+            id: nextId,
+            name: data.name,
+            manager: data.manager,
+            category: data.category,
+            subcategory: data.subcategory,
+            yearlyCapacity: Number(data.yearlyCapacity) || 12,
+            futureEvents: data.futureEvents || "ללא",
+            allocations: newAllocations
+          });
+          state.selectedEmployeeId = nextId;
+        }
+      }
+
+      if (context.formType === "system") {
+        if (context.mode === "edit") {
+          systems = systems.map((system) => system.id === context.entityId ? {
+            ...system,
+            name: data.name,
+            required: Number(data.required) || 0,
+            totalBudget: Number(data.totalBudget) || getSystemTotalBudget(system),
+            statusHint: data.statusHint || "ok"
+          } : system);
+          state.selectedSystemId = context.entityId;
+        } else {
+          const id = toSystemId(data.name);
+          if (systems.some((system) => system.id === id)) {
+            showToast("מערכת בשם דומה כבר קיימת");
+            return;
+          }
+          systems.push({ id, name: data.name, required: Number(data.required) || 0, totalBudget: Number(data.totalBudget) || 2400, statusHint: data.statusHint || "ok" });
+          employees = employees.map((employee) => ({ ...employee, allocations: { ...employee.allocations, [id]: 0 } }));
+          state.selectedSystemId = id;
+        }
+      }
+
+      if (context.formType === "category" && context.mode === "create") {
+        const baseColors = ["--cat-dev", "--cat-front", "--cat-dba", "--cat-devops", "--cat-ux", "--cat-impl", "--cat-pm"];
+        categoryTree.push({
+          title: data.title,
+          children: data.children.split(",").map((item) => item.trim()).filter(Boolean),
+          required: Number(data.required) || 0,
+          existing: Number(data.existing) || 0,
+          colorVar: baseColors[categoryTree.length % baseColors.length]
+        });
+      }
+
+      if (context.formType === "change" && context.mode === "create") {
+        changes.unshift({ date: toIsoDateDisplay(data.date), type: data.type || "info", title: data.title, impact: data.impact });
+      }
+
+      saveToSession();
+      fillFilters();
+      closeForm();
+      render();
+      showToast(context.mode === "edit" ? "הנתון עודכן בהצלחה (דמו)" : "הנתון נוסף בהצלחה (דמו)");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      window.clearTimeout(showToast._timer);
+      showToast._timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    const assignState = { systemId: null, selected: new Set(), months: {}, q: "" };
+
+    function openAssignDrawer(systemId) {
+      const sys = systems.find((s) => s.id === systemId);
+      if (!sys) return;
+      assignState.systemId = systemId;
+      assignState.selected = new Set(employees.filter((e) => (e.allocations[systemId] || 0) > 0).map((e) => e.id));
+      assignState.months = {};
+      employees.forEach((e) => { if ((e.allocations[systemId] || 0) > 0) assignState.months[e.id] = e.allocations[systemId]; });
+      assignState.q = "";
+      document.getElementById("assignDrawerTitle").textContent = `שיבוץ עובדים — ${sys.name}`;
+      document.getElementById("assignDrawerSub").textContent = `בחר עובדים לשיבוץ למערכת. שינויים יחולו מיד.`;
+      document.getElementById("assignSearch").value = "";
+      document.getElementById("assignOverlay").classList.add("show");
+      document.getElementById("assignDrawer").classList.add("show");
+      renderAssignList();
+    }
+
+    function closeAssignDrawer() {
+      document.getElementById("assignOverlay").classList.remove("show");
+      document.getElementById("assignDrawer").classList.remove("show");
+      assignState.systemId = null;
+    }
+
+    function renderAssignList() {
+      const q = assignState.q.trim().toLowerCase();
+      const sorted = [...employees]
+        .filter((e) => !q || `${e.name} ${e.subcategory} ${e.category} ${e.manager}`.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const gA = getEmployeeGap(a), gB = getEmployeeGap(b);
+          const tierA = gA > 1 ? 0 : gA >= 0 ? 1 : 2;
+          const tierB = gB > 1 ? 0 : gB >= 0 ? 1 : 2;
+          return tierA !== tierB ? tierA - tierB : gB - gA;
+        });
+
+      const list = document.getElementById("assignDrawerList");
+      if (!list) return;
+      list.innerHTML = sorted.map((e) => {
+        const gap = getEmployeeGap(e);
+        const used = getEmployeeTotal(e);
+        const statusCls = gap > 1 ? "ok" : gap >= 0 ? "warn" : "danger";
+        const checked = assignState.selected.has(e.id);
+        const borderColor = gap > 1 ? "var(--ok)" : gap >= 0 ? "var(--warn)" : "var(--danger)";
+        return `
+          <div class="assign-row ${checked ? "checked" : ""}" data-assign-toggle="${e.id}" style="border-right:3px solid ${borderColor}">
+            <div class="assign-check">${checked ? "✓" : ""}</div>
+            <div class="assign-row-info">
+              <div class="assign-row-name">${escHtml(e.name)}</div>
+              <div class="assign-row-meta">${escHtml(e.subcategory)} · ${escHtml(e.category)} · מנהל: ${escHtml(e.manager)}</div>
+            </div>
+            <div class="assign-row-stats">
+              <div class="assign-stat"><div class="label">קיבולת</div><div class="value">${e.yearlyCapacity}</div></div>
+              <div class="assign-stat"><div class="label">מנוצל</div><div class="value">${used}</div></div>
+              <div class="assign-stat"><div class="label">יתרה</div><div class="value ${statusCls}">${gap}</div></div>
+              ${checked ? `<div class="assign-stat"><div class="label">חודשים</div><input data-months-input="${e.id}" type="number" min="1" max="${e.yearlyCapacity}" value="${assignState.months[e.id] || 1}" style="width:46px;font-size:13px;font-weight:800;border:1px solid var(--brand);border-radius:4px;padding:2px 4px;text-align:center;background:var(--bg);color:var(--brand)" onclick="event.stopPropagation()"></div>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      list.querySelectorAll("[data-assign-toggle]").forEach((row) => {
+        row.addEventListener("click", () => {
+          const id = Number(row.getAttribute("data-assign-toggle"));
+          if (assignState.selected.has(id)) {
+            assignState.selected.delete(id);
+            delete assignState.months[id];
+          } else {
+            assignState.selected.add(id);
+            if (!assignState.months[id]) assignState.months[id] = 1;
+          }
+          renderAssignList();
+          updateAssignCount();
+        });
+      });
+
+      list.querySelectorAll("[data-months-input]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const id = Number(input.getAttribute("data-months-input"));
+          assignState.months[id] = Math.max(1, Number(input.value) || 1);
+        });
+        input.addEventListener("input", () => {
+          const id = Number(input.getAttribute("data-months-input"));
+          assignState.months[id] = Math.max(1, Number(input.value) || 1);
+        });
+      });
+      updateAssignCount();
+    }
+
+    function updateAssignCount() {
+      const el = document.getElementById("assignCount");
+      if (el) el.textContent = `${assignState.selected.size} עובדים נבחרו`;
+    }
+
+    function submitAssign() {
+      const sysId = assignState.systemId;
+      if (!sysId) return;
+      employees = employees.map((e) => {
+        const wasAssigned = (e.allocations[sysId] || 0) > 0;
+        const shouldAssign = assignState.selected.has(e.id);
+        if (wasAssigned === shouldAssign) return e;
+        const newAlloc = { ...e.allocations };
+        if (shouldAssign && !wasAssigned) newAlloc[sysId] = assignState.months[e.id] || 1;
+        if (shouldAssign && wasAssigned) newAlloc[sysId] = assignState.months[e.id] || e.allocations[sysId];
+        if (!shouldAssign && wasAssigned) newAlloc[sysId] = 0;
+        return { ...e, allocations: newAlloc };
+      });
+      saveToSession();
+      closeAssignDrawer();
+      render();
+      showToast(`שיבוץ עובדים עודכן (${assignState.selected.size} עובדים)`);
+    }
+
+    function bindAssignDrawer() {
+      document.getElementById("assignDrawerClose").addEventListener("click", closeAssignDrawer);
+      document.getElementById("assignCancelBtn").addEventListener("click", closeAssignDrawer);
+      document.getElementById("assignOverlay").addEventListener("click", closeAssignDrawer);
+      document.getElementById("assignConfirmBtn").addEventListener("click", submitAssign);
+      document.getElementById("assignSearch").addEventListener("input", (e) => {
+        assignState.q = e.target.value;
+        renderAssignList();
+      });
+    }
+
+    function scrollIntoViewIfNeeded(el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < 0 || rect.top > window.innerHeight * 0.35) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function render() {
+      const employeesSearchInput = document.getElementById("employeesTabSearch");
+      const systemsSearchInput = document.getElementById("systemsTabSearch");
+
+      const wasEmployeeSearchFocused = employeesSearchInput && document.activeElement === employeesSearchInput;
+      const wasSystemSearchFocused = systemsSearchInput && document.activeElement === systemsSearchInput;
+
+      buildTabs();
+      updateToolbar();
+      renderScreens();
+      fillFilters();
+      
+      const newEmployeesSearch = document.getElementById("employeesTabSearch");
+      const newSystemsSearch = document.getElementById("systemsTabSearch");
+
+      if (newEmployeesSearch && state.filters.q !== "") {
+        newEmployeesSearch.value = state.filters.q;
+      }
+      if (newSystemsSearch && state.filters.q !== "") {
+        newSystemsSearch.value = state.filters.q;
+      }
+
+      if (wasEmployeeSearchFocused && newEmployeesSearch) newEmployeesSearch.focus();
+      if (wasSystemSearchFocused && newSystemsSearch) newSystemsSearch.focus();
+    }
+
+    loadFromSession();
+    bindControls();
+    bindAssignDrawer();
+    render();
+  </script>
+</body>
+</html>

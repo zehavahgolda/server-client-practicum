@@ -1,0 +1,16 @@
+﻿// DTO used when updating an existing employee.
+namespace HR_System.DTOs.Employees
+{
+    public class EmployeeUpdateDto
+    {
+        public string? FullName { get; set; }
+        public string? ProfessionalCategory { get; set; }
+        public string? ProfessionalSubCategory { get; set; }
+        public string? ManagerName { get; set; }
+        public int? Year { get; set; }
+        public int? YearlyCapacityMonths { get; set; }
+        public string? UpcomingEvent { get; set; }
+        public string? Notes { get; set; }
+        public bool? IsActive { get; set; }
+    }
+}

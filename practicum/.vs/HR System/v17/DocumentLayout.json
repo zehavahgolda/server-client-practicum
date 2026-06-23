@@ -1,0 +1,444 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\controllers\\systemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\controllers\\systemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\controllers\\employeescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\controllers\\employeescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\controllers\\changecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\controllers\\changecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\categoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\categoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\systemservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\systemservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\changeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\changeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\employeeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\employeeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\ichangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\ichangeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\icategoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\icategoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\models\\change.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\models\\change.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\models\\categor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\models\\categor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\models\\systemmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\models\\systemmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\models\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\models\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\dtos\\systems\\systemdetailsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\dtos\\systems\\systemdetailsdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\isystemservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\isystemservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\hr system.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\hr system.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\services\\iemployeeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\services\\iemployeeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\dtos\\employees\\employeeupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\dtos\\employees\\employeeupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\dtos\\employees\\employeecreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\dtos\\employees\\employeecreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\dtos\\employees\\allocationcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\dtos\\employees\\allocationcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|c:\\users\\pc\\desktop\\practicum\\practicum_final\\practicum\\hr system\\dtos\\systems\\systemcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C23935C-C230-4602-9E4E-02FDBE53479D}|HR System\\HR System.csproj|solutionrelative:hr system\\dtos\\systems\\systemcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 18,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ChangeController.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\ChangeController.cs",
+              "RelativeDocumentMoniker": "HR System\\Controllers\\ChangeController.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\ChangeController.cs",
+              "RelativeToolTip": "HR System\\Controllers\\ChangeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAYwBkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T14:04:44.978Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ChangeService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\ChangeService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\ChangeService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\ChangeService.cs",
+              "RelativeToolTip": "HR System\\Services\\ChangeService.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAswB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T14:03:34.441Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IChangeService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\IChangeService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\IChangeService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\IChangeService.cs",
+              "RelativeToolTip": "HR System\\Services\\IChangeService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T14:03:03.372Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CategoryController.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\CategoryController.cs",
+              "RelativeDocumentMoniker": "HR System\\Controllers\\CategoryController.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\CategoryController.cs",
+              "RelativeToolTip": "HR System\\Controllers\\CategoryController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAYwBkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T12:24:35.669Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CategoryService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\CategoryService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\CategoryService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\CategoryService.cs",
+              "RelativeToolTip": "HR System\\Services\\CategoryService.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAswCUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T12:23:56.544Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ICategoryService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\ICategoryService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\ICategoryService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\ICategoryService.cs",
+              "RelativeToolTip": "HR System\\Services\\ICategoryService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T12:23:23.392Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Change.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\Change.cs",
+              "RelativeDocumentMoniker": "HR System\\Models\\Change.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\Change.cs",
+              "RelativeToolTip": "HR System\\Models\\Change.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T12:22:16.921Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Categor.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\Categor.cs",
+              "RelativeDocumentMoniker": "HR System\\Models\\Categor.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\Categor.cs",
+              "RelativeToolTip": "HR System\\Models\\Categor.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T12:21:44.288Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Employee.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\Employee.cs",
+              "RelativeDocumentMoniker": "HR System\\Models\\Employee.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\Employee.cs",
+              "RelativeToolTip": "HR System\\Models\\Employee.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAkwDwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T09:14:51.151Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "SystemModel.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\SystemModel.cs",
+              "RelativeDocumentMoniker": "HR System\\Models\\SystemModel.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Models\\SystemModel.cs",
+              "RelativeToolTip": "HR System\\Models\\SystemModel.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAgwCQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-22T08:39:16.695Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ISystemService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\ISystemService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\ISystemService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\ISystemService.cs",
+              "RelativeToolTip": "HR System\\Services\\ISystemService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T12:51:23.192Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "SystemService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\SystemService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\SystemService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\SystemService.cs",
+              "RelativeToolTip": "HR System\\Services\\SystemService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAANMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T12:38:22.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "SystemDetailsDto.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Systems\\SystemDetailsDto.cs",
+              "RelativeDocumentMoniker": "HR System\\DTOs\\Systems\\SystemDetailsDto.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Systems\\SystemDetailsDto.cs",
+              "RelativeToolTip": "HR System\\DTOs\\Systems\\SystemDetailsDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T12:38:03.075Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\appsettings.json",
+              "RelativeDocumentMoniker": "HR System\\appsettings.json",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\appsettings.json",
+              "RelativeToolTip": "HR System\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-06-21T12:37:49.793Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "SystemController.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\SystemController.cs",
+              "RelativeDocumentMoniker": "HR System\\Controllers\\SystemController.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\SystemController.cs",
+              "RelativeToolTip": "HR System\\Controllers\\SystemController.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAowF8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T11:51:10.251Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "EmployeeService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\EmployeeService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\EmployeeService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\EmployeeService.cs",
+              "RelativeToolTip": "HR System\\Services\\EmployeeService.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAAAMsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T11:45:11.065Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "IEmployeeService.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\IEmployeeService.cs",
+              "RelativeDocumentMoniker": "HR System\\Services\\IEmployeeService.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Services\\IEmployeeService.cs",
+              "RelativeToolTip": "HR System\\Services\\IEmployeeService.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAwwDgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T11:40:28.858Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Program.cs",
+              "RelativeDocumentMoniker": "HR System\\Program.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Program.cs",
+              "RelativeToolTip": "HR System\\Program.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAswDwAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T11:35:05.478Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "EmployeesController.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\EmployeesController.cs",
+              "RelativeDocumentMoniker": "HR System\\Controllers\\EmployeesController.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\Controllers\\EmployeesController.cs",
+              "RelativeToolTip": "HR System\\Controllers\\EmployeesController.cs",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAkwIQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T10:58:02.385Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "HR System",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\HR System.csproj",
+              "RelativeDocumentMoniker": "HR System\\HR System.csproj",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\HR System.csproj",
+              "RelativeToolTip": "HR System\\HR System.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-06-21T10:56:24.772Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "SystemCreateDto.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Systems\\SystemCreateDto.cs",
+              "RelativeDocumentMoniker": "HR System\\DTOs\\Systems\\SystemCreateDto.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Systems\\SystemCreateDto.cs",
+              "RelativeToolTip": "HR System\\DTOs\\Systems\\SystemCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T10:48:28.487Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "AllocationCreateDto.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Employees\\AllocationCreateDto.cs",
+              "RelativeDocumentMoniker": "HR System\\DTOs\\Employees\\AllocationCreateDto.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Employees\\AllocationCreateDto.cs",
+              "RelativeToolTip": "HR System\\DTOs\\Employees\\AllocationCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T10:48:22.323Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "EmployeeUpdateDto.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Employees\\EmployeeUpdateDto.cs",
+              "RelativeDocumentMoniker": "HR System\\DTOs\\Employees\\EmployeeUpdateDto.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Employees\\EmployeeUpdateDto.cs",
+              "RelativeToolTip": "HR System\\DTOs\\Employees\\EmployeeUpdateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T10:48:18.601Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "EmployeeCreateDto.cs",
+              "DocumentMoniker": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Employees\\EmployeeCreateDto.cs",
+              "RelativeDocumentMoniker": "HR System\\DTOs\\Employees\\EmployeeCreateDto.cs",
+              "ToolTip": "C:\\Users\\PC\\Desktop\\practicum\\practicum_final\\practicum\\HR System\\DTOs\\Employees\\EmployeeCreateDto.cs",
+              "RelativeToolTip": "HR System\\DTOs\\Employees\\EmployeeCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-21T10:48:13.991Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

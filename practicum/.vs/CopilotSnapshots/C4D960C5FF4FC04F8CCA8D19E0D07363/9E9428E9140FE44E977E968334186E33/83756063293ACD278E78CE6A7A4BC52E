@@ -1,0 +1,73 @@
+﻿using HR_System.Services;
+using MongoDB.Driver;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// 1. ����� ������ ������ ���� �-appsettings.json
+var connectionString = builder.Configuration["MongoDB:ConnectionString"];
+var databaseName = builder.Configuration["MongoDB:DatabaseName"];
+
+// 2. ����� �-MongoClient �-Singleton (���� ��� ��� ������)
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
+
+// 3. ����� �-IMongoDatabase (�� �� ���� �� ��� ����� �� ������)
+builder.Services.AddScoped<IMongoDatabase>(sp =>
+    sp.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
+
+// 4. ����� ��������� ���
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<ISystemService, SystemService>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+/// <summary>
+/// Interface defining operations available for Employee management used by API controllers.
+/// Includes read operations and write operations required by the UI (create/update/assign/delete).
+/// </summary>
+public interface IEmployeeService
+{
+    // Retrieve list of employees with optional filters used by UI list and filters.
+    Task<List<EmployeeListItemDto>> GetEmployeesAsync(
+        int? year = null,
+        string? managerName = null,
+        string? professionalCategory = null,
+        string? systemId = null,
+        string? search = null);
+
+    // Retrieve full details for a single employee by id.
+    Task<EmployeeDetailsDto?> GetEmployeeByIdAsync(string id);
+
+    // Update the ActualMonths field for a specific allocation of an employee.
+    Task<bool> UpdateAllocationActualMonthsAsync(
+        string employeeId,
+        string systemId,
+        string roleInSystem,
+        int actualMonths);
+
+    // Create a new employee and return the created id.
+    Task<string> CreateEmployeeAsync(EmployeeCreateDto dto);
+
+    // Update fields of an existing employee, returns true if modified.
+    Task<bool> UpdateEmployeeAsync(string id, EmployeeUpdateDto dto);
+
+    // Add a new allocation to an employee (assign to a system/role).
+    Task<bool> AddAllocationAsync(string employeeId, AllocationCreateDto dto);
+
+    // Delete (or soft-delete) an employee by id.
+    Task<bool> DeleteEmployeeAsync(string id);
+}
+    

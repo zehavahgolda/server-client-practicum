@@ -1,0 +1,6 @@
+@HR_System_HostAddress = http://localhost:5165
+
+GET {{HR_System_HostAddress}}/api/employees/
+Accept: application/json
+
+###

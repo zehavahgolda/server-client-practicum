@@ -1,0 +1,57 @@
+﻿using HR_System.DTOs.Employees;
+
+namespace HR_System.Services
+{
+    /// <summary>
+    /// Service contract for employee operations used by API controllers.
+    /// Includes read operations and write operations required by the UI (create/update/assign/delete).
+    /// </summary>
+    public interface IEmployeeService
+    {
+        /// <summary>
+        /// Retrieve list of employees with optional filters used by UI list and filters.
+        /// </summary>
+        Task<List<EmployeeListItemDto>> GetEmployeesAsync(
+            int? year = null,
+            string? managerName = null,
+            string? professionalCategory = null,
+            string? systemId = null,
+            string? search = null);
+
+        /// <summary>
+        /// Retrieve full details for a single employee by id.
+        /// </summary>
+        Task<EmployeeDetailsDto?> GetEmployeeByIdAsync(string id);
+
+        /// <summary>
+        /// Update the ActualMonths field for a specific allocation of an employee.
+        /// </summary>
+        Task<bool> UpdateAllocationActualMonthsAsync(
+            string employeeId,
+            string systemId,
+            string roleInSystem,
+            int actualMonths);
+
+        /// <summary>
+        /// Create a new employee from the provided DTO and return the created employee id.
+        /// </summary>
+        Task<string> CreateEmployeeAsync(EmployeeCreateDto dto);
+
+        /// <summary>
+        /// Update an existing employee. Supports partial updates. Returns true if modified.
+        /// </summary>
+        Task<bool> UpdateEmployeeAsync(string id, EmployeeUpdateDto dto);
+
+        /// <summary>
+        /// Add an allocation to an existing employee (assign to a system/role).
+        /// Returns true if the allocation was added.
+        /// </summary>
+        Task<bool> AddAllocationAsync(string employeeId, AllocationCreateDto dto);
+
+        /// <summary>
+        /// Soft-delete an employee by id (set IsActive = false).
+        /// Returns true if the employee was updated.
+        /// </summary>
+        Task<bool> DeleteEmployeeAsync(string id);
+    }
+}
