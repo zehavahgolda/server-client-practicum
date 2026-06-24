@@ -1,5 +1,11 @@
-﻿public record EmployeeRelevantChangeDto(
-    string Title, // כותרת שינוי
-    string? Date, // תאריך
-    string? Description // פירוט קצר
-);
+﻿using System.Collections.Generic;
+
+namespace HR_System.DTOs.Employees
+{
+    public record EmployeeRelevantChangeDto
+    {
+        public string Title { get; init; } = null!; // כותרת שינוי
+        public int? Date { get; init; } // תאריך
+        public string? Description { get; init; } // פירוט קצר
+    }
+}

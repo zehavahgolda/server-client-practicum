@@ -3,18 +3,18 @@ using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// чшйаъ двгшеъ дзйбеш м-MongoDB оъек чебх д-appsettings.json
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ-MongoDB пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ-appsettings.json
 var connectionString = builder.Configuration["MongoDB:ConnectionString"];
 var databaseName = builder.Configuration["MongoDB:DatabaseName"];
 
-// шйщен д-MongoClient лсйрвмиеп (оефт йзйг млм аешк зйй дййщен)
+// пїЅпїЅпїЅпїЅпїЅ пїЅ-MongoClient пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
 
-// шйщен д-IMongoDatabase л-Scoped (оефт згщ млм бчщд)
+// пїЅпїЅпїЅпїЅпїЅ пїЅ-IMongoDatabase пїЅ-Scoped (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ)
 builder.Services.AddScoped<IMongoDatabase>(sp =>
     sp.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
 
-// десфъ бчшйн едвгшъ сшйамйжцйд м-JSON тбеш ъайоеъ м-Frontend
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ-JSON пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ-Frontend
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
     {
@@ -25,13 +25,13 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// шйщен щйшеъй дафмйчцйд мцешк джшчъ ъмейеъ (Dependency Injection)
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (Dependency Injection)
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ISystemService, SystemService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IChangeService, ChangeService>();
 
-// двгшъ огйрйеъ CORS тбеш оощч дощъощ дочеой
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ CORS пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalUI", policy =>
@@ -40,9 +40,11 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAutoMapper(typeof(AutoMappering));
+
 var app = builder.Build();
 
-// двгшеъ сбйбъ фйъез
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -51,10 +53,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// дфтмъ CORS баефп вмебмй
+// пїЅпїЅпїЅпїЅпїЅ CORS пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 app.UseCors("AllowLocalUI");
 
-// дфтмъ айоеъ едшщаеъ
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 app.UseAuthorization();
 app.MapControllers();
 

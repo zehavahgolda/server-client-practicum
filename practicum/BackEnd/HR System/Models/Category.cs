@@ -12,7 +12,7 @@ namespace HR_System.Models
         [BsonElement("name")]
         public string Name { get; set; } = null!;
 
-        [BsonElement("description")]
-        public string? Description { get; set; }
+        [BsonElement("innerCategory")]
+        public string? innerCategory { get; set; }
     }
 }

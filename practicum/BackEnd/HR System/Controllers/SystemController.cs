@@ -93,4 +93,55 @@ public class SystemController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+    [HttpPost]
+    public async Task<ActionResult> Create([FromBody] SystemCreateDto dto)
+    {
+        try
+        {
+            if (dto == null) return BadRequest("System data is required.");
+
+            await _systemService.CreateSystemAsync(dto);
+
+            // החזרת הצלחה (201 Created הוא הסטטוס המקובל ל-POST)
+            return Ok(new { message = "System created successfully" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    /// עדכון מערכת קיימת (PUT).
+    /// מקבל את המזהה בנתיב ואת הנתונים החדשים בגוף הבקשה.
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> Update(string id, [FromBody] SystemCreateDto dto)
+    {
+        try
+        {
+            await _systemService.UpdateSystemAsync(id, dto);
+            return NoContent(); // 204 מציין הצלחה ללא צורך בהחזרת אובייקט
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    /// מחיקת מערכת מהמערכת (DELETE).
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> Delete(string id)
+    {
+        try
+        {
+            await _systemService.DeleteSystemAsync(id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
 }

@@ -9,5 +9,8 @@ namespace HR_System.Services
         Task<SystemDetailsDto?> GetSystemByIdAsync(string id);
 
         Task<byte[]> ExportSystemsToExcelAsync(int? year = null, string? status = null);
+        Task CreateSystemAsync(SystemCreateDto dto);
+        Task UpdateSystemAsync(string id, SystemCreateDto dto);
+        Task DeleteSystemAsync(string id);
     }
 }

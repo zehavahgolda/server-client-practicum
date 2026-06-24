@@ -101,7 +101,7 @@ namespace HR_System.Controllers
         /// עדכון עובד קיים.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeUpdateDto dto)
+        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeEditDto dto)
         {
             var success = await _employeeService.UpdateEmployeeAsync(id, dto);
             if (!success) return NotFound("Employee not found or no changes were made.");

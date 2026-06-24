@@ -190,7 +190,7 @@
       },
       {
         "Name": "dto",
-        "Type": "HR_System.DTOs.Employees.EmployeeUpdateDto",
+        "Type": "HR_System.DTOs.Employees.EmployeeEditDto",
         "IsRequired": true
       }
     ],
@@ -307,6 +307,22 @@
   },
   {
     "ContainingType": "SystemController",
+    "Method": "Create",
+    "RelativePath": "api/System",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "HR_System.DTOs.Systems.SystemCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SystemController",
     "Method": "GetSystemById",
     "RelativePath": "api/System/{id}",
     "HttpMethod": "GET",
@@ -330,6 +346,43 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "SystemController",
+    "Method": "Update",
+    "RelativePath": "api/System/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "HR_System.DTOs.Systems.SystemCreateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "SystemController",
+    "Method": "Delete",
+    "RelativePath": "api/System/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "SystemController",

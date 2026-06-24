@@ -329,17 +329,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmployeeUpdateDto"
+                "$ref": "#/components/schemas/EmployeeEditDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/EmployeeUpdateDto"
+                "$ref": "#/components/schemas/EmployeeEditDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/EmployeeUpdateDto"
+                "$ref": "#/components/schemas/EmployeeEditDto"
               }
             }
           }
@@ -523,6 +523,35 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/System/shortage": {
@@ -600,6 +629,65 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "System"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemCreateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemCreateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "System"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/api/System/export": {
@@ -667,7 +755,7 @@
             "type": "string",
             "nullable": true
           },
-          "description": {
+          "innerCategory": {
             "type": "string",
             "nullable": true
           }
@@ -726,6 +814,30 @@
           "actualMonths": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeAllocationEditDto": {
+        "type": "object",
+        "properties": {
+          "systemId": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleInSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "plannedMonths": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "actualMonths": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -789,15 +901,15 @@
             "type": "string",
             "nullable": true
           },
+          "managerName": {
+            "type": "string",
+            "nullable": true
+          },
           "professionalCategory": {
             "type": "string",
             "nullable": true
           },
           "professionalSubCategory": {
-            "type": "string",
-            "nullable": true
-          },
-          "managerName": {
             "type": "string",
             "nullable": true
           },
@@ -808,6 +920,10 @@
           "yearlyCapacityMonths": {
             "type": "integer",
             "format": "int32"
+          },
+          "upcomingEvent": {
+            "type": "string",
+            "nullable": true
           },
           "allocatedMonths": {
             "type": "integer",
@@ -824,10 +940,6 @@
           "assignedSystemsCount": {
             "type": "integer",
             "format": "int32"
-          },
-          "upcomingEvent": {
-            "type": "string",
-            "nullable": true
           },
           "notes": {
             "type": "string",
@@ -854,79 +966,7 @@
         },
         "additionalProperties": false
       },
-      "EmployeeListItemDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "nullable": true
-          },
-          "fullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "professionalCategory": {
-            "type": "string",
-            "nullable": true
-          },
-          "professionalSubCategory": {
-            "type": "string",
-            "nullable": true
-          },
-          "managerName": {
-            "type": "string",
-            "nullable": true
-          },
-          "year": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "yearlyCapacityMonths": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "allocatedMonths": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "remainingMonths": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "availabilityStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "assignedSystemsCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "upcomingEvent": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "EmployeeRelevantChangeDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "date": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "EmployeeUpdateDto": {
+      "EmployeeEditDto": {
         "type": "object",
         "properties": {
           "fullName": {
@@ -965,6 +1005,78 @@
           },
           "isActive": {
             "type": "boolean",
+            "nullable": true
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeAllocationEditDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "professionalCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "professionalSubCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "managerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "yearlyCapacityMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remainingMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "availabilityStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignedSystemsCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeRelevantChangeDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "date": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -1008,6 +1120,35 @@
           "availabilityStatus": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SystemCreateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerManagerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiredCapacityMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "managementNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

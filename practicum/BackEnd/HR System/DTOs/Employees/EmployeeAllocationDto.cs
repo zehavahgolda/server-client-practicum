@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace HR_System.DTOs.Employees
 {
  

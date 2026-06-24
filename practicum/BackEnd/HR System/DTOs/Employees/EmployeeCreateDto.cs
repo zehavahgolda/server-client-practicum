@@ -1,20 +1,18 @@
-// DTO used when creating a new employee from the API.
-// Includes basic employee fields and optional initial allocations.
+using System.Collections.Generic;
+
 namespace HR_System.DTOs.Employees
 {
-    public class EmployeeCreateDto
+    public record EmployeeCreateDto
     {
-        public string FullName { get; set; } = null!;
-        public string ProfessionalCategory { get; set; } = null!;
-        public string? ProfessionalSubCategory { get; set; }
-        public string ManagerName { get; set; } = null!;
-        public int Year { get; set; }
-        public int YearlyCapacityMonths { get; set; } = 12;
-        public string? UpcomingEvent { get; set; }
-        public string? Notes { get; set; }
-        public bool IsActive { get; set; } = true;
-
-        // Optional initial allocations when creating an employee.
-        public List<AllocationCreateDto>? Allocations { get; set; }
+        public string FullName { get; init; } = null!;
+        public string ProfessionalCategory { get; init; } = null!;
+        public string? ProfessionalSubCategory { get; init; }
+        public string ManagerName { get; init; } = null!;
+        public int Year { get; init; }
+        public int YearlyCapacityMonths { get; init; } = 12;
+        public string? UpcomingEvent { get; init; }
+        public string? Notes { get; init; }
+        public bool IsActive { get; init; } = true;
+        public List<AllocationCreateDto>? Allocations { get; init; }//נראה לי זה STO מיותר 
     }
 }

@@ -120,9 +120,8 @@ namespace HR_System.Services
             );
         }
 
-        /// <summary>
         /// ייצוא דוח המערכות לקובץ אקסל.
-        /// </summary>
+    
         public async Task<byte[]> ExportSystemsToExcelAsync(int? year = null, string? status = null)
         {
             var systems = await GetSystemsAsync(year, status);
@@ -207,6 +206,42 @@ namespace HR_System.Services
         {
             var remaining = employee.YearlyCapacityMonths - (employee.Allocations ?? []).Sum(a => a.ActualMonths);
             return remaining > 0 ? "Available" : (remaining == 0 ? "Balanced" : "Overloaded");
+        }
+        public async Task CreateSystemAsync(SystemCreateDto dto)
+        {
+            var newSystem = new SystemModel
+            {
+                Name = dto.Name,
+                OwnerManagerName = dto.OwnerManagerName,
+                Year = dto.Year,
+                RequiredCapacityMonths = dto.RequiredCapacityMonths,
+                ManagementNote = dto.ManagementNote,
+                IsActive = dto.IsActive,
+                UpdatedAt = DateTime.UtcNow // מומלץ להוסיף חותמת זמן
+            };
+
+            await _systemsCollection.InsertOneAsync(newSystem);
+        }
+
+        /// עדכון מערכת קיימת במסד הנתונים.
+        public async Task UpdateSystemAsync(string id, SystemCreateDto dto)
+        {
+            var update = Builders<SystemModel>.Update
+                .Set(s => s.Name, dto.Name)
+                .Set(s => s.OwnerManagerName, dto.OwnerManagerName)
+                .Set(s => s.Year, dto.Year)
+                .Set(s => s.RequiredCapacityMonths, dto.RequiredCapacityMonths)
+                .Set(s => s.ManagementNote, dto.ManagementNote)
+                .Set(s => s.IsActive, dto.IsActive)
+                .Set(s => s.UpdatedAt, DateTime.UtcNow);
+
+            await _systemsCollection.UpdateOneAsync(s => s.Id == id, update);
+        }
+
+        /// הסרת רשומת מערכת ממסד הנתונים.
+        public async Task DeleteSystemAsync(string id)
+        {
+            await _systemsCollection.DeleteOneAsync(s => s.Id == id);
         }
     }
 }

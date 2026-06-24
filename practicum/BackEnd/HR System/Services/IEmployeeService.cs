@@ -40,7 +40,7 @@ namespace HR_System.Services
         /// <summary>
         /// עדכון עובד קיים. תומך בעדכון חלקי. מחזיר אמת אם בוצע עדכון.
         /// </summary>
-        Task<bool> UpdateEmployeeAsync(string id, EmployeeUpdateDto dto);
+        Task<bool> UpdateEmployeeAsync(string id, EmployeeEditDto dto);
 
         /// <summary>
         /// הוספת הקצאה לעובד קיים (שיוך למערכת ותפקיד).
