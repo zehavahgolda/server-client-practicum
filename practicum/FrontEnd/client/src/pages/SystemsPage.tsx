@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSystems } from "../hooks/useSystems";
-import { getStatusColor } from "../utils/calculations";
+import { getGapTone, getStatusColor } from "../utils/calculations";
 
 export default function SystemsPage() {
   const [searchParams] = useSearchParams();
@@ -81,10 +81,15 @@ export default function SystemsPage() {
 
           <div className="systems-list">
             {visibleSystems.map((system) => (
+              (() => {
+                const tone = getGapTone(system.gap);
+                const toneLabel = tone === "shortage" ? "חסך" : tone === "surplus" ? "עודף" : "מאוזן";
+
+                return (
               <button
                 key={system.id}
                 type="button"
-                className={`system-row ${selectedSystem?.id === system.id ? "selected" : ""}`}
+                className={`system-row ${tone} ${selectedSystem?.id === system.id ? "selected" : ""}`}
                 onClick={() => loadSystemDetails(system.id)}
                 style={{
                   borderRightColor: getStatusColor(system.capacityStatus)
@@ -97,14 +102,17 @@ export default function SystemsPage() {
                 <div className="system-metrics">
                   <span>נדרש: {system.requiredCapacityMonths}</span>
                   <span>מוקצה: {system.allocatedMonths}</span>
-                  <span className={system.gap < 0 ? "brand" : system.gap > 4 ? "danger" : system.gap > 0 ? "warn" : "ok"}>
+                  <span className={getGapTone(system.gap)}>
                     פער: {system.gap}
                   </span>
                 </div>
+                <span className={`status-chip ${tone}`}>{toneLabel}</span>
                 <span className="status-badge" style={{ background: getStatusColor(system.capacityStatus) }}>
                   {system.capacityStatus}
                 </span>
               </button>
+                );
+              })()
             ))}
           </div>
         </article>
@@ -192,14 +200,16 @@ export default function SystemsPage() {
           max-width: 1300px;
           margin: 0 auto;
           padding: 20px;
+          color: var(--text-primary);
         }
 
         .app-header {
-          background: #ffffff;
-          border: 1px solid #d8dde3;
+          background: var(--surface-bg);
+          border: 1px solid var(--border-color);
           border-radius: 12px;
           padding: 14px 16px;
           margin-bottom: 12px;
+          box-shadow: var(--shadow-soft);
         }
 
         .app-header h1 {
@@ -209,12 +219,12 @@ export default function SystemsPage() {
 
         .app-header p {
           margin: 6px 0 0;
-          color: #4b5563;
+          color: var(--text-secondary);
         }
 
         .toolbar {
-          background: #ffffff;
-          border: 1px solid #d8dde3;
+          background: var(--surface-bg);
+          border: 1px solid var(--border-color);
           border-radius: 12px;
           padding: 14px;
           display: grid;
@@ -228,17 +238,18 @@ export default function SystemsPage() {
           flex-direction: column;
           gap: 4px;
           font-size: 12px;
-          color: #374151;
+          color: var(--text-secondary);
           font-weight: 700;
         }
 
         .toolbar input,
         .toolbar select {
-          border: 1px solid #c7ced7;
+          border: 1px solid var(--input-border);
           border-radius: 8px;
           padding: 9px 10px;
           font-size: 13px;
-          background: #fff;
+          background: var(--input-bg);
+          color: var(--text-primary);
         }
 
         .toolbar-stats {
@@ -249,8 +260,8 @@ export default function SystemsPage() {
         }
 
         .toolbar-stats span {
-          background: #e9f0fa;
-          color: #1f4f82;
+          background: var(--status-surplus-soft);
+          color: var(--status-surplus);
           border-radius: 999px;
           padding: 6px 10px;
           font-size: 12px;
@@ -259,9 +270,9 @@ export default function SystemsPage() {
 
         .error-box {
           margin-top: 10px;
-          background: #fbe8ea;
-          border: 1px solid #e5a6af;
-          color: #8d1f2f;
+          background: var(--status-danger-soft);
+          border: 1px solid color-mix(in srgb, var(--status-danger) 30%, transparent);
+          color: var(--status-danger);
           border-radius: 10px;
           padding: 10px 12px;
         }
@@ -274,10 +285,11 @@ export default function SystemsPage() {
         }
 
         .panel {
-          background: #ffffff;
-          border: 1px solid #d8dde3;
+          background: var(--surface-bg);
+          border: 1px solid var(--border-color);
           border-radius: 12px;
           padding: 14px;
+          box-shadow: var(--shadow-soft);
         }
 
         .panel h2 {
@@ -302,9 +314,9 @@ export default function SystemsPage() {
         .system-row {
           width: 100%;
           text-align: right;
-          border: 1px solid #dce3ea;
+          border: 1px solid var(--border-color);
           border-right: 3px solid;
-          background: #fff;
+          background: var(--surface-bg);
           border-radius: 10px;
           padding: 10px;
           cursor: pointer;
@@ -315,13 +327,25 @@ export default function SystemsPage() {
           font-family: inherit;
         }
 
+        .system-row.shortage {
+          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--status-danger) 24%, transparent);
+        }
+
+        .system-row.surplus {
+          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--status-surplus) 24%, transparent);
+        }
+
+        .system-row.balanced {
+          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--status-success) 24%, transparent);
+        }
+
         .system-row:hover {
-          border-color: #5b8fc7;
+          border-color: var(--status-surplus);
         }
 
         .system-row.selected {
-          border-color: #2864a6;
-          background: #eef5fd;
+          border-color: var(--status-surplus);
+          background: var(--surface-alt);
         }
 
         .system-main {
@@ -331,7 +355,7 @@ export default function SystemsPage() {
         }
 
         .system-main small {
-          color: #4b5563;
+          color: var(--text-secondary);
         }
 
         .system-metrics {
@@ -342,24 +366,46 @@ export default function SystemsPage() {
           min-width: 95px;
         }
 
-        .system-metrics .danger {
-          color: #9b1c1c;
+        .system-metrics .shortage {
+          color: var(--status-danger);
           font-weight: 700;
         }
 
-        .system-metrics .warn {
-          color: #8a4b0e;
+        .system-metrics .surplus {
+          color: var(--status-surplus);
           font-weight: 700;
         }
 
-        .system-metrics .ok {
-          color: #0f6e56;
+        .system-metrics .balanced {
+          color: var(--status-success);
           font-weight: 700;
         }
 
-        .system-metrics .brand {
-          color: #0369a1;
-          font-weight: 700;
+        .status-chip {
+          border-radius: 999px;
+          padding: 4px 10px;
+          font-size: 12px;
+          font-weight: 800;
+          border: 1px solid transparent;
+          white-space: nowrap;
+        }
+
+        .status-chip.shortage {
+          background: var(--status-danger-soft);
+          color: var(--status-danger);
+          border-color: color-mix(in srgb, var(--status-danger) 28%, transparent);
+        }
+
+        .status-chip.surplus {
+          background: var(--status-surplus-soft);
+          color: var(--status-surplus);
+          border-color: color-mix(in srgb, var(--status-surplus) 28%, transparent);
+        }
+
+        .status-chip.balanced {
+          background: var(--status-success-soft);
+          color: var(--status-success);
+          border-color: color-mix(in srgb, var(--status-success) 28%, transparent);
         }
 
         .status-badge {
@@ -376,7 +422,7 @@ export default function SystemsPage() {
 
         .detail-head p {
           margin: 4px 0;
-          color: #374151;
+          color: var(--text-secondary);
         }
 
         .metrics-grid {
@@ -387,8 +433,8 @@ export default function SystemsPage() {
         }
 
         .metric-card {
-          background: #f9fafb;
-          border: 1px solid #e5e7eb;
+          background: var(--surface-alt);
+          border: 1px solid var(--border-color);
           border-radius: 8px;
           padding: 10px;
           text-align: center;
@@ -396,22 +442,22 @@ export default function SystemsPage() {
 
         .metric-label {
           font-size: 12px;
-          color: #4b5563;
+          color: var(--text-secondary);
           margin-bottom: 4px;
         }
 
         .metric-value {
           font-size: 20px;
           font-weight: 800;
-          color: #1f2937;
+          color: var(--text-primary);
         }
 
         .metric-value.danger {
-          color: #991b1b;
+          color: var(--status-danger);
         }
 
         .metric-value.ok {
-          color: #0f6e56;
+          color: var(--status-success);
         }
 
         .employees-list {
@@ -421,7 +467,7 @@ export default function SystemsPage() {
         }
 
         .employee-row {
-          border: 1px solid #dce3ea;
+          border: 1px solid var(--border-color);
           border-radius: 8px;
           padding: 8px;
           display: flex;
@@ -432,7 +478,7 @@ export default function SystemsPage() {
         .employee-row small {
           display: block;
           margin-top: 2px;
-          color: #4b5563;
+          color: var(--text-secondary);
           font-size: 12px;
         }
 
@@ -444,8 +490,8 @@ export default function SystemsPage() {
         }
 
         .budget-grid > div {
-          background: #f9fafb;
-          border: 1px solid #e5e7eb;
+          background: var(--surface-alt);
+          border: 1px solid var(--border-color);
           border-radius: 8px;
           padding: 10px;
           text-align: center;
@@ -453,14 +499,14 @@ export default function SystemsPage() {
 
         .budget-grid .label {
           font-size: 12px;
-          color: #4b5563;
+          color: var(--text-secondary);
           margin-bottom: 4px;
         }
 
         .budget-grid .value {
           font-size: 16px;
           font-weight: 800;
-          color: #1f2937;
+          color: var(--text-primary);
         }
 
         @media (max-width: 980px) {

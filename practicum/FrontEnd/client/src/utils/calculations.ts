@@ -39,15 +39,27 @@ export const calculateKPIs = (employees: EmployeeListItem[], systems: System[]):
 };
 
 export const getStatusColor = (status: string): string => {
-  switch (status) {
-    case "At Risk":
-    case "Risk":
-      return "#991b1b";
-    case "Shortage":
-      return "#b45309";
-    case "Excess":
-      return "#0369a1";
-    default:
-      return "#15803d";
+  const normalizedStatus = status.trim().toLowerCase();
+
+  if (normalizedStatus === "excess" || normalizedStatus === "surplus") {
+    return "var(--status-surplus)";
   }
+
+  if (normalizedStatus === "shortage" || normalizedStatus === "at risk" || normalizedStatus === "risk") {
+    return "var(--status-danger)";
+  }
+
+  return "var(--status-success)";
+};
+
+export const getGapTone = (gap: number): "shortage" | "surplus" | "balanced" => {
+  if (gap > 0) {
+    return "shortage";
+  }
+
+  if (gap < 0) {
+    return "surplus";
+  }
+
+  return "balanced";
 };

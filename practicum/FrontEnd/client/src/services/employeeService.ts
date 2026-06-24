@@ -1,5 +1,5 @@
 import httpClient from "./api/httpClient";
-import type { EmployeeDetails, EmployeeFilters, EmployeeListItem } from "../types";
+import type { EmployeeDetails, EmployeeFilters, EmployeeListItem, EmployeeUpsertPayload } from "../types";
 
 type ApiEmployee = Partial<EmployeeListItem> & {
   id?: string;
@@ -8,10 +8,9 @@ type ApiEmployee = Partial<EmployeeListItem> & {
   departmentId?: string;
   totalActualMonths?: number;
   allocations?: unknown[];
+  year?: number;
 };
 
-// The backend currently returns mixed schemas for employees (legacy + new).
-// This normalizer supports both so the list view remains stable.
 function normalizeEmployee(item: ApiEmployee): EmployeeListItem {
   const id = item.id || item._id || "";
   const allocatedMonths = item.allocatedMonths ?? item.totalActualMonths ?? 0;
@@ -36,31 +35,34 @@ function normalizeEmployee(item: ApiEmployee): EmployeeListItem {
 
 export const employeeService = {
   async getEmployees(filters: EmployeeFilters = {}): Promise<EmployeeListItem[]> {
+    // חוזרים לנתיב המקורי ללא /api
     const response = await httpClient.get<ApiEmployee[]>("/Employees", {
       params: filters
     });
-
-    const primary = (response.data || []).map(normalizeEmployee);
-    if (primary.length > 0 || filters.year == null) {
-      return primary;
-    }
-
-    // Backend data can be stored without year. If year-filtered query is empty,
-    // fallback to an unfiltered query so employees still load.
-    const { year, ...restFilters } = filters;
-    const fallbackResponse = await httpClient.get<ApiEmployee[]>("/Employees", {
-      params: restFilters
-    });
-    return (fallbackResponse.data || []).map(normalizeEmployee);
+    return (response.data || []).map(normalizeEmployee);
   },
 
   async getEmployeeById(id: string): Promise<EmployeeDetails> {
     const response = await httpClient.get<EmployeeDetails>(`/Employees/${id}`);
-    return {
-      ...response.data,
-      allocations: response.data.allocations || [],
-      relevantChanges: response.data.relevantChanges || []
-    };
+    return { ...response.data, allocations: response.data.allocations || [] };
+  },
+
+  async createEmployee(payload: EmployeeUpsertPayload): Promise<EmployeeListItem | null> {
+    const response = await httpClient.post<ApiEmployee | null>("/Employees", payload);
+    if (!response.data) {
+      return null;
+    }
+
+    return normalizeEmployee(response.data);
+  },
+
+  async updateEmployee(id: string, payload: EmployeeUpsertPayload): Promise<EmployeeListItem | null> {
+    const response = await httpClient.put<ApiEmployee | null>(`/Employees/${id}`, payload);
+    if (!response.data) {
+      return null;
+    }
+
+    return normalizeEmployee(response.data);
   },
 
   async updateAllocationMonths(payload: {
@@ -70,7 +72,7 @@ export const employeeService = {
     actualMonths: number;
   }): Promise<void> {
     const { employeeId, systemId, roleInSystem, actualMonths } = payload;
-
+    // נשתמש בנתיב המלא כפי שמופיע ב-Swagger, אבל בלי /api הפעם
     await httpClient.put(`/Employees/${employeeId}/allocation-months`, null, {
       params: { systemId, roleInSystem, actualMonths }
     });

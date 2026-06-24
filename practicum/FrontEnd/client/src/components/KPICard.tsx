@@ -10,9 +10,9 @@ interface KPICardProps {
 
 export function KPICard({ label, value, status, onClick, icon }: KPICardProps) {
   const statusClass = {
-    ok: "border-green-600 bg-green-50",
-    warn: "border-orange-600 bg-orange-50",
-    danger: "border-red-600 bg-red-50"
+    ok: "kpi-ok",
+    warn: "kpi-warn",
+    danger: "kpi-danger"
   }[status || "ok"];
 
   return (
@@ -20,6 +20,8 @@ export function KPICard({ label, value, status, onClick, icon }: KPICardProps) {
       type="button"
       onClick={onClick}
       className={`kpi-card ${statusClass} ${onClick ? "cursor-pointer" : ""}`}
+
+      aria-label={label}
     >
       {icon && <div className="kpi-icon">{icon}</div>}
       <div className="kpi-label">{label}</div>

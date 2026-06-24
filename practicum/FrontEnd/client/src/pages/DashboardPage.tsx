@@ -115,14 +115,16 @@ export default function DashboardPage() {
           max-width: 1300px;
           margin: 0 auto;
           padding: 20px;
+          color: var(--text-primary);
         }
 
         .dashboard-header {
-          background: #ffffff;
-          border: 1px solid #d8dde3;
+          background: var(--surface-bg);
+          border: 1px solid var(--border-color);
           border-radius: 12px;
           padding: 14px 16px;
           margin-bottom: 12px;
+          box-shadow: var(--shadow-soft);
         }
 
         .dashboard-header h1 {
@@ -132,7 +134,7 @@ export default function DashboardPage() {
 
         .dashboard-header p {
           margin: 6px 0 0;
-          color: #4b5563;
+          color: var(--text-secondary);
         }
 
         .loading-bar {
@@ -151,22 +153,6 @@ export default function DashboardPage() {
           margin-bottom: 12px;
         }
 
-        .kpi-card {
-          border: 2px solid;
-          border-radius: 12px;
-          padding: 16px;
-          text-align: center;
-          background: white;
-          transition: all 0.2s;
-          cursor: pointer;
-          font-family: inherit;
-        }
-
-        .kpi-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
         .kpi-icon {
           font-size: 28px;
           margin-bottom: 8px;
@@ -174,7 +160,7 @@ export default function DashboardPage() {
 
         .kpi-label {
           font-size: 12px;
-          color: #4b5563;
+          color: var(--text-secondary);
           margin-bottom: 6px;
           font-weight: 700;
         }
@@ -182,7 +168,7 @@ export default function DashboardPage() {
         .kpi-value {
           font-size: 32px;
           font-weight: 800;
-          color: #1f2937;
+          color: var(--text-primary);
         }
 
         .dashboard-grid {
@@ -192,10 +178,11 @@ export default function DashboardPage() {
         }
 
         .dashboard-panel {
-          background: #ffffff;
-          border: 1px solid #d8dde3;
+          background: var(--surface-bg);
+          border: 1px solid var(--border-color);
           border-radius: 12px;
           padding: 14px;
+          box-shadow: var(--shadow-soft);
         }
 
         .dashboard-panel h2 {
@@ -217,13 +204,13 @@ export default function DashboardPage() {
           display: flex;
           justify-content: space-between;
           padding: 8px 10px;
-          background: #f9fafb;
+          background: var(--surface-alt);
           border-radius: 8px;
           font-size: 14px;
         }
 
         .summary-list strong {
-          color: #374151;
+          color: var(--text-primary);
         }
 
         .summary-list span {
@@ -231,19 +218,19 @@ export default function DashboardPage() {
         }
 
         .summary-list .ok {
-          color: #15803d;
+          color: var(--status-success);
         }
 
         .summary-list .warn {
-          color: #b45309;
+          color: var(--status-danger);
         }
 
         .summary-list .danger {
-          color: #991b1b;
+          color: var(--status-danger);
         }
 
         .summary-list .brand {
-          color: #185fa5;
+          color: var(--status-surplus);
         }
 
         @media (max-width: 980px) {

@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEmployees } from "../hooks/useEmployees";
+
 
 export default function EmployeesPage() {
   const [searchParams] = useSearchParams();
@@ -11,12 +12,53 @@ export default function EmployeesPage() {
     selectedEmployee,
     loadingList,
     loadingDetails,
+    loadingCreate,
     error,
     filters,
     setFilters,
     loadEmployeeDetails,
+    setSelectedEmployee,
+    createEmployee,
+    updateEmployee,
     updateActualMonths
   } = useEmployees({ year: 2026 });
+
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createFormState, setCreateFormState] = useState({
+    fullName: "",
+    professionalCategory: "",
+    professionalSubCategory: "",
+    managerName: "",
+    year: "2026",
+    yearlyCapacityMonths: "12",
+    upcomingEvent: "",
+    notes: "",
+    managerReviewNote: ""
+  });
+
+  const [employeeFormState, setEmployeeFormState] = useState(createFormState);
+  const [isEditingEmployee, setIsEditingEmployee] = useState(false);
+
+  useEffect(() => {
+    if (!selectedEmployee) {
+      setEmployeeFormState(createFormState);
+      setIsEditingEmployee(false);
+      return;
+    }
+
+    setEmployeeFormState({
+      fullName: selectedEmployee.fullName ?? "",
+      professionalCategory: selectedEmployee.professionalCategory ?? "",
+      professionalSubCategory: selectedEmployee.professionalSubCategory ?? "",
+      managerName: selectedEmployee.managerName ?? "",
+      year: String(selectedEmployee.year ?? 2026),
+      yearlyCapacityMonths: String(selectedEmployee.yearlyCapacityMonths ?? 12),
+      upcomingEvent: selectedEmployee.upcomingEvent ?? "",
+      notes: selectedEmployee.notes ?? "",
+      managerReviewNote: selectedEmployee.managerReviewNote ?? ""
+    });
+    setIsEditingEmployee(true);
+  }, [selectedEmployee]);
 
   const filteredEmployees = useMemo(() => {
     if (availabilityFilter === "overloaded") {
@@ -39,11 +81,47 @@ export default function EmployeesPage() {
     [filteredEmployees]
   );
 
+  const getEmployeeTone = (remainingMonths: number) => {
+    if (remainingMonths < 0) {
+      return "shortage";
+    }
+
+    if (remainingMonths === 0) {
+      return "balanced";
+    }
+
+    return "surplus";
+  };
+
+  const getEmployeeToneLabel = (remainingMonths: number) => {
+    if (remainingMonths < 0) {
+      return "חסר";
+    }
+
+    if (remainingMonths === 0) {
+      return "מאוזן";
+    }
+
+    return "עודף";
+  };
+
   const [formState, setFormState] = useState({
-    systemId: "",
-    roleInSystem: "",
+    selectedAllocationKey: "",
     actualMonths: ""
   });
+
+  const allocationOptions = useMemo(() => {
+    if (!selectedEmployee) {
+      return [];
+    }
+
+    return selectedEmployee.allocations.map((allocation) => ({
+      key: `${allocation.systemId}__${allocation.roleInSystem}`,
+      systemId: allocation.systemId,
+      roleInSystem: allocation.roleInSystem,
+      label: `${allocation.systemName} · ${allocation.roleInSystem}`
+    }));
+  }, [selectedEmployee]);
 
   const categories = useMemo(
     () =>
@@ -64,7 +142,12 @@ export default function EmployeesPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!formState.systemId.trim() || !formState.roleInSystem.trim()) {
+    if (!formState.selectedAllocationKey) {
+      return;
+    }
+
+    const selectedAllocation = allocationOptions.find((option) => option.key === formState.selectedAllocationKey);
+    if (!selectedAllocation) {
       return;
     }
 
@@ -73,8 +156,96 @@ export default function EmployeesPage() {
       return;
     }
 
-    await updateActualMonths(formState.systemId.trim(), formState.roleInSystem.trim(), actualMonths);
-    setFormState({ systemId: "", roleInSystem: "", actualMonths: "" });
+    await updateActualMonths(selectedAllocation.systemId, selectedAllocation.roleInSystem, actualMonths);
+    setFormState({ selectedAllocationKey: "", actualMonths: "" });
+  };
+
+  const handleCreateEmployee = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const fullName = employeeFormState.fullName.trim();
+    const professionalCategory = employeeFormState.professionalCategory.trim();
+    const managerName = employeeFormState.managerName.trim();
+    const year = Number(employeeFormState.year);
+    const yearlyCapacityMonths = Number(employeeFormState.yearlyCapacityMonths);
+
+    if (!fullName || !professionalCategory || !managerName) {
+      return;
+    }
+
+    if (Number.isNaN(year) || Number.isNaN(yearlyCapacityMonths)) {
+      return;
+    }
+
+    await createEmployee({
+      fullName,
+      professionalCategory,
+      professionalSubCategory: employeeFormState.professionalSubCategory.trim() || undefined,
+      managerName,
+      year,
+      yearlyCapacityMonths,
+      upcomingEvent: employeeFormState.upcomingEvent.trim() || undefined,
+      notes: employeeFormState.notes.trim() || undefined,
+      managerReviewNote: employeeFormState.managerReviewNote.trim() || undefined
+    });
+
+    setCreateFormState({
+      fullName: "",
+      professionalCategory: "",
+      professionalSubCategory: "",
+      managerName: "",
+      year: "2026",
+      yearlyCapacityMonths: "12",
+      upcomingEvent: "",
+      notes: "",
+      managerReviewNote: ""
+    });
+    setEmployeeFormState({
+      fullName: "",
+      professionalCategory: "",
+      professionalSubCategory: "",
+      managerName: "",
+      year: "2026",
+      yearlyCapacityMonths: "12",
+      upcomingEvent: "",
+      notes: "",
+      managerReviewNote: ""
+    });
+    setIsCreateOpen(false);
+  };
+
+  const handleUpdateEmployee = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedEmployee?.id) {
+      return;
+    }
+
+    const fullName = employeeFormState.fullName.trim();
+    const professionalCategory = employeeFormState.professionalCategory.trim();
+    const managerName = employeeFormState.managerName.trim();
+    const year = Number(employeeFormState.year);
+    const yearlyCapacityMonths = Number(employeeFormState.yearlyCapacityMonths);
+
+    if (!fullName || !professionalCategory || !managerName) {
+      return;
+    }
+
+    if (Number.isNaN(year) || Number.isNaN(yearlyCapacityMonths)) {
+      return;
+    }
+
+    await updateEmployee(selectedEmployee.id, {
+      fullName,
+      professionalCategory,
+      professionalSubCategory: employeeFormState.professionalSubCategory.trim() || undefined,
+      managerName,
+      year,
+      yearlyCapacityMonths,
+      upcomingEvent: employeeFormState.upcomingEvent.trim() || undefined,
+      notes: employeeFormState.notes.trim() || undefined,
+      managerReviewNote: employeeFormState.managerReviewNote.trim() || undefined
+    });
   };
 
   return (
@@ -135,10 +306,21 @@ export default function EmployeesPage() {
         </label>
 
         <div className="toolbar-stats">
-          <span>סה"כ: {viewMeta.total}</span>
-          <span>בלחץ: {viewMeta.lowCapacity}</span>
-          <span>עומס יתר: {viewMeta.overloaded}</span>
+          <span className="stat-neutral">סה"כ: {viewMeta.total}</span>
+          <span className="stat-danger">בלחץ: {viewMeta.lowCapacity}</span>
+          <span className="stat-danger">עומס יתר: {viewMeta.overloaded}</span>
         </div>
+
+        <button
+          type="button"
+          className="primary-btn toolbar-add-btn"
+          onClick={() => {
+            setSelectedEmployee(null);
+            setIsCreateOpen(true);
+          }}
+        >
+          + הוספת עובד
+        </button>
       </section>
 
       {error && <div className="error-box">{error}</div>}
@@ -153,8 +335,19 @@ export default function EmployeesPage() {
               <button
                 key={employee.id}
                 type="button"
-                className={`employee-row ${selectedEmployee?.id === employee.id ? "selected" : ""}`}
-                onClick={() => loadEmployeeDetails(employee.id)}
+                className={`employee-row ${getEmployeeTone(employee.remainingMonths)} ${selectedEmployee?.id === employee.id ? "selected" : ""}`}
+                onClick={() => {
+                  setIsCreateOpen(false);
+                  loadEmployeeDetails(employee.id);
+                }}
+                style={{
+                  borderRightColor:
+                    employee.remainingMonths < 0
+                      ? "var(--status-danger)"
+                      : employee.remainingMonths === 0
+                        ? "var(--status-success)"
+                        : "var(--status-surplus)"
+                }}
               >
                 <div className="employee-main">
                   <strong>{employee.fullName}</strong>
@@ -169,6 +362,9 @@ export default function EmployeesPage() {
                     יתרה {employee.remainingMonths}
                   </span>
                 </div>
+                <span className={`status-chip ${getEmployeeTone(employee.remainingMonths)}`}>
+                  {getEmployeeToneLabel(employee.remainingMonths)}
+                </span>
               </button>
             ))}
           </div>
@@ -176,17 +372,121 @@ export default function EmployeesPage() {
 
         <article className="panel details-panel">
           <h2>פרטי עובד</h2>
-          {!selectedEmployee && <p>בחר עובד להצגת פרטים.</p>}
+          {!selectedEmployee && !isCreateOpen && <p>בחר עובד להצגת פרטים או לחץ על "הוספת עובד".</p>}
           {loadingDetails ? <p>טוען פרטים...</p> : null}
 
-          {selectedEmployee && !loadingDetails && (
+          {(isCreateOpen || selectedEmployee) && (
+            <form className="allocation-form" onSubmit={isEditingEmployee ? handleUpdateEmployee : handleCreateEmployee}>
+              <h4>{isEditingEmployee ? "עריכת עובד" : "הוספת עובד חדש"}</h4>
+              <div className="form-grid">
+                <label>
+                  שם מלא
+                  <input
+                    value={employeeFormState.fullName}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, fullName: e.target.value }))}
+                    placeholder="למשל: נועה ארז"
+                    required
+                  />
+                </label>
+
+                <label>
+                  קטגוריה מקצועית
+                  <input
+                    value={employeeFormState.professionalCategory}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, professionalCategory: e.target.value }))}
+                    placeholder="למשל: פיתוח"
+                    required
+                  />
+                </label>
+
+                <label>
+                  תת-תחום
+                  <input
+                    value={employeeFormState.professionalSubCategory}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, professionalSubCategory: e.target.value }))}
+                    placeholder="למשל: Backend"
+                  />
+                </label>
+
+                <label>
+                  מנהל
+                  <input
+                    value={employeeFormState.managerName}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, managerName: e.target.value }))}
+                    placeholder="למשל: עידו טל"
+                    required
+                  />
+                </label>
+
+                <label>
+                  שנה
+                  <input
+                    type="number"
+                    min={2020}
+                    value={employeeFormState.year}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, year: e.target.value }))}
+                    required
+                  />
+                </label>
+
+                <label>
+                  קיבולת שנתית (חודשים)
+                  <input
+                    type="number"
+                    min={0}
+                    value={employeeFormState.yearlyCapacityMonths}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, yearlyCapacityMonths: e.target.value }))}
+                    required
+                  />
+                </label>
+
+                <label>
+                  אירוע עתידי
+                  <input
+                    value={employeeFormState.upcomingEvent}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, upcomingEvent: e.target.value }))}
+                    placeholder="למשל: מילואים ברבעון ג׳"
+                  />
+                </label>
+
+                <label>
+                  הערות
+                  <textarea
+                    value={employeeFormState.notes}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, notes: e.target.value }))}
+                    placeholder="הערות כלליות"
+                  />
+                </label>
+
+                <label>
+                  הערת מנהל
+                  <textarea
+                    value={employeeFormState.managerReviewNote}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, managerReviewNote: e.target.value }))}
+                    placeholder="משוב מנהל"
+                  />
+                </label>
+              </div>
+
+              <button type="submit" className="primary-btn" disabled={loadingCreate}>
+                {loadingCreate ? "שומר..." : isEditingEmployee ? "שמירת שינויים" : "שמירת עובד"}
+              </button>
+            </form>
+          )}
+
+          {selectedEmployee && !loadingDetails && !isCreateOpen && (
             <>
               <div className="detail-head">
                 <h3>{selectedEmployee.fullName}</h3>
                 <p>
                   {selectedEmployee.professionalCategory} · {selectedEmployee.professionalSubCategory || "-"}
                 </p>
-                <p>סטטוס זמינות: {selectedEmployee.availabilityStatus}</p>
+                <p>
+                  סטטוס זמינות: {selectedEmployee.availabilityStatus}{" "}
+                  <span className={`status-chip ${getEmployeeTone(selectedEmployee.remainingMonths)}`}>
+                    {getEmployeeToneLabel(selectedEmployee.remainingMonths)}
+                  </span>
+                </p>
               </div>
 
               <h4>הקצאות פעילות</h4>
@@ -205,25 +505,31 @@ export default function EmployeesPage() {
                 ))}
               </div>
 
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setIsEditingEmployee(true)}
+              >
+                עריכת עובד
+              </button>
+
               <form className="allocation-form" onSubmit={handleSubmit}>
                 <h4>עדכון חודשי הקצאה בפועל</h4>
                 <div className="form-grid">
                   <label>
-                    SystemId
-                    <input
-                      value={formState.systemId}
-                      onChange={(e) => setFormState((prev) => ({ ...prev, systemId: e.target.value }))}
-                      placeholder="למשל: servicenow"
-                    />
-                  </label>
-
-                  <label>
-                    RoleInSystem
-                    <input
-                      value={formState.roleInSystem}
-                      onChange={(e) => setFormState((prev) => ({ ...prev, roleInSystem: e.target.value }))}
-                      placeholder="למשל: Backend"
-                    />
+                    מערכת ותפקיד
+                    <select
+                      value={formState.selectedAllocationKey}
+                      onChange={(e) => setFormState((prev) => ({ ...prev, selectedAllocationKey: e.target.value }))}
+                      disabled={allocationOptions.length === 0}
+                    >
+                      <option value="">בחר הקצאה קיימת</option>
+                      {allocationOptions.map((option) => (
+                        <option key={option.key} value={option.key}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </label>
 
                   <label>

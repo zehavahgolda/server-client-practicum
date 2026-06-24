@@ -1,59 +1,65 @@
+// src/types/employee.ts
+
+export interface EmployeeAllocation {
+  systemId: string;
+  systemName: string;
+  systemCapacityStatus: string; // "Shortage", "Balanced", "Excess"
+  roleInSystem: string;
+  plannedMonths: number;
+  actualMonths: number;
+  year?: number;
+}
+
+export interface EmployeeRelevantChange {
+  title: string;
+  date?: number;
+  description?: string;
+  year?: number;
+}
+
+// זה ה-Interface המרכזי לכרטיסיית הפרטים
+export interface EmployeeDetails {
+  id: string;
+  fullName: string;
+  managerName: string;
+  professionalCategory: string;
+  professionalSubCategory?: string;
+  year: number;
+  yearlyCapacityMonths: number;
+  upcomingEvent?: string;
+  allocatedMonths: number;
+  remainingMonths: number;
+  availabilityStatus: string;
+  assignedSystemsCount: number;
+  notes?: string;
+  managerReviewNote?: string;
+  relevantChanges: EmployeeRelevantChange[];
+  allocations: EmployeeAllocation[]
+}
+
+// לשימוש ברשימת העובדים (List View)
 export interface EmployeeListItem {
   id: string;
   fullName: string;
   professionalCategory: string;
   professionalSubCategory?: string;
   managerName: string;
-  year: number;
   yearlyCapacityMonths: number;
   allocatedMonths: number;
   remainingMonths: number;
   availabilityStatus: string;
   assignedSystemsCount: number;
-  upcomingEvent?: string;
+  year?: number;
 }
 
-// Server API response (raw from backend)
-export interface EmployeeServerResponse {
-  _id: string;
-  name: string;
-  departmentId: string;
+export interface EmployeeUpsertPayload {
+  fullName: string;
+  professionalCategory: string;
+  professionalSubCategory?: string;
+  managerName: string;
   year: number;
-  totalActualMonths: number;
-  allocations: Array<{
-    systemId: string;
-    systemName?: string;
-    roleInSystem: string;
-    plannedMonths: number;
-    actualMonths: number;
-  }>;
-}
-
-export interface EmployeeAllocation {
-  systemId: string;
-  systemName: string;
-  systemCapacityStatus: string;
-  roleInSystem: string;
-  plannedMonths: number;
-  actualMonths: number;
-}
-
-export interface EmployeeDetails extends EmployeeListItem {
+  yearlyCapacityMonths: number;
+  upcomingEvent?: string;
   notes?: string;
   managerReviewNote?: string;
-  relevantChanges: Array<{
-    date: string;
-    title: string;
-    impact: string;
-    type?: string;
-  }>;
-  allocations: EmployeeAllocation[];
-}
-
-export interface EmployeeFilters {
-  year?: number;
-  managerName?: string;
-  professionalCategory?: string;
-  systemId?: string;
-  search?: string;
 }

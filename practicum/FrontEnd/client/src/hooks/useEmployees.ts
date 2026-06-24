@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { employeeService } from "../services/employeeService";
-import type { EmployeeDetails, EmployeeFilters, EmployeeListItem } from "../types";
-
+import { type EmployeeFilters } from "../types/filters";
+import { type EmployeeDetails, type EmployeeListItem, type EmployeeUpsertPayload } from "../types/employee";
 export function useEmployees(initialFilters: EmployeeFilters = {}) {
   const [filters, setFilters] = useState<EmployeeFilters>(initialFilters);
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeDetails | null>(null);
   const [loadingList, setLoadingList] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingCreate, setLoadingCreate] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadEmployees = useCallback(async () => {
@@ -59,6 +60,47 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     [selectedEmployee?.id, loadEmployeeDetails, loadEmployees]
   );
 
+  const createEmployee = useCallback(
+    async (payload: EmployeeUpsertPayload) => {
+      setLoadingCreate(true);
+      setError(null);
+      try {
+        const createdEmployee = await employeeService.createEmployee(payload);
+        await loadEmployees();
+
+        if (createdEmployee?.id) {
+          await loadEmployeeDetails(createdEmployee.id);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "הוספת עובד נכשלה";
+        setError(message);
+      } finally {
+        setLoadingCreate(false);
+      }
+    },
+    [loadEmployeeDetails, loadEmployees]
+  );
+
+  const updateEmployee = useCallback(
+    async (id: string, payload: EmployeeUpsertPayload) => {
+      setError(null);
+      try {
+        const updatedEmployee = await employeeService.updateEmployee(id, payload);
+        await loadEmployees();
+
+        if (updatedEmployee?.id) {
+          await loadEmployeeDetails(updatedEmployee.id);
+        } else {
+          await loadEmployeeDetails(id);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "עדכון העובד נכשל";
+        setError(message);
+      }
+    },
+    [loadEmployeeDetails, loadEmployees]
+  );
+
   useEffect(() => {
     loadEmployees();
   }, [loadEmployees]);
@@ -77,12 +119,15 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     selectedEmployee,
     loadingList,
     loadingDetails,
+    loadingCreate,
     error,
     filters,
     setFilters,
     loadEmployees,
     loadEmployeeDetails,
     setSelectedEmployee,
+    createEmployee,
+    updateEmployee,
     updateActualMonths,
     meta
   };

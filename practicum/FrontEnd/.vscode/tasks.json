@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev-client",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev", "--", "--host", "0.0.0.0"],
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "preview-client",
+      "type": "shell",
+      "command": "npx",
+      "args": ["vite", "preview", "--host", "127.0.0.1", "--port", "4173"],
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
