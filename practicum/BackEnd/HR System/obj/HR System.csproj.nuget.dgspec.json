@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server_client_practicum\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj": {}
+    "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj": {}
   },
   "projects": {
-    "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server_client_practicum\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj": {
+    "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server_client_practicum\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj",
+        "projectUniqueName": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj",
         "projectName": "HR System",
-        "projectPath": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server_client_practicum\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj",
+        "projectPath": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj",
         "packagesPath": "C:\\Users\\eli7p\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server_client_practicum\\server-client-practicum\\practicum\\BackEnd\\HR System\\obj\\",
+        "outputPath": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server-client-practicum\\practicum\\BackEnd\\HR System\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

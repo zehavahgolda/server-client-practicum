@@ -273,6 +273,68 @@
         }
       }
     },
+    "/api/Employees/assignment-candidates": {
+      "get": {
+        "tags": [
+          "Employees"
+        ],
+        "parameters": [
+          {
+            "name": "systemId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployeeAssignmentCandidateDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployeeAssignmentCandidateDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployeeAssignmentCandidateDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Employees/{id}": {
       "get": {
         "tags": [
@@ -445,6 +507,37 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/AllocationCreateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Employees/bulk-assign": {
+      "post": {
+        "tags": [
+          "Employees"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignEmployeesDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignEmployeesDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAssignEmployeesDto"
               }
             }
           }
@@ -744,6 +837,23 @@
         },
         "additionalProperties": false
       },
+      "BulkAssignEmployeesDto": {
+        "type": "object",
+        "properties": {
+          "systemId": {
+            "type": "string",
+            "nullable": true
+          },
+          "employees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeAssignmentItemDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Category": {
         "type": "object",
         "properties": {
@@ -838,6 +948,80 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeAssignmentCandidateDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "professionalCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "professionalSubCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "managerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "yearlyCapacityMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocatedMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remainingMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "availabilityStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignedSystemsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "alreadyAssignedToSystem": {
+            "type": "boolean"
+          },
+          "canAssign": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmployeeAssignmentItemDto": {
+        "type": "object",
+        "properties": {
+          "employeeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleInSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "plannedMonths": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actualMonths": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -265,6 +265,58 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HR_System.Controllers.EmployeesController",
+    "Method": "GetAssignmentCandidates",
+    "RelativePath": "api/Employees/assignment-candidates",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "systemId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "year",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "search",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[HR_System.DTOs.Employees.EmployeeAssignmentCandidateDto, HR System, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HR_System.Controllers.EmployeesController",
+    "Method": "BulkAssignEmployees",
+    "RelativePath": "api/Employees/bulk-assign",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "HR_System.DTOs.Employees.BulkAssignEmployeesDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "SystemController",
     "Method": "GetSystems",
     "RelativePath": "api/System",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "J0Jwq9nZIHc=",
+  "dgSpecHash": "y4hWzZjRMVM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server_client_practicum\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj",
+  "projectFilePath": "C:\\Users\\eli7p\\Desktop\\פרקטיקום\\server-client-practicum\\practicum\\BackEnd\\HR System\\HR System.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\eli7p\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\eli7p\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
