@@ -1,0 +1,69 @@
+.create-system-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-system-modal {
+  width: min(720px, calc(100vw - 32px));
+  background: var(--surface-bg);
+  border-radius: 18px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+  padding: 30px;
+  position: relative;
+}
+
+.create-system-modal h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.create-system-modal p {
+  color: var(--text-secondary);
+  margin: 8px 0 22px;
+}
+
+.create-system-close {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-bg);
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.create-system-note-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--text-secondary);
+  font-weight: 800;
+}
+
+.create-system-note-label textarea {
+  min-height: 80px;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: inherit;
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.create-system-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+}

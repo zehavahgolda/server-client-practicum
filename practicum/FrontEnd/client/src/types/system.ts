@@ -44,3 +44,9 @@ export interface SystemFilters {
   ownerManagerName?: string;
   search?: string;
 }
+export interface SystemCreateDto {
+  name: string;
+  year: number;
+  requiredCapacityMonths: number;
+  managementNote?: string;
+}

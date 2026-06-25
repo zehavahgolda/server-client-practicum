@@ -1,0 +1,136 @@
+.systems-groups-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+}
+
+.system-group {
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.system-group-header {
+  width: 100%;
+  border: none;
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  padding: 18px 22px;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: right;
+}
+
+.system-group-header:hover {
+  background: var(--surface-alt);
+}
+
+.system-group-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.system-group-color-line {
+  width: 5px;
+  height: 56px;
+  border-radius: 999px;
+  background: var(--status-surplus);
+}
+
+.system-group.shortage .system-group-color-line {
+  background: var(--status-danger);
+}
+
+.system-group.balanced .system-group-color-line {
+  background: var(--status-success);
+}
+
+.system-group.excess .system-group-color-line {
+  background: var(--status-surplus);
+}
+
+.system-group-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.system-group-header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.system-group-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.system-group-gap {
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.system-group-gap.shortage {
+  background: var(--status-danger-soft);
+  color: var(--status-danger);
+}
+
+.system-group-gap.balanced {
+  background: var(--status-success-soft);
+  color: var(--status-success);
+}
+
+.system-group-gap.excess {
+  background: var(--status-surplus-soft);
+  color: var(--status-surplus);
+}
+
+.system-group-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.system-group-body {
+  border-top: 1px solid var(--border-color);
+  padding: 0 0 18px;
+}
+
+.system-group-subtitle {
+  margin: 16px 22px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.systems-cards-grid.group-grid {
+  padding-top: 16px;
+}
+
+@media (max-width: 640px) {
+  .system-group-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .system-group-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

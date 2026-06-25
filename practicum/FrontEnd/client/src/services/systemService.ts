@@ -1,5 +1,5 @@
 import httpClient from "./api/httpClient";
-import type { System, SystemDetails, SystemFilters } from "../types";
+import type { System, SystemDetails, SystemFilters, SystemCreateDto } from "../types";
 
 function normalizeSystem(item: System): System {
   return {
@@ -42,5 +42,9 @@ export const systemService = {
       responseType: "blob"
     });
     return response.data;
-  }
+  },
+  async createSystem(dto: SystemCreateDto): Promise<string> {
+  const response = await httpClient.post<string>("/System", dto);
+  return response.data;
+}
 };
