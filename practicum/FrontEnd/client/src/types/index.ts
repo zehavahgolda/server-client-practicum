@@ -3,4 +3,5 @@ export * from "./system"; // או הקובץ הרלוונטיexport * from "./kp
 export * from "./change";
 export * from "./category";
 export * from "./filters";
+export * from "./assignment";
 

@@ -23,21 +23,19 @@ export const systemService = {
     return (response.data || []).map(normalizeSystem);
   },
 
-  async getSystemById(id: string): Promise<SystemDetails> {
-    const response = await httpClient.get<SystemDetails>(`/System/${id}`);
-    return {
-      ...response.data,
-      assignedEmployees: response.data.assignedEmployees || [],
-      changes: response.data.changes || [],
-      budget: response.data.budget || {
-        totalBudget: 0,
-        totalPlannedMonths: 0,
-        totalActualMonths: 0,
-        variancePercent: 0
-      }
-    };
-  },
+ async getSystemById(id: string): Promise<SystemDetails> {
+  const response = await httpClient.get<SystemDetails>(`/System/${id}`);
 
+  return {
+    ...response.data,
+    assignedEmployees: response.data.assignedEmployees || [],
+    changes: response.data.changes || [],
+    totalBudget: response.data.totalBudget || 0,
+    totalPlannedMonths: response.data.totalPlannedMonths || 0,
+    totalActualMonths: response.data.totalActualMonths || 0,
+    variancePercent: response.data.variancePercent || 0
+  };
+},
   async exportToExcel(year?: number, status?: string): Promise<Blob> {
     const response = await httpClient.get("/System/export", {
       params: { year, status },
