@@ -1,8 +1,55 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEmployees } from "../hooks/useEmployees";
+import { useSystems } from "../hooks/useSystems";
 
+type EmployeeFormState = {
+  fullName: string;
+  professionalCategory: string;
+  professionalSubCategory: string;
+  managerName: string;
+  year: string;
+  yearlyCapacityMonths: string;
+  upcomingEvent: string;
+  notes: string;
+  managerReviewNote: string;
+};
+
+const emptyEmployeeForm: EmployeeFormState = {
+  fullName: "",
+  professionalCategory: "",
+  professionalSubCategory: "",
+  managerName: "",
+  year: "2026",
+  yearlyCapacityMonths: "12",
+  upcomingEvent: "",
+  notes: "",
+  managerReviewNote: ""
+};
+
+const MAX_MONTHS = 12;
+
+function clampMonthsInput(value: string): string {
+  if (value === "") {
+    return "";
+  }
+
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) {
+    return "";
+  }
+
+  if (numericValue < 0) {
+    return "0";
+  }
+
+  if (numericValue > MAX_MONTHS) {
+    return String(MAX_MONTHS);
+  }
+
+  return value;
+}
 
 export default function EmployeesPage() {
   const [searchParams] = useSearchParams();
@@ -17,48 +64,18 @@ export default function EmployeesPage() {
     filters,
     setFilters,
     loadEmployeeDetails,
-    setSelectedEmployee,
     createEmployee,
     updateEmployee,
+    addAllocation,
     updateActualMonths
   } = useEmployees({ year: 2026 });
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [createFormState, setCreateFormState] = useState({
-    fullName: "",
-    professionalCategory: "",
-    professionalSubCategory: "",
-    managerName: "",
-    year: "2026",
-    yearlyCapacityMonths: "12",
-    upcomingEvent: "",
-    notes: "",
-    managerReviewNote: ""
-  });
+  const { systems } = useSystems();
 
-  const [employeeFormState, setEmployeeFormState] = useState(createFormState);
-  const [isEditingEmployee, setIsEditingEmployee] = useState(false);
-
-  useEffect(() => {
-    if (!selectedEmployee) {
-      setEmployeeFormState(createFormState);
-      setIsEditingEmployee(false);
-      return;
-    }
-
-    setEmployeeFormState({
-      fullName: selectedEmployee.fullName ?? "",
-      professionalCategory: selectedEmployee.professionalCategory ?? "",
-      professionalSubCategory: selectedEmployee.professionalSubCategory ?? "",
-      managerName: selectedEmployee.managerName ?? "",
-      year: String(selectedEmployee.year ?? 2026),
-      yearlyCapacityMonths: String(selectedEmployee.yearlyCapacityMonths ?? 12),
-      upcomingEvent: selectedEmployee.upcomingEvent ?? "",
-      notes: selectedEmployee.notes ?? "",
-      managerReviewNote: selectedEmployee.managerReviewNote ?? ""
-    });
-    setIsEditingEmployee(true);
-  }, [selectedEmployee]);
+  const [employeeFormState, setEmployeeFormState] = useState<EmployeeFormState>(emptyEmployeeForm);
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+  const [employeeModalMode, setEmployeeModalMode] = useState<"create" | "edit">("create");
+  const [isSavingEmployee, setIsSavingEmployee] = useState(false);
 
   const filteredEmployees = useMemo(() => {
     if (availabilityFilter === "overloaded") {
@@ -110,6 +127,18 @@ export default function EmployeesPage() {
     actualMonths: ""
   });
 
+  const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
+  const [newAllocationState, setNewAllocationState] = useState({
+    systemId: "",
+    roleInSystem: "",
+    plannedMonths: "",
+    actualMonths: "0"
+  });
+  const [isSavingAllocation, setIsSavingAllocation] = useState(false);
+
+  const [isAllocationUpdateModalOpen, setIsAllocationUpdateModalOpen] = useState(false);
+  const [isSavingAllocationUpdate, setIsSavingAllocationUpdate] = useState(false);
+
   const allocationOptions = useMemo(() => {
     if (!selectedEmployee) {
       return [];
@@ -152,12 +181,75 @@ export default function EmployeesPage() {
     }
 
     const actualMonths = Number(formState.actualMonths);
-    if (Number.isNaN(actualMonths)) {
+    if (Number.isNaN(actualMonths) || actualMonths > MAX_MONTHS || actualMonths < 0) {
       return;
     }
 
-    await updateActualMonths(selectedAllocation.systemId, selectedAllocation.roleInSystem, actualMonths);
+    setIsSavingAllocationUpdate(true);
+    try {
+      await updateActualMonths(selectedAllocation.systemId, selectedAllocation.roleInSystem, actualMonths);
+      setFormState({ selectedAllocationKey: "", actualMonths: "" });
+      setIsAllocationUpdateModalOpen(false);
+    } finally {
+      setIsSavingAllocationUpdate(false);
+    }
+  };
+
+  const openAllocationUpdateModal = () => {
     setFormState({ selectedAllocationKey: "", actualMonths: "" });
+    setIsAllocationUpdateModalOpen(true);
+  };
+
+  const handleAddAllocation = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!newAllocationState.systemId || !newAllocationState.roleInSystem.trim()) {
+      return;
+    }
+
+    const plannedMonths = Number(newAllocationState.plannedMonths);
+    const actualMonths = Number(newAllocationState.actualMonths);
+
+    if (
+      Number.isNaN(plannedMonths) ||
+      Number.isNaN(actualMonths) ||
+      plannedMonths > MAX_MONTHS ||
+      actualMonths > MAX_MONTHS ||
+      plannedMonths < 0 ||
+      actualMonths < 0
+    ) {
+      return;
+    }
+
+    setIsSavingAllocation(true);
+    try {
+      await addAllocation({
+        systemId: newAllocationState.systemId,
+        roleInSystem: newAllocationState.roleInSystem.trim(),
+        plannedMonths,
+        actualMonths
+      });
+
+      setNewAllocationState({
+        systemId: "",
+        roleInSystem: "",
+        plannedMonths: "",
+        actualMonths: "0"
+      });
+      setIsAllocationModalOpen(false);
+    } finally {
+      setIsSavingAllocation(false);
+    }
+  };
+
+  const openAllocationModal = () => {
+    setNewAllocationState({
+      systemId: "",
+      roleInSystem: "",
+      plannedMonths: "",
+      actualMonths: "0"
+    });
+    setIsAllocationModalOpen(true);
   };
 
   const handleCreateEmployee = async (event: FormEvent<HTMLFormElement>) => {
@@ -173,80 +265,73 @@ export default function EmployeesPage() {
       return;
     }
 
-    if (Number.isNaN(year) || Number.isNaN(yearlyCapacityMonths)) {
+    if (Number.isNaN(year) || Number.isNaN(yearlyCapacityMonths) || yearlyCapacityMonths > MAX_MONTHS || yearlyCapacityMonths < 0) {
       return;
     }
 
-    await createEmployee({
-      fullName,
-      professionalCategory,
-      professionalSubCategory: employeeFormState.professionalSubCategory.trim() || undefined,
-      managerName,
-      year,
-      yearlyCapacityMonths,
-      upcomingEvent: employeeFormState.upcomingEvent.trim() || undefined,
-      notes: employeeFormState.notes.trim() || undefined,
-      managerReviewNote: employeeFormState.managerReviewNote.trim() || undefined
-    });
+    setIsSavingEmployee(true);
+    try {
+      const payload = {
+        fullName,
+        professionalCategory,
+        professionalSubCategory: employeeFormState.professionalSubCategory.trim() || undefined,
+        managerName,
+        year,
+        yearlyCapacityMonths,
+        upcomingEvent: employeeFormState.upcomingEvent.trim() || undefined,
+        notes: employeeFormState.notes.trim() || undefined,
+        managerReviewNote: employeeFormState.managerReviewNote.trim() || undefined
+      };
 
-    setCreateFormState({
-      fullName: "",
-      professionalCategory: "",
-      professionalSubCategory: "",
-      managerName: "",
-      year: "2026",
-      yearlyCapacityMonths: "12",
-      upcomingEvent: "",
-      notes: "",
-      managerReviewNote: ""
-    });
+      if (employeeModalMode === "edit" && selectedEmployee?.id) {
+        await updateEmployee(selectedEmployee.id, payload);
+      } else {
+        await createEmployee(payload);
+      }
+
+      setEmployeeFormState(emptyEmployeeForm);
+      setIsEmployeeModalOpen(false);
+    } finally {
+      setIsSavingEmployee(false);
+    }
+  };
+
+  const openCreateEmployeeModal = () => {
+    setEmployeeModalMode("create");
+    setEmployeeFormState(emptyEmployeeForm);
+    setIsEmployeeModalOpen(true);
+  };
+
+  const openEditEmployeeModal = () => {
+    if (!selectedEmployee) {
+      return;
+    }
+
+    setEmployeeModalMode("edit");
     setEmployeeFormState({
-      fullName: "",
-      professionalCategory: "",
-      professionalSubCategory: "",
-      managerName: "",
-      year: "2026",
-      yearlyCapacityMonths: "12",
-      upcomingEvent: "",
-      notes: "",
-      managerReviewNote: ""
+      fullName: selectedEmployee.fullName ?? "",
+      professionalCategory: selectedEmployee.professionalCategory ?? "",
+      professionalSubCategory: selectedEmployee.professionalSubCategory ?? "",
+      managerName: selectedEmployee.managerName ?? "",
+      year: String(selectedEmployee.year ?? 2026),
+      yearlyCapacityMonths: String(selectedEmployee.yearlyCapacityMonths ?? 12),
+      upcomingEvent: selectedEmployee.upcomingEvent ?? "",
+      notes: selectedEmployee.notes ?? "",
+      managerReviewNote: selectedEmployee.managerReviewNote ?? ""
     });
-    setIsCreateOpen(false);
+    setIsEmployeeModalOpen(true);
   };
 
-  const handleUpdateEmployee = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!selectedEmployee?.id) {
-      return;
+  const plannedAllocationTotalInEdit = useMemo(() => {
+    if (employeeModalMode !== "edit" || !selectedEmployee) {
+      return 0;
     }
 
-    const fullName = employeeFormState.fullName.trim();
-    const professionalCategory = employeeFormState.professionalCategory.trim();
-    const managerName = employeeFormState.managerName.trim();
-    const year = Number(employeeFormState.year);
-    const yearlyCapacityMonths = Number(employeeFormState.yearlyCapacityMonths);
+    return selectedEmployee.allocations.reduce((total, allocation) => total + allocation.plannedMonths, 0);
+  }, [employeeModalMode, selectedEmployee]);
 
-    if (!fullName || !professionalCategory || !managerName) {
-      return;
-    }
-
-    if (Number.isNaN(year) || Number.isNaN(yearlyCapacityMonths)) {
-      return;
-    }
-
-    await updateEmployee(selectedEmployee.id, {
-      fullName,
-      professionalCategory,
-      professionalSubCategory: employeeFormState.professionalSubCategory.trim() || undefined,
-      managerName,
-      year,
-      yearlyCapacityMonths,
-      upcomingEvent: employeeFormState.upcomingEvent.trim() || undefined,
-      notes: employeeFormState.notes.trim() || undefined,
-      managerReviewNote: employeeFormState.managerReviewNote.trim() || undefined
-    });
-  };
+  const editCapacityMonths = Number(employeeFormState.yearlyCapacityMonths) || 0;
+  const isPlannedOverCapacity = employeeModalMode === "edit" && plannedAllocationTotalInEdit > editCapacityMonths;
 
   return (
     <main className="app-shell" dir="rtl">
@@ -315,8 +400,7 @@ export default function EmployeesPage() {
           type="button"
           className="primary-btn toolbar-add-btn"
           onClick={() => {
-            setSelectedEmployee(null);
-            setIsCreateOpen(true);
+            openCreateEmployeeModal();
           }}
         >
           + הוספת עובד
@@ -337,7 +421,6 @@ export default function EmployeesPage() {
                 type="button"
                 className={`employee-row ${getEmployeeTone(employee.remainingMonths)} ${selectedEmployee?.id === employee.id ? "selected" : ""}`}
                 onClick={() => {
-                  setIsCreateOpen(false);
                   loadEmployeeDetails(employee.id);
                 }}
                 style={{
@@ -372,13 +455,213 @@ export default function EmployeesPage() {
 
         <article className="panel details-panel">
           <h2>פרטי עובד</h2>
-          {!selectedEmployee && !isCreateOpen && <p>בחר עובד להצגת פרטים או לחץ על "הוספת עובד".</p>}
+          {!selectedEmployee && <p>בחר עובד להצגת פרטים או לחץ על "הוספת עובד".</p>}
           {loadingDetails ? <p>טוען פרטים...</p> : null}
 
-          {(isCreateOpen || selectedEmployee) && (
-            <form className="allocation-form" onSubmit={isEditingEmployee ? handleUpdateEmployee : handleCreateEmployee}>
-              <h4>{isEditingEmployee ? "עריכת עובד" : "הוספת עובד חדש"}</h4>
+          {selectedEmployee && !loadingDetails && (
+            <>
+              <div className="detail-head">
+                <h3>{selectedEmployee.fullName}</h3>
+                <p>
+                  {selectedEmployee.professionalCategory} · {selectedEmployee.professionalSubCategory || "-"}
+                </p>
+                <p>
+                  סטטוס זמינות: {selectedEmployee.availabilityStatus}{" "}
+                  <span className={`status-chip ${getEmployeeTone(selectedEmployee.remainingMonths)}`}>
+                    {getEmployeeToneLabel(selectedEmployee.remainingMonths)}
+                  </span>
+                </p>
+              </div>
+
+              <div className="employee-readonly-grid">
+                <div className="readonly-item">
+                  <span className="readonly-label">מנהל</span>
+                  <strong>{selectedEmployee.managerName || "-"}</strong>
+                </div>
+                <div className="readonly-item">
+                  <span className="readonly-label">שנה</span>
+                  <strong>{selectedEmployee.year}</strong>
+                </div>
+                <div className="readonly-item">
+                  <span className="readonly-label">קיבולת שנתית</span>
+                  <strong>{selectedEmployee.yearlyCapacityMonths}</strong>
+                </div>
+                <div className="readonly-item">
+                  <span className="readonly-label">אירוע עתידי</span>
+                  <strong>{selectedEmployee.upcomingEvent || "אין"}</strong>
+                </div>
+                <div className="readonly-item">
+                  <span className="readonly-label">הערות</span>
+                  <strong>{selectedEmployee.notes || "אין"}</strong>
+                </div>
+                <div className="readonly-item">
+                  <span className="readonly-label">הערת מנהל</span>
+                  <strong>{selectedEmployee.managerReviewNote || "אין"}</strong>
+                </div>
+              </div>
+
+              <h4>הקצאות פעילות</h4>
+              <div className="allocations">
+                {selectedEmployee.allocations.length === 0 && <p>אין הקצאות לעובד זה.</p>}
+                {selectedEmployee.allocations.map((allocation) => (
+                  <div key={`${allocation.systemId}-${allocation.roleInSystem}`} className="allocation-row">
+                    <div>
+                      <strong>{allocation.systemName}</strong>
+                      <small>
+                        {allocation.roleInSystem} · מתוכנן: {allocation.plannedMonths} · בפועל: {allocation.actualMonths}
+                      </small>
+                    </div>
+                    <span>{allocation.systemCapacityStatus}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="detail-actions">
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={openEditEmployeeModal}
+                >
+                  עריכת עובד
+                </button>
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={openAllocationModal}
+                >
+                  + הוספת הקצאה
+                </button>
+                {allocationOptions.length > 0 && (
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={openAllocationUpdateModal}
+                  >
+                    ✎ עדכון חודשים
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </article>
+      </section>
+
+      {isAllocationModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsAllocationModalOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={() => setIsAllocationModalOpen(false)}
+              aria-label="סגירה"
+            >
+              ×
+            </button>
+
+            <div className="modal-header">
+              <h3>הוספת הקצאה חדשה</h3>
+              <p>הקצה עובד למערכת עם תפקיד וחודשים מתוכננים.</p>
+            </div>
+
+            <form className="modal-form" onSubmit={handleAddAllocation}>
               <div className="form-grid">
+                <label>
+                  מערכת
+                  <select
+                    value={newAllocationState.systemId}
+                    onChange={(e) => setNewAllocationState((prev) => ({ ...prev, systemId: e.target.value }))}
+                    required
+                  >
+                    <option value="">בחר מערכת</option>
+                    {systems.map((system) => (
+                      <option key={system.id} value={system.id}>
+                        {system.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  תפקיד במערכת
+                  <input
+                    value={newAllocationState.roleInSystem}
+                    onChange={(e) => setNewAllocationState((prev) => ({ ...prev, roleInSystem: e.target.value }))}
+                    placeholder="למשל: Backend"
+                    required
+                  />
+                </label>
+
+                <label>
+                  חודשים מתוכננים
+                  <input
+                    type="number"
+                    min={0}
+                    max={MAX_MONTHS}
+                    value={newAllocationState.plannedMonths}
+                    onChange={(e) =>
+                      setNewAllocationState((prev) => ({
+                        ...prev,
+                        plannedMonths: clampMonthsInput(e.target.value)
+                      }))
+                    }
+                    placeholder="למשל: 6"
+                    required
+                  />
+                </label>
+
+                <label>
+                  חודשים בפועל
+                  <input
+                    type="number"
+                    min={0}
+                    max={MAX_MONTHS}
+                    value={newAllocationState.actualMonths}
+                    onChange={(e) =>
+                      setNewAllocationState((prev) => ({
+                        ...prev,
+                        actualMonths: clampMonthsInput(e.target.value)
+                      }))
+                    }
+                    placeholder="למשל: 0"
+                  />
+                </label>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="secondary-btn" onClick={() => setIsAllocationModalOpen(false)}>
+                  ביטול
+                </button>
+                <button type="submit" className="primary-btn" disabled={isSavingAllocation}>
+                  {isSavingAllocation ? "שומר..." : "הוספת הקצאה"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isEmployeeModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsEmployeeModalOpen(false)}>
+          <div className="modal-card employee-modal-card" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={() => setIsEmployeeModalOpen(false)}
+              aria-label="סגירה"
+            >
+              ×
+            </button>
+
+            <div className="modal-header">
+              <h3>{employeeModalMode === "edit" ? "עריכת עובד" : "הוספת עובד"}</h3>
+            </div>
+
+            <form className="modal-form" onSubmit={handleCreateEmployee}>
+              <section className="modal-section">
+                <h4 className="modal-section-title">פרופיל עובד</h4>
+                <p className="modal-section-subtitle">נתוני דמו בלבד להצגה</p>
+
+                <div className="form-grid">
                 <label>
                   שם מלא
                   <input
@@ -400,15 +683,6 @@ export default function EmployeesPage() {
                 </label>
 
                 <label>
-                  תת-תחום
-                  <input
-                    value={employeeFormState.professionalSubCategory}
-                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, professionalSubCategory: e.target.value }))}
-                    placeholder="למשל: Backend"
-                  />
-                </label>
-
-                <label>
                   מנהל
                   <input
                     value={employeeFormState.managerName}
@@ -419,139 +693,184 @@ export default function EmployeesPage() {
                 </label>
 
                 <label>
-                  שנה
+                  תת תחום
                   <input
-                    type="number"
-                    min={2020}
-                    value={employeeFormState.year}
-                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, year: e.target.value }))}
-                    required
-                  />
-                </label>
-
-                <label>
-                  קיבולת שנתית (חודשים)
-                  <input
-                    type="number"
-                    min={0}
-                    value={employeeFormState.yearlyCapacityMonths}
-                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, yearlyCapacityMonths: e.target.value }))}
-                    required
-                  />
-                </label>
-
-                <label>
-                  אירוע עתידי
-                  <input
-                    value={employeeFormState.upcomingEvent}
-                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, upcomingEvent: e.target.value }))}
-                    placeholder="למשל: מילואים ברבעון ג׳"
-                  />
-                </label>
-
-                <label>
-                  הערות
-                  <textarea
-                    value={employeeFormState.notes}
-                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, notes: e.target.value }))}
-                    placeholder="הערות כלליות"
-                  />
-                </label>
-
-                <label>
-                  הערת מנהל
-                  <textarea
-                    value={employeeFormState.managerReviewNote}
-                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, managerReviewNote: e.target.value }))}
-                    placeholder="משוב מנהל"
+                    value={employeeFormState.professionalSubCategory}
+                    onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, professionalSubCategory: e.target.value }))}
+                    placeholder="למשל: Backend"
                   />
                 </label>
               </div>
+              </section>
 
-              <button type="submit" className="primary-btn" disabled={loadingCreate}>
-                {loadingCreate ? "שומר..." : isEditingEmployee ? "שמירת שינויים" : "שמירת עובד"}
-              </button>
-            </form>
-          )}
+              <section className="modal-section">
+                <h4 className="modal-section-title">קיבולת וזמינות</h4>
+                <p className="modal-section-subtitle">נתוני דמו בלבד להצגה</p>
 
-          {selectedEmployee && !loadingDetails && !isCreateOpen && (
-            <>
-              <div className="detail-head">
-                <h3>{selectedEmployee.fullName}</h3>
-                <p>
-                  {selectedEmployee.professionalCategory} · {selectedEmployee.professionalSubCategory || "-"}
-                </p>
-                <p>
-                  סטטוס זמינות: {selectedEmployee.availabilityStatus}{" "}
-                  <span className={`status-chip ${getEmployeeTone(selectedEmployee.remainingMonths)}`}>
-                    {getEmployeeToneLabel(selectedEmployee.remainingMonths)}
-                  </span>
-                </p>
-              </div>
-
-              <h4>הקצאות פעילות</h4>
-              <div className="allocations">
-                {selectedEmployee.allocations.length === 0 && <p>אין הקצאות לעובד זה.</p>}
-                {selectedEmployee.allocations.map((allocation) => (
-                  <div key={`${allocation.systemId}-${allocation.roleInSystem}`} className="allocation-row">
-                    <div>
-                      <strong>{allocation.systemName}</strong>
-                      <small>
-                        {allocation.roleInSystem} · מתוכנן: {allocation.plannedMonths} · בפועל: {allocation.actualMonths}
-                      </small>
-                    </div>
-                    <span>{allocation.systemCapacityStatus}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={() => setIsEditingEmployee(true)}
-              >
-                עריכת עובד
-              </button>
-
-              <form className="allocation-form" onSubmit={handleSubmit}>
-                <h4>עדכון חודשי הקצאה בפועל</h4>
                 <div className="form-grid">
                   <label>
-                    מערכת ותפקיד
-                    <select
-                      value={formState.selectedAllocationKey}
-                      onChange={(e) => setFormState((prev) => ({ ...prev, selectedAllocationKey: e.target.value }))}
-                      disabled={allocationOptions.length === 0}
-                    >
-                      <option value="">בחר הקצאה קיימת</option>
-                      {allocationOptions.map((option) => (
-                        <option key={option.key} value={option.key}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label>
-                    ActualMonths
+                    קיבולת שנתית
                     <input
                       type="number"
                       min={0}
-                      value={formState.actualMonths}
-                      onChange={(e) => setFormState((prev) => ({ ...prev, actualMonths: e.target.value }))}
-                      placeholder="למשל: 5"
+                      max={MAX_MONTHS}
+                      value={employeeFormState.yearlyCapacityMonths}
+                      onChange={(e) =>
+                        setEmployeeFormState((prev) => ({
+                          ...prev,
+                          yearlyCapacityMonths: clampMonthsInput(e.target.value)
+                        }))
+                      }
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    שנה
+                    <input
+                      type="number"
+                      min={2020}
+                      value={employeeFormState.year}
+                      onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, year: e.target.value }))}
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    אירועים עתידיים
+                    <input
+                      value={employeeFormState.upcomingEvent}
+                      onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, upcomingEvent: e.target.value }))}
+                      placeholder="למשל: מילואים ברבעון ג׳"
                     />
                   </label>
                 </div>
+              </section>
 
-                <button type="submit" className="primary-btn">
-                  שמירת עדכון
+              {employeeModalMode === "edit" && selectedEmployee && (
+                <section className="modal-section">
+                  <h4 className="modal-section-title">הקצאות למערכות</h4>
+                  <p className="modal-section-subtitle">חודש עבודה מתוכנן לכל מערכת</p>
+                  {isPlannedOverCapacity && (
+                    <p className="modal-warning-text">
+                      חריגה אדומה בשחור: סך ההקצאות המתוכננות גבוה מהקיבולת השנתית.
+                    </p>
+                  )}
+
+                  <div className="allocation-preview-grid">
+                    {selectedEmployee.allocations.map((allocation) => (
+                      <label key={`${allocation.systemId}-${allocation.roleInSystem}`}>
+                        {allocation.systemName}
+                        <input type="number" min={0} max={MAX_MONTHS} value={allocation.plannedMonths} readOnly />
+                      </label>
+                    ))}
+                    {selectedEmployee.allocations.length === 0 && <p className="modal-section-subtitle">אין הקצאות פעילות לעובד.</p>}
+                  </div>
+                </section>
+              )}
+
+              <section className="modal-section">
+                <div className="form-grid">
+                  <label>
+                    הערות
+                    <textarea
+                      value={employeeFormState.notes}
+                      onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, notes: e.target.value }))}
+                      placeholder="הערות כלליות"
+                    />
+                  </label>
+
+                <label>
+                    הערת מנהל
+                    <textarea
+                      value={employeeFormState.managerReviewNote}
+                      onChange={(e) => setEmployeeFormState((prev) => ({ ...prev, managerReviewNote: e.target.value }))}
+                      placeholder="משוב מנהל"
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <div className="modal-actions">
+                <button type="button" className="secondary-btn" onClick={() => setIsEmployeeModalOpen(false)}>
+                  ביטול
                 </button>
-              </form>
-            </>
-          )}
-        </article>
-      </section>
+                <button type="submit" className="primary-btn" disabled={isSavingEmployee || loadingCreate}>
+                  {isSavingEmployee || loadingCreate ? "שומר..." : employeeModalMode === "edit" ? "שמירה" : "יצירת עובד"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isAllocationUpdateModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsAllocationUpdateModalOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={() => setIsAllocationUpdateModalOpen(false)}
+              aria-label="סגירה"
+            >
+              ×
+            </button>
+
+            <div className="modal-header">
+              <h3>עדכון חודשי הקצאה בפועל</h3>
+              <p>בחר הקצאה קיימת ועדכן את מספר החודשים בפועל.</p>
+            </div>
+
+            <form className="modal-form" onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <label>
+                  מערכת ותפקיד
+                  <select
+                    value={formState.selectedAllocationKey}
+                    onChange={(e) => setFormState((prev) => ({ ...prev, selectedAllocationKey: e.target.value }))}
+                    disabled={allocationOptions.length === 0}
+                    required
+                  >
+                    <option value="">בחר הקצאה קיימת</option>
+                    {allocationOptions.map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  חודשים בפועל
+                  <input
+                    type="number"
+                    min={0}
+                    max={MAX_MONTHS}
+                    value={formState.actualMonths}
+                    onChange={(e) =>
+                      setFormState((prev) => ({
+                        ...prev,
+                        actualMonths: clampMonthsInput(e.target.value)
+                      }))
+                    }
+                    placeholder="למשל: 5"
+                    required
+                  />
+                </label>
+              </div>
+
+              <div className="modal-actions">
+                <button type="button" className="secondary-btn" onClick={() => setIsAllocationUpdateModalOpen(false)}>
+                  ביטול
+                </button>
+                <button type="submit" className="primary-btn" disabled={isSavingAllocationUpdate}>
+                  {isSavingAllocationUpdate ? "שומר..." : "שמירת עדכון"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

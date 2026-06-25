@@ -83,7 +83,6 @@ export default function SystemsPage() {
             {visibleSystems.map((system) => (
               (() => {
                 const tone = getGapTone(system.gap);
-                const toneLabel = tone === "shortage" ? "חסך" : tone === "surplus" ? "עודף" : "מאוזן";
 
                 return (
               <button
@@ -106,7 +105,7 @@ export default function SystemsPage() {
                     פער: {system.gap}
                   </span>
                 </div>
-                <span className={`status-chip ${tone}`}>{toneLabel}</span>
+                
                 <span className="status-badge" style={{ background: getStatusColor(system.capacityStatus) }}>
                   {system.capacityStatus}
                 </span>

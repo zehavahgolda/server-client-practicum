@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { allocationService } from "../services/allocationService";
 import { employeeService } from "../services/employeeService";
 import { type EmployeeFilters } from "../types/filters";
 import { type EmployeeDetails, type EmployeeListItem, type EmployeeUpsertPayload } from "../types/employee";
+
 export function useEmployees(initialFilters: EmployeeFilters = {}) {
   const [filters, setFilters] = useState<EmployeeFilters>(initialFilters);
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
@@ -54,6 +56,22 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
         await loadEmployees();
       } catch (err) {
         const message = err instanceof Error ? err.message : "עדכון ההקצאה נכשל";
+        setError(message);
+      }
+    },
+    [selectedEmployee?.id, loadEmployeeDetails, loadEmployees]
+  );
+
+  const addAllocation = useCallback(
+    async (payload: { systemId: string; roleInSystem: string; plannedMonths: number; actualMonths: number }) => {
+      if (!selectedEmployee?.id) return;
+      setError(null);
+      try {
+        await allocationService.addAllocation(selectedEmployee.id, payload);
+        await loadEmployeeDetails(selectedEmployee.id);
+        await loadEmployees();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "הוספת הקצאה נכשלה";
         setError(message);
       }
     },
@@ -128,6 +146,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     setSelectedEmployee,
     createEmployee,
     updateEmployee,
+    addAllocation,
     updateActualMonths,
     meta
   };
