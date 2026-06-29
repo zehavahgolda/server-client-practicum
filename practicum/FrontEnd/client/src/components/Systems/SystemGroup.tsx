@@ -23,13 +23,12 @@ function sumAllocated(systems: System[]) {
 function sumGap(systems: System[]) {
   return systems.reduce((sum, system) => sum + system.gap, 0);
 }
-
 export default function SystemGroup({
   title,
   subtitle,
   tone,
   systems,
-  defaultOpen = true,
+  defaultOpen = false,
   onSystemClick
 }: SystemGroupProps) {
   const [open, setOpen] = useState(defaultOpen);

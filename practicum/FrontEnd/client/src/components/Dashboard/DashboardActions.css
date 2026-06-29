@@ -1,0 +1,27 @@
+.dashboard-actions {
+  height: 60px;
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  border-radius: 6px;
+  padding: 0 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.dashboard-actions-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+}
+
+.dashboard-actions-button {
+  background: #ffffff;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}

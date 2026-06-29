@@ -1,0 +1,38 @@
+.dashboard-chart-card {
+  background: #ffffff;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 210px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard-chart-card-header {
+  height: 46px;
+  border-bottom: 1px solid #e1e1e1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 14px;
+  box-sizing: border-box;
+}
+
+.dashboard-chart-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #000000;
+}
+
+.dashboard-chart-card-body {
+  min-height: 128px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}

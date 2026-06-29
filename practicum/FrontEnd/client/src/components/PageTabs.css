@@ -1,0 +1,29 @@
+.page-tabs {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.page-tab-link {
+  border: 1px solid var(--border-color);
+  background: var(--surface-bg);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.page-tab-link:hover {
+  background: var(--surface-alt);
+  color: var(--text-primary);
+}
+
+.page-tab-link.active {
+  background: var(--status-surplus);
+  color: #ffffff;
+  border-color: var(--status-surplus);
+}

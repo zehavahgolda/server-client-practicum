@@ -1,0 +1,13 @@
+
+.dashboard-page {
+  direction: rtl;
+  min-height: 100vh;
+  background: #efeeeb;
+  padding: 12px 32px 32px;
+  box-sizing: border-box;
+
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  overflow-x: hidden;
+}

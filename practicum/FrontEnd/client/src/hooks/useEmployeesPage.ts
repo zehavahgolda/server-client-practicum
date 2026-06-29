@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
-import type { EmployeeUpsertPayload } from "../types";
+import { employeeService } from "../services/employeeService";
+import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
 
 export function useEmployeesPage() {
   const [searchParams] = useSearchParams();
@@ -29,6 +30,8 @@ export function useEmployeesPage() {
     updateActualMonths
   } = employeesHook;
 
+  const [employeesForFilterOptions, setEmployeesForFilterOptions] = useState<EmployeeListItem[]>([]);
+
   const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
   const [employeeModalMode, setEmployeeModalMode] = useState<"create" | "edit">("create");
   const [allocationModalOpen, setAllocationModalOpen] = useState(false);
@@ -37,6 +40,26 @@ export function useEmployeesPage() {
   const [savingEmployee, setSavingEmployee] = useState(false);
   const [savingAllocation, setSavingAllocation] = useState(false);
   const [savingAllocationUpdate, setSavingAllocationUpdate] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadFilterOptions() {
+      const data = await employeeService.getEmployees({
+        year: filters.year ?? 2026
+      });
+
+      if (!cancelled) {
+        setEmployeesForFilterOptions(data);
+      }
+    }
+
+    loadFilterOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.year]);
 
   const filteredEmployees = useMemo(() => {
     if (availabilityFilter === "overloaded") {
@@ -61,16 +84,26 @@ export function useEmployeesPage() {
 
   const categories = useMemo(
     () =>
-      [...new Set(filteredEmployees.map((employee) => employee.professionalCategory.trim()).filter(Boolean))]
-        .sort((a, b) => a.localeCompare(b, "he")),
-    [filteredEmployees]
+      [
+        ...new Set(
+          employeesForFilterOptions
+            .map((employee) => employee.professionalCategory?.trim())
+            .filter(Boolean)
+        )
+      ].sort((a, b) => a.localeCompare(b, "he")),
+    [employeesForFilterOptions]
   );
 
   const managers = useMemo(
     () =>
-      [...new Set(filteredEmployees.map((employee) => employee.managerName.trim()).filter(Boolean))]
-        .sort((a, b) => a.localeCompare(b, "he")),
-    [filteredEmployees]
+      [
+        ...new Set(
+          employeesForFilterOptions
+            .map((employee) => employee.managerName?.trim())
+            .filter(Boolean)
+        )
+      ].sort((a, b) => a.localeCompare(b, "he")),
+    [employeesForFilterOptions]
   );
 
   const allocationOptions = useMemo(() => {

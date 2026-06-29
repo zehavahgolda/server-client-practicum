@@ -1,0 +1,44 @@
+.dashboard-horizontal-bars {
+  width: 100%;
+  direction: ltr;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard-horizontal-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 100px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dashboard-horizontal-value {
+  font-size: 12px;
+  font-weight: 800;
+  color: #000;
+}
+
+.dashboard-horizontal-track {
+  height: 10px;
+  background: #ecebe8;
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.dashboard-horizontal-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.dashboard-horizontal-label {
+  direction: rtl;
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}

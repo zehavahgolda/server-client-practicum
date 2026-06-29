@@ -11,7 +11,7 @@ function App() {
     <Router>
       <div className="app-wrapper">
         <nav className="app-nav" dir="rtl">
-          <NavLink to="/" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
+          {/* <NavLink to="/" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
             📊 דשבורד
           </NavLink>
           <NavLink
@@ -34,7 +34,7 @@ function App() {
             className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
           >
             📜 שינויים
-          </NavLink>
+          </NavLink> */}
         </nav>
 
         <Routes>

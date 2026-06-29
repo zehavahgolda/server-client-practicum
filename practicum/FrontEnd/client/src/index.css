@@ -14,3 +14,18 @@ body {
   background: #f1f2f4;
   color: #1f2937;
 }
+.empty-text {
+  width: 100%;
+  min-height: 96px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--surface-alt);
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 18px;
+  box-sizing: border-box;
+}

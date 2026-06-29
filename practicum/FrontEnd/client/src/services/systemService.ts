@@ -1,11 +1,23 @@
 import httpClient from "./api/httpClient";
-import type { System, SystemDetails, SystemFilters, SystemCreateDto } from "../types";
+import type { System, SystemDetails, SystemFilters, SystemCreateDto, SystemUpdateDto } from "../types";
 
 function normalizeSystem(item: System): System {
   return {
     ...item,
     name: item.name?.trim() || "ללא שם",
     capacityStatus: item.capacityStatus?.trim() || "לא מוגדר"
+  };
+}
+
+function normalizeSystemDetails(item: SystemDetails): SystemDetails {
+  return {
+    ...normalizeSystem(item),
+    assignedEmployees: item.assignedEmployees || [],
+    changes: item.changes || [],
+    totalBudget: item.totalBudget || 0,
+    totalPlannedMonths: item.totalPlannedMonths || 0,
+    totalActualMonths: item.totalActualMonths || 0,
+    variancePercent: item.variancePercent || 0
   };
 }
 
@@ -26,15 +38,7 @@ export const systemService = {
  async getSystemById(id: string): Promise<SystemDetails> {
   const response = await httpClient.get<SystemDetails>(`/System/${id}`);
 
-  return {
-    ...response.data,
-    assignedEmployees: response.data.assignedEmployees || [],
-    changes: response.data.changes || [],
-    totalBudget: response.data.totalBudget || 0,
-    totalPlannedMonths: response.data.totalPlannedMonths || 0,
-    totalActualMonths: response.data.totalActualMonths || 0,
-    variancePercent: response.data.variancePercent || 0
-  };
+  return normalizeSystemDetails(response.data);
 },
   async exportToExcel(year?: number, status?: string): Promise<Blob> {
     const response = await httpClient.get("/System/export", {
@@ -46,5 +50,9 @@ export const systemService = {
   async createSystem(dto: SystemCreateDto): Promise<string> {
   const response = await httpClient.post<string>("/System", dto);
   return response.data;
+},
+  async updateSystem(id: string, dto: SystemUpdateDto): Promise<SystemDetails> {
+    const response = await httpClient.put<SystemDetails>(`/System/${id}`, dto);
+    return normalizeSystemDetails(response.data);
 }
 };

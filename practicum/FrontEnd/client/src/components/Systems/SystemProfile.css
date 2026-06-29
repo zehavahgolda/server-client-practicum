@@ -1,7 +1,7 @@
 .system-profile-page {
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
@@ -9,51 +9,51 @@
 .system-profile-header {
   background: var(--surface-alt);
   border-bottom: 1px solid var(--border-color);
-  padding: 26px 32px;
+  padding: 16px 18px;
   display: flex;
   justify-content: space-between;
-  gap: 22px;
+  gap: 12px;
   align-items: center;
 }
 
 .system-profile-eyebrow {
   color: var(--status-surplus);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 900;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .system-profile-header h1 {
   margin: 0;
-  font-size: 34px;
+  font-size: 24px;
   color: var(--text-primary);
 }
 
 .system-profile-header p {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .system-profile-avatar {
-  width: 86px;
-  height: 86px;
-  border-radius: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
   background: var(--status-surplus-soft);
   color: var(--status-surplus);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 34px;
+  font-size: 24px;
   font-weight: 900;
   flex-shrink: 0;
 }
 
 .system-profile-tags {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
-  margin-top: 14px;
+  margin-top: 8px;
 }
 
 .system-profile-tags.centered {
@@ -65,54 +65,54 @@
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 13px;
+  padding: 5px 10px;
+  font-size: 11px;
   font-weight: 900;
 }
 
 .system-profile-actions {
-  padding: 22px 32px 0;
+  padding: 14px 18px 0;
   display: flex;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .system-note-box {
-  margin: 22px 32px 0;
+  margin: 14px 18px 0;
   background: #fffaf3;
   border: 1px solid #eadcc7;
   color: #6b4e20;
   border-radius: 10px;
-  padding: 14px 18px;
-  font-size: 15px;
+  padding: 10px 12px;
+  font-size: 12px;
 }
 
 .system-profile-kpis {
-  padding: 22px 32px;
+  padding: 14px 18px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 10px;
 }
 
 .system-profile-kpi {
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 9px;
+  padding: 11px;
 }
 
 .system-profile-kpi span {
   display: block;
   color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 11px;
+  margin-bottom: 4px;
 }
 
 .system-profile-kpi strong {
   display: block;
   color: var(--text-primary);
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 900;
 }
 
@@ -129,76 +129,76 @@
 }
 
 .system-profile-content {
-  padding: 0 32px 32px;
+  padding: 0 18px 18px;
   display: grid;
   grid-template-columns: 1.45fr 1fr;
-  gap: 20px;
+  gap: 12px;
 }
 
 .system-profile-panel {
   border: 1px solid var(--border-color);
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--surface-bg);
-  padding: 22px;
-  min-height: 320px;
+  padding: 14px;
+  min-height: 235px;
 }
 
 .system-profile-panel h2 {
-  margin: 0 0 18px;
+  margin: 0 0 10px;
   color: var(--text-primary);
-  font-size: 21px;
+  font-size: 16px;
 }
 
 .system-profile-panel h3 {
-  margin: 22px 0 12px;
+  margin: 14px 0 8px;
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: 13px;
 }
 
 .empty-text {
   color: var(--text-secondary);
-  font-size: 15px;
-  padding: 14px 0;
+  font-size: 12px;
+  padding: 10px 0;
 }
 
 .assigned-employees-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .assigned-employee-row {
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 9px;
   background: var(--surface-bg);
-  padding: 15px 16px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 10px;
 }
 
 .assigned-employee-row strong {
   display: block;
   color: var(--text-primary);
-  font-size: 16px;
-  margin-bottom: 6px;
+  font-size: 13px;
+  margin-bottom: 4px;
 }
 
 .assigned-employee-row span {
   display: block;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 11px;
 }
 
 .small-outline-btn {
   border: 1px solid var(--border-color);
   background: var(--surface-bg);
   color: var(--text-primary);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 6px;
+  padding: 6px 9px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 800;
   cursor: pointer;
   white-space: nowrap;
@@ -212,13 +212,13 @@
 .changes-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .change-row {
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 8px;
 }
 
 .change-row strong {
@@ -245,14 +245,14 @@
   .system-profile-header {
     flex-direction: column-reverse;
     align-items: flex-start;
-    padding: 22px;
+    padding: 14px;
   }
 
   .system-profile-actions,
   .system-profile-kpis,
   .system-profile-content {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .system-profile-kpis {
@@ -260,8 +260,8 @@
   }
 
   .system-note-box {
-    margin-left: 18px;
-    margin-right: 18px;
+    margin-left: 12px;
+    margin-right: 12px;
   }
 
   .assigned-employee-row {

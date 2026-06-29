@@ -1,3 +1,4 @@
+
 import type { EmployeeDetails } from "../../types";
 import EmployeeProfile from "./EmployeeProfile";
 
@@ -30,31 +31,33 @@ export default function EmployeeProfileSection({
 
   return (
     <section className="employees-profile-board">
-      <button
-        type="button"
-        className="secondary-btn employees-back-btn"
-        onClick={onClose}
-      >
-        סגירת פרופיל
-      </button>
+      <div className="employees-profile-toolbar">
+        <button
+          type="button"
+          className="secondary-btn employees-back-btn"
+          onClick={onClose}
+        >
+          סגירת פרופיל
+        </button>
+
+        <div className="detail-actions employees-profile-actions">
+          <button type="button" className="secondary-btn" onClick={onEdit}>
+            עריכת עובד
+          </button>
+
+          <button type="button" className="secondary-btn" onClick={onAddAllocation}>
+            + הוספת הקצאה
+          </button>
+
+          {allocationOptionsCount > 0 && (
+            <button type="button" className="secondary-btn" onClick={onUpdateAllocation}>
+              ✎ עדכון חודשים
+            </button>
+          )}
+        </div>
+      </div>
 
       <EmployeeProfile employee={employee} />
-
-      <div className="detail-actions employees-profile-actions">
-        <button type="button" className="secondary-btn" onClick={onEdit}>
-          עריכת עובד
-        </button>
-
-        <button type="button" className="secondary-btn" onClick={onAddAllocation}>
-          + הוספת הקצאה
-        </button>
-
-        {allocationOptionsCount > 0 && (
-          <button type="button" className="secondary-btn" onClick={onUpdateAllocation}>
-            ✎ עדכון חודשים
-          </button>
-        )}
-      </div>
     </section>
   );
 }

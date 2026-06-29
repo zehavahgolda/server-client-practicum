@@ -1,0 +1,57 @@
+.dashboard-kpi-card {
+  height: 100px;
+  border-radius: 6px;
+  border: 1px solid #dedede;
+  background: #ffffff;
+  padding: 12px;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.dashboard-kpi-card h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+}
+
+.dashboard-kpi-card strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+  color: #111;
+}
+
+.dashboard-kpi-card p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.dashboard-kpi-card--orange {
+  background: #fff3df;
+  border-color: #b87517;
+}
+
+.dashboard-kpi-card--orange strong {
+  color: #006b57;
+}
+
+.dashboard-kpi-card--blue {
+  background: #eaf4ff;
+  border-color: #1f70c1;
+}
+
+.dashboard-kpi-card--blue strong {
+  color: #ad2c2c;
+}
+
+.dashboard-kpi-card--red {
+  background: #fde8ea;
+  border-color: #d72e2e;
+}
+
+.dashboard-kpi-card--red strong {
+  color: #ad2c2c;
+}

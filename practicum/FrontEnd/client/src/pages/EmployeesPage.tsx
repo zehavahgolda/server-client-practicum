@@ -5,14 +5,17 @@ import EmployeeProfileSection from "../components/Employees/EmployeeProfileSecti
 import EmployeeFormModal from "../components/Employees/EmployeeFormModal";
 import AllocationModal from "../components/Employees/AllocationModal";
 import AllocationUpdateModal from "../components/Employees/AllocationUpdateModal";
+import PageTabs from "../components/PageTabs";
 
 export default function EmployeesPage() {
   const page = useEmployeesPage();
 
   return (
+    
     <main className="app-shell" dir="rtl">
+      <PageTabs />
       <header className="app-header">
-        <h1>ניהול עובדים - חיבור לשרת</h1>
+        <h1>ניהול עובדים</h1>
         <p>רשימת עובדים, פרטי עובד, קיבולת, שיבוצים ועדכוני הקצאה.</p>
       </header>
 

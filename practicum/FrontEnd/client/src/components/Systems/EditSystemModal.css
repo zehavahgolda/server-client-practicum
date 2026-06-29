@@ -1,4 +1,4 @@
-.create-system-backdrop {
+.edit-system-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.45);
@@ -6,30 +6,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
 }
 
-.create-system-modal {
-  width: min(720px, calc(100vw - 32px));
+.edit-system-modal {
+  width: min(760px, calc(100vw - 32px));
   background: var(--surface-bg);
   border-radius: 16px;
   border: 1px solid var(--border-color);
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
   padding: 24px;
   position: relative;
+  text-align: right;
 }
 
-.create-system-modal h2 {
+.edit-system-modal h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 900;
 }
 
-.create-system-modal p {
+.edit-system-modal p {
   color: var(--text-secondary);
   margin: 6px 0 18px;
+  font-size: 14px;
 }
 
-.create-system-close {
+.edit-system-close {
   position: absolute;
   top: 18px;
   left: 18px;
@@ -42,28 +45,25 @@
   cursor: pointer;
 }
 
-.create-system-note-label {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 10px;
+.edit-system-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.edit-system-form-grid label {
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text-secondary);
-  font-weight: 800;
 }
 
-.create-system-note-label textarea {
-  min-height: 66px;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  padding: 10px;
-  font-family: inherit;
-  background: var(--input-bg);
-  color: var(--text-primary);
-}
-
-.create-system-actions {
+.edit-system-actions {
   display: flex;
   justify-content: flex-start;
   gap: 8px;
   margin-top: 14px;
+}
+
+@media (max-width: 700px) {
+  .edit-system-form-grid {
+    grid-template-columns: 1fr;
+  }
 }

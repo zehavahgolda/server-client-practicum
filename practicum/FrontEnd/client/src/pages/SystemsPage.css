@@ -1,80 +1,55 @@
 .systems-page-shell {
-  max-width: 1500px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 22px 28px 60px;
+  padding: 22px 56px 48px;
   color: var(--text-primary);
-}
-
-.systems-tabs {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.systems-tabs button {
-  border: 1px solid var(--border-color);
-  background: var(--surface-bg);
-  color: var(--text-secondary);
-  border-radius: 10px;
-  padding: 12px 20px;
-  font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: var(--shadow-soft);
-}
-
-.systems-tabs button.active {
-  background: var(--status-surplus);
-  color: #ffffff;
-  border-color: var(--status-surplus);
 }
 
 .systems-toolbar-card {
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 18px;
+  border-radius: 11px;
+  padding: 12px;
   box-shadow: var(--shadow-soft);
 }
 
 .systems-filter-row {
   display: grid;
-  grid-template-columns: 140px 170px 170px 170px minmax(280px, 1fr) 76px;
-  gap: 12px;
+  grid-template-columns: 120px 150px 150px 150px minmax(240px, 1fr) 64px;
+  gap: 8px;
   align-items: end;
 }
 
 .systems-filter-row label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
 .systems-filter-row select,
 .systems-filter-row input {
-  height: 48px;
+  height: 36px;
   border: 1px solid var(--input-border);
-  border-radius: 10px;
+  border-radius: 7px;
   background: var(--input-bg);
   color: var(--text-primary);
-  padding: 0 14px;
+  padding: 0 10px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .clean-btn {
-  height: 48px;
+  height: 36px;
   margin: 0;
 }
 
 .systems-toolbar-divider {
   height: 1px;
   background: var(--border-color);
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
 .systems-actions-row,
@@ -82,15 +57,15 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 7px;
 }
 
 .systems-actions-row span,
 .systems-view-row span {
-  min-width: 70px;
+  min-width: 54px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -99,8 +74,8 @@
   background: var(--surface-bg);
   color: var(--text-secondary);
   border-radius: 999px;
-  padding: 8px 18px;
-  font-size: 14px;
+  padding: 6px 11px;
+  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -112,25 +87,25 @@
 }
 
 .systems-overview-title {
-  margin: 22px 0 16px;
+  margin: 16px 0 10px;
   text-align: right;
 }
 
 .systems-overview-title h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 18px;
 }
 
 .systems-overview-title p {
-  margin: 6px 0 0;
+  margin: 3px 0 0;
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .systems-board {
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }
@@ -139,17 +114,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px 24px;
+  padding: 15px 18px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .systems-board-header h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 18px;
 }
 
 .systems-board-header p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--text-secondary);
 }
 
@@ -157,22 +132,28 @@
   background: var(--status-danger-soft);
   color: var(--status-danger);
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 6px 10px;
   font-weight: 900;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .systems-cards-grid {
-  padding: 22px;
+  padding: 24px 32px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(240px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
   align-items: stretch;
 }
 
 @media (max-width: 1280px) {
+  .systems-page-shell {
+    padding: 20px 42px 44px;
+  }
+
   .systems-cards-grid {
-    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    padding: 22px 26px;
+    gap: 16px;
   }
 
   .systems-filter-row {
@@ -185,8 +166,14 @@
 }
 
 @media (max-width: 980px) {
+  .systems-page-shell {
+    padding: 18px 24px 38px;
+  }
+
   .systems-cards-grid {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    padding: 18px 20px;
+    gap: 14px;
   }
 
   .systems-filter-row {
@@ -200,17 +187,7 @@
 
 @media (max-width: 640px) {
   .systems-page-shell {
-    padding: 14px 10px 40px;
-  }
-
-  .systems-tabs {
-    justify-content: stretch;
-  }
-
-  .systems-tabs button {
-    flex: 1;
-    padding: 10px;
-    font-size: 13px;
+    padding: 12px 14px 28px;
   }
 
   .systems-filter-row {
@@ -223,18 +200,19 @@
 
   .systems-actions-row,
   .systems-view-row {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
   }
 
   .systems-cards-grid {
     grid-template-columns: 1fr;
     padding: 14px;
+    gap: 12px;
   }
 
   .systems-board-header {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
   }
 }

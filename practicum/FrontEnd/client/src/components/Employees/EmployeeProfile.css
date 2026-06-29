@@ -253,3 +253,20 @@
     font-size: 28px;
   }
 }
+.employees-profile-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.employees-profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.employees-back-btn {
+  flex: 0 0 auto;
+}

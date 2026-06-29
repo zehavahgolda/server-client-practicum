@@ -1,3 +1,4 @@
+import PageTabs from "../components/PageTabs";
 import { useCategories } from "../hooks/useCategories";
 
 export default function CategoriesPage() {
@@ -19,6 +20,7 @@ export default function CategoriesPage() {
 
   return (
     <main className="app-shell" dir="rtl">
+      <PageTabs />
       <header className="app-header">
         <h1>קטגוריות מקצועיות</h1>
         <p>ניתוח קיבולת וניצול לפי קטגוריה מקצועית</p>

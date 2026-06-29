@@ -43,10 +43,16 @@ export interface SystemFilters {
   status?: string;
   ownerManagerName?: string;
   search?: string;
+  categoryName?: string;
 }
 export interface SystemCreateDto {
   name: string;
   year: number;
   requiredCapacityMonths: number;
   managementNote?: string;
+}
+
+export interface SystemUpdateDto {
+  name: string;
+  requiredCapacityMonths: number;
 }

@@ -1,14 +1,14 @@
 .systems-groups-stack {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 18px;
+  gap: 12px;
+  padding: 14px;
 }
 
 .system-group {
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
 }
 
@@ -17,7 +17,7 @@
   border: none;
   background: var(--surface-bg);
   color: var(--text-primary);
-  padding: 18px 22px;
+  padding: 12px 18px;
   font-family: inherit;
   cursor: pointer;
   display: flex;
@@ -33,12 +33,12 @@
 .system-group-title-wrap {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .system-group-color-line {
-  width: 5px;
-  height: 56px;
+  width: 4px;
+  height: 46px;
   border-radius: 999px;
   background: var(--status-surplus);
 }
@@ -54,30 +54,33 @@
 .system-group.excess .system-group-color-line {
   background: var(--status-surplus);
 }
-
 .system-group-header h3 {
   margin: 0;
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.2px;
 }
 
 .system-group-header p {
   margin: 6px 0 0;
   color: var(--text-secondary);
   font-size: 15px;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .system-group-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .system-group-gap {
   border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 14px;
-  font-weight: 900;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .system-group-gap.shortage {
@@ -104,29 +107,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .system-group-body {
   border-top: 1px solid var(--border-color);
-  padding: 0 0 18px;
+  padding: 0 0 14px;
 }
 
 .system-group-subtitle {
-  margin: 16px 22px 0;
+  margin: 12px 18px 0;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .systems-cards-grid.group-grid {
-  padding-top: 16px;
+  padding-top: 12px;
 }
 
 @media (max-width: 640px) {
   .system-group-header {
     align-items: flex-start;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
   }
 
   .system-group-left {

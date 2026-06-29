@@ -1,4 +1,6 @@
+import type { Dispatch, SetStateAction } from "react";
 import type { EmployeeFilters as EmployeeFiltersType } from "../../types";
+import "./EmployeeFilters.css";
 
 interface EmployeeFiltersProps {
   filters: EmployeeFiltersType;
@@ -7,7 +9,7 @@ interface EmployeeFiltersProps {
   total: number;
   lowCapacity: number;
   overloaded: number;
-  onChangeFilters: React.Dispatch<React.SetStateAction<EmployeeFiltersType>>;
+  onChangeFilters: Dispatch<SetStateAction<EmployeeFiltersType>>;
   onCreateEmployee: () => void;
   onClearFilters: () => void;
 }

@@ -6,6 +6,7 @@ interface SystemProfileProps {
   loading?: boolean;
   onBack: () => void;
   onOpenAssign: () => void;
+  onOpenEdit: () => void;
 }
 
 function getTone(gap: number) {
@@ -24,7 +25,8 @@ export default function SystemProfile({
   system,
   loading = false,
   onBack,
-  onOpenAssign
+  onOpenAssign,
+  onOpenEdit
 }: SystemProfileProps) {
   const tone = getTone(system.gap);
   const firstLetter = system.name?.charAt(0) || "מ";
@@ -56,7 +58,7 @@ export default function SystemProfile({
           חזרה לרשימה
         </button>
 
-        <button type="button" className="primary-btn">
+        <button type="button" className="primary-btn" onClick={onOpenEdit}>
           עריכת מערכת
         </button>
 
