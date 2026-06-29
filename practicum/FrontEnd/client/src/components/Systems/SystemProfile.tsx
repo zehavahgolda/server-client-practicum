@@ -21,6 +21,32 @@ function getStatusLabel(gap: number) {
   return "Balanced";
 }
 
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("he-IL", {
+    style: "currency",
+    currency: "ILS",
+    maximumFractionDigits: 0
+  }).format(value || 0);
+}
+
+function getBudgetUsagePercent(system: SystemDetails) {
+  if (!system.totalBudget || system.totalBudget <= 0) return 0;
+
+  const usedBudget = system.totalActualMonths > 0
+    ? (system.totalActualMonths / Math.max(system.totalPlannedMonths, 1)) * system.totalBudget
+    : 0;
+
+  return Math.min(100, Math.round((usedBudget / system.totalBudget) * 100));
+}
+
+function getUsedBudget(system: SystemDetails) {
+  if (!system.totalBudget || system.totalBudget <= 0) return 0;
+
+  return system.totalActualMonths > 0
+    ? (system.totalActualMonths / Math.max(system.totalPlannedMonths, 1)) * system.totalBudget
+    : 0;
+}
+
 export default function SystemProfile({
   system,
   loading = false,
@@ -31,6 +57,11 @@ export default function SystemProfile({
   const tone = getTone(system.gap);
   const firstLetter = system.name?.charAt(0) || "מ";
 
+  const usedBudget = getUsedBudget(system);
+  const remainingBudget = system.totalBudget - usedBudget;
+  const budgetUsagePercent = getBudgetUsagePercent(system);
+  const budgetTone = remainingBudget < 0 ? "shortage" : "balanced";
+
   return (
     <section className="system-profile-page" dir="rtl">
       <header className="system-profile-header">
@@ -38,7 +69,7 @@ export default function SystemProfile({
           <div className="system-profile-eyebrow">סביבת ניהול מערכת</div>
           <h1>{system.name}</h1>
           <p>
-            מצב: {getStatusLabel(system.gap)} | עובדים משויכים:{" "}
+            מצב: {getStatusLabel(system.gap)} | עובדים משויכים: {" "}
             {system.assignedEmployeesCount}
           </p>
 
@@ -70,6 +101,50 @@ export default function SystemProfile({
       {loading && <div className="system-note-box">טוען פרטי מערכת...</div>}
 
       {system.managementNote && <div className="system-note-box">{system.managementNote}</div>}
+
+      <section className="system-budget-panel">
+        <div className="system-budget-header">
+          <div>
+            <h2>תקציב</h2>
+            <p>תמונת מצב תקציבית למערכת לפי חודשי עבודה ותמחור מוגדר.</p>
+          </div>
+
+          <span className={`system-budget-status ${budgetTone}`}>
+            {remainingBudget < 0 ? "חריגה תקציבית" : "תקציב תקין"}
+          </span>
+        </div>
+
+        <div className="system-budget-kpis">
+          <div className="system-budget-kpi">
+            <span>הוקצה</span>
+            <strong>{formatCurrency(system.totalBudget)}</strong>
+          </div>
+
+          <div className="system-budget-kpi">
+            <span>שימוש בפועל</span>
+            <strong>{formatCurrency(usedBudget)}</strong>
+          </div>
+
+          <div className="system-budget-kpi">
+            <span>{remainingBudget < 0 ? "חריגה" : "יתרה"}</span>
+            <strong className={budgetTone}>{formatCurrency(Math.abs(remainingBudget))}</strong>
+          </div>
+        </div>
+
+        <div className="system-budget-progress">
+          <div className="system-budget-progress-label">
+            <span>ניצול תקציב</span>
+            <strong>{budgetUsagePercent}%</strong>
+          </div>
+
+          <div className="system-budget-track">
+            <div
+              className={`system-budget-fill ${budgetTone}`}
+              style={{ width: `${budgetUsagePercent}%` }}
+            />
+          </div>
+        </div>
+      </section>
 
       <div className="system-profile-kpis">
         <div className="system-profile-kpi">

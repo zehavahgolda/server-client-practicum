@@ -6,13 +6,14 @@ import EmployeeFormModal from "../components/Employees/EmployeeFormModal";
 import AllocationModal from "../components/Employees/AllocationModal";
 import AllocationUpdateModal from "../components/Employees/AllocationUpdateModal";
 import PageTabs from "../components/PageTabs";
+import "./EmployeesPage.css";
 
 export default function EmployeesPage() {
   const page = useEmployeesPage();
 
   return (
     
-    <main className="app-shell" dir="rtl">
+    <main className="employees-page-shell" dir="rtl">
       <PageTabs />
       <header className="app-header">
         <h1>ניהול עובדים</h1>
