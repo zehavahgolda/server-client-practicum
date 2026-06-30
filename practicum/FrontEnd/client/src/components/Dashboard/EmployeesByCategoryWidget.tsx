@@ -6,7 +6,13 @@ import DashboardDonutChart from "./DashboardDonutChart";
 const categoryColors = ["#1f6db3", "#149584", "#7550b9", "#cb6a0b", "#d1495b", "#4f8f5b"];
 
 export default function EmployeesByCategoryWidget() {
-  const { employees } = useEmployees();
+  const { employees } = useEmployees({ year: 2026 });
+  console.log(
+  employees.map(e => ({
+    name: e.fullName,
+    category: e.professionalCategory
+  }))
+);
 
   const employeesByCategory = useMemo(() => {
     const counts = new Map<string, number>();

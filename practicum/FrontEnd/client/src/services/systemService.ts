@@ -5,7 +5,10 @@ function normalizeSystem(item: System): System {
   return {
     ...item,
     name: item.name?.trim() || "ללא שם",
-    capacityStatus: item.capacityStatus?.trim() || "לא מוגדר"
+    capacityStatus: item.capacityStatus?.trim() || "לא מוגדר",
+    allocatedBudget: item.allocatedBudget || 0,
+    usedBudget: item.usedBudget || 0,
+    budgetGap: item.budgetGap || 0
   };
 }
 
@@ -14,6 +17,11 @@ function normalizeSystemDetails(item: SystemDetails): SystemDetails {
     ...normalizeSystem(item),
     assignedEmployees: item.assignedEmployees || [],
     changes: item.changes || [],
+
+    allocatedBudget: item.allocatedBudget || 0,
+    usedBudget: item.usedBudget || 0,
+    budgetGap: item.budgetGap || 0,
+
     totalBudget: item.totalBudget || 0,
     totalPlannedMonths: item.totalPlannedMonths || 0,
     totalActualMonths: item.totalActualMonths || 0,

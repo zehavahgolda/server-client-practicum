@@ -13,7 +13,8 @@ interface Props {
 function buildInitialForm(system: SystemDetails | null): SystemUpdateDto {
   return {
     name: system?.name ?? "",
-    requiredCapacityMonths: system?.requiredCapacityMonths ?? 1
+    requiredCapacityMonths: system?.requiredCapacityMonths ?? 1,
+    allocatedBudget: system?.allocatedBudget ?? 0
   };
 }
 
@@ -49,13 +50,19 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
       return;
     }
 
+    if (form.allocatedBudget < 0) {
+      setError("תקציב מוקצה לא יכול להיות שלילי.");
+      return;
+    }
+
     setSaving(true);
     setError("");
 
     try {
       await systemService.updateSystem(systemId, {
         name,
-        requiredCapacityMonths: form.requiredCapacityMonths
+        requiredCapacityMonths: form.requiredCapacityMonths,
+        allocatedBudget: Number(form.allocatedBudget) || 0
       });
 
       await onUpdated();
@@ -75,7 +82,7 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
         </button>
 
         <h2>עריכת מערכת</h2>
-        <p>מסך נוח לניהול דרישות הקיבולת ומצב הסיכון של מערכת.</p>
+        <p>מסך נוח לניהול דרישות הקיבולת והתקציב של מערכת.</p>
 
         {error && <div className="error-box">{error}</div>}
 
@@ -98,6 +105,21 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
                 setForm((prev) => ({
                   ...prev,
                   requiredCapacityMonths: Number(event.target.value)
+                }))
+              }
+            />
+          </label>
+
+          <label>
+            תקציב מוקצה
+            <input
+              type="number"
+              min={0}
+              value={form.allocatedBudget}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  allocatedBudget: Number(event.target.value)
                 }))
               }
             />

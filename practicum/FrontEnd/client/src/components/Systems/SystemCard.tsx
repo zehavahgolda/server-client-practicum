@@ -19,8 +19,24 @@ function getStatusLabel(system: System) {
   return "Balanced";
 }
 
+function getBudgetTone(system: System) {
+  if (!system.allocatedBudget || system.allocatedBudget <= 0) return "neutral";
+  if (system.budgetGap < 0) return "shortage";
+  return "balanced";
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("he-IL", {
+    style: "currency",
+    currency: "ILS",
+    maximumFractionDigits: 0
+  }).format(value || 0);
+}
+
 export default function SystemCard({ system, selected = false, onClick }: SystemCardProps) {
   const tone = getTone(system);
+  const budgetTone = getBudgetTone(system);
+  const hasBudget = system.allocatedBudget > 0;
 
   return (
     <button
@@ -37,6 +53,20 @@ export default function SystemCard({ system, selected = false, onClick }: System
         <span className={`system-status-pill ${tone}`}>
           {getStatusLabel(system)}
         </span>
+      </div>
+
+      <div className={`system-budget-mini ${budgetTone}`}>
+        {hasBudget ? (
+          <>
+            <span>💰 תקציב: {formatCurrency(system.allocatedBudget)}</span>
+            <span>
+              {system.budgetGap < 0 ? "חריגה" : "יתרה"}:{" "}
+              {formatCurrency(Math.abs(system.budgetGap))}
+            </span>
+          </>
+        ) : (
+          <span>💰 תקציב לא הוגדר</span>
+        )}
       </div>
 
       <div className="system-card-divider" />

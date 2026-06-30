@@ -1,18 +1,66 @@
+import { useEffect, useState } from "react";
 import DashboardChartCard from "./DashboardChartCard";
 import DashboardHorizontalBars from "./DashboardHorizontalBars";
+import { systemService } from "../../services/systemService";
 
-const budgetBySystem = [
-  { label: "ServiceNow", value: 560000, color: "#1f6db3" },
-  { label: "מערכת פנים", value: 504000, color: "#149584" },
-  { label: "GIS ארגוני", value: 392000, color: "#7550b9" },
-  { label: "BI ניהולי", value: 308000, color: "#6c7d13" },
-  { label: "מודול סייבר", value: 280000, color: "#cb6a0b" }
-];
+const chartColors = ["#1f6db3", "#149584", "#7550b9", "#6c7d13", "#cb6a0b", "#b43135", "#4f8f5b"];
+
+interface BudgetBarItem {
+  label: string;
+  value: number;
+  color: string;
+}
 
 export default function BudgetBySystemWidget() {
+  const [budgetBySystem, setBudgetBySystem] = useState<BudgetBarItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadBudgetBySystem() {
+      try {
+        const systems = await systemService.getSystems();
+
+        const items = systems
+          .map((system) => ({
+            label: system.name,
+            value: system.allocatedBudget || 0
+          }))
+          .filter((item) => item.value > 0)
+          .sort((a, b) => b.value - a.value)
+          .map((item, index) => ({
+            ...item,
+            color: chartColors[index % chartColors.length]
+          }));
+
+        if (isMounted) {
+          setBudgetBySystem(items);
+        }
+      } catch (error) {
+        console.error("Failed to load budget by system", error);
+        if (isMounted) setBudgetBySystem([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    void loadBudgetBySystem();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <DashboardChartCard title="חלוקת תקציב לפי מערכת">
-      <DashboardHorizontalBars items={budgetBySystem} />
+      {loading ? (
+        <p className="empty-text">טוען נתונים...</p>
+      ) : budgetBySystem.length === 0 ? (
+        <p className="empty-text">אין נתוני תקציב להצגה.</p>
+      ) : (
+        <DashboardHorizontalBars items={budgetBySystem} />
+      )}
     </DashboardChartCard>
   );
 }

@@ -8,6 +8,10 @@ export interface System {
   capacityStatus: string;
   assignedEmployeesCount: number;
   managementNote?: string;
+
+  allocatedBudget: number;
+  usedBudget: number;
+  budgetGap: number;
 }
 
 export interface SystemAssignedEmployee {
@@ -32,6 +36,10 @@ export interface SystemDetails extends System {
     type?: string;
   }>;
 
+  allocatedBudget: number;
+  usedBudget: number;
+  budgetGap: number;
+
   totalBudget: number;
   totalPlannedMonths: number;
   totalActualMonths: number;
@@ -49,11 +57,12 @@ export interface SystemCreateDto {
   name: string;
   year: number;
   requiredCapacityMonths: number;
+  allocatedBudget: number;
   managementNote?: string;
 }
 
 export interface SystemUpdateDto {
   name: string;
   requiredCapacityMonths: number;
+  allocatedBudget: number;
 }
-ע

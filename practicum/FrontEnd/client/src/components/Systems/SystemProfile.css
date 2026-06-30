@@ -644,10 +644,9 @@
     padding-right: 12px;
   }
 
-  .system-budget-panel {
-    margin-left: 12px;
-    margin-right: 12px;
-  }
+.system-budget-panel {
+  margin: 18px 18px 14px;
+}
 
   .system-profile-kpis {
     grid-template-columns: 1fr;

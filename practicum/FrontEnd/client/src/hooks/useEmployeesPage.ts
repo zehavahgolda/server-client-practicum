@@ -8,6 +8,7 @@ import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
 export function useEmployeesPage() {
   const [searchParams] = useSearchParams();
   const availabilityFilter = searchParams.get("availability");
+  const employeeIdFromUrl = searchParams.get("employeeId");
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   const employeesHook = useEmployees({ year: 2026 });
@@ -29,6 +30,12 @@ export function useEmployeesPage() {
     addAllocation,
     updateActualMonths
   } = employeesHook;
+  useEffect(() => {
+  if (!employeeIdFromUrl) return;
+
+  void loadEmployeeDetails(employeeIdFromUrl);
+}, [employeeIdFromUrl, loadEmployeeDetails]);
+  
 
   const [employeesForFilterOptions, setEmployeesForFilterOptions] = useState<EmployeeListItem[]>([]);
 

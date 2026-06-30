@@ -19,13 +19,6 @@
   box-sizing: border-box;
 }
 
-.dashboard-chart-card-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 800;
-  color: #000000;
-}
-
 .dashboard-chart-card-body {
   min-height: 128px;
   display: flex;

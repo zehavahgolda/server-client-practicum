@@ -14,6 +14,7 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
     name: "",
     year: 2026,
     requiredCapacityMonths: 12,
+    allocatedBudget: 0,
     managementNote: ""
   });
 
@@ -33,6 +34,11 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
       return;
     }
 
+    if (form.allocatedBudget < 0) {
+      setError("תקציב מוקצה לא יכול להיות שלילי.");
+      return;
+    }
+
     setSaving(true);
     setError("");
 
@@ -40,6 +46,7 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
       await systemService.createSystem({
         ...form,
         name: form.name.trim(),
+        allocatedBudget: Number(form.allocatedBudget) || 0,
         managementNote: form.managementNote?.trim() || undefined
       });
 
@@ -60,7 +67,7 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
         </button>
 
         <h2>הוספת מערכת</h2>
-        <p>מסך זריז לניהול דרישות הקיבולת ומצב הסיכון של מערכת.</p>
+        <p>מסך זריז לניהול דרישות הקיבולת והתקציב של מערכת.</p>
 
         {error && <div className="error-box">{error}</div>}
 
@@ -92,6 +99,21 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
                 setForm((p) => ({
                   ...p,
                   requiredCapacityMonths: Number(e.target.value)
+                }))
+              }
+            />
+          </label>
+
+          <label>
+            תקציב מוקצה
+            <input
+              type="number"
+              min={0}
+              value={form.allocatedBudget}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  allocatedBudget: Number(e.target.value)
                 }))
               }
             />

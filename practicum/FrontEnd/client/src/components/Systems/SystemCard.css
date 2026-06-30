@@ -93,6 +93,46 @@
   color: var(--status-success);
 }
 
+
+.system-budget-mini {
+  margin: 10px 0 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  border: 1px solid transparent;
+}
+
+.system-budget-mini span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.system-budget-mini.balanced {
+  background: #eef9f2;
+  border-color: #cce9d5;
+  color: #166534;
+}
+
+.system-budget-mini.shortage {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.system-budget-mini.neutral {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+/* ---------------------------------------- */
+
 .system-card-divider {
   border-top: 1px dashed var(--border-color);
   margin: 11px 0 8px;

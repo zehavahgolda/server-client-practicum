@@ -1,5 +1,7 @@
 import type { SystemDetails } from "../../types";
 import "./SystemProfile.css";
+import { useNavigate } from "react-router-dom";
+
 
 interface SystemProfileProps {
   system: SystemDetails;
@@ -30,21 +32,12 @@ function formatCurrency(value: number) {
 }
 
 function getBudgetUsagePercent(system: SystemDetails) {
-  if (!system.totalBudget || system.totalBudget <= 0) return 0;
+  if (!system.allocatedBudget || system.allocatedBudget <= 0) return 0;
 
-  const usedBudget = system.totalActualMonths > 0
-    ? (system.totalActualMonths / Math.max(system.totalPlannedMonths, 1)) * system.totalBudget
-    : 0;
-
-  return Math.min(100, Math.round((usedBudget / system.totalBudget) * 100));
-}
-
-function getUsedBudget(system: SystemDetails) {
-  if (!system.totalBudget || system.totalBudget <= 0) return 0;
-
-  return system.totalActualMonths > 0
-    ? (system.totalActualMonths / Math.max(system.totalPlannedMonths, 1)) * system.totalBudget
-    : 0;
+  return Math.min(
+    100,
+    Math.round((system.usedBudget / system.allocatedBudget) * 100)
+  );
 }
 
 export default function SystemProfile({
@@ -57,10 +50,9 @@ export default function SystemProfile({
   const tone = getTone(system.gap);
   const firstLetter = system.name?.charAt(0) || "מ";
 
-  const usedBudget = getUsedBudget(system);
-  const remainingBudget = system.totalBudget - usedBudget;
   const budgetUsagePercent = getBudgetUsagePercent(system);
-  const budgetTone = remainingBudget < 0 ? "shortage" : "balanced";
+  const budgetTone = system.budgetGap < 0 ? "shortage" : "balanced";
+  const navigate = useNavigate();
 
   return (
     <section className="system-profile-page" dir="rtl">
@@ -69,7 +61,7 @@ export default function SystemProfile({
           <div className="system-profile-eyebrow">סביבת ניהול מערכת</div>
           <h1>{system.name}</h1>
           <p>
-            מצב: {getStatusLabel(system.gap)} | עובדים משויכים: {" "}
+            מצב: {getStatusLabel(system.gap)} | עובדים משויכים:{" "}
             {system.assignedEmployeesCount}
           </p>
 
@@ -110,24 +102,26 @@ export default function SystemProfile({
           </div>
 
           <span className={`system-budget-status ${budgetTone}`}>
-            {remainingBudget < 0 ? "חריגה תקציבית" : "תקציב תקין"}
+            {system.budgetGap < 0 ? "חריגה תקציבית" : "תקציב תקין"}
           </span>
         </div>
 
         <div className="system-budget-kpis">
           <div className="system-budget-kpi">
             <span>הוקצה</span>
-            <strong>{formatCurrency(system.totalBudget)}</strong>
+            <strong>{formatCurrency(system.allocatedBudget)}</strong>
           </div>
 
           <div className="system-budget-kpi">
             <span>שימוש בפועל</span>
-            <strong>{formatCurrency(usedBudget)}</strong>
+            <strong>{formatCurrency(system.usedBudget)}</strong>
           </div>
 
           <div className="system-budget-kpi">
-            <span>{remainingBudget < 0 ? "חריגה" : "יתרה"}</span>
-            <strong className={budgetTone}>{formatCurrency(Math.abs(remainingBudget))}</strong>
+            <span>{system.budgetGap < 0 ? "חריגה" : "יתרה"}</span>
+            <strong className={budgetTone}>
+              {formatCurrency(Math.abs(system.budgetGap))}
+            </strong>
           </div>
         </div>
 
@@ -188,9 +182,13 @@ export default function SystemProfile({
                     </span>
                   </div>
 
-                  <button type="button" className="small-outline-btn">
-                    פתיחת עובד
-                  </button>
+                <button
+                type="button"
+                className="small-outline-btn"
+                onClick={() => navigate(`/employees?employeeId=${employee.employeeId}`)}
+              >
+                פתיחת עובד
+              </button>
                 </div>
               ))}
             </div>

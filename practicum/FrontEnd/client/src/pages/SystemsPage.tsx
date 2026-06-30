@@ -69,6 +69,7 @@ function getGapGroups(systems: System[]) {
 export default function SystemsPage() {
   const [searchParams] = useSearchParams();
   const riskFilter = searchParams.get("risk");
+  const systemIdFromUrl = searchParams.get("systemId");
 
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [uiStatus, setUiStatus] = useState<UiStatus>("all");
@@ -104,6 +105,11 @@ export default function SystemsPage() {
 
     void loadCategories();
   }, []);
+  useEffect(() => {
+  if (!systemIdFromUrl) return;
+
+  void loadSystemDetails(systemIdFromUrl);
+}, [systemIdFromUrl, loadSystemDetails]);
 
   const visibleSystems = useMemo(() => {
     let result = systems;

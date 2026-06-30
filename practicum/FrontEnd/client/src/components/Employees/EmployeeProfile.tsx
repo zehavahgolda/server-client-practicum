@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import type { EmployeeDetails } from "../../types";
 import "./EmployeeProfile.css";
 
@@ -22,6 +23,7 @@ function getEmployeeInitial(name: string) {
 }
 
 export default function EmployeeProfile({ employee }: Props) {
+  const navigate = useNavigate();
   const tone = getAvailabilityTone(employee);
 
   return (
@@ -107,7 +109,12 @@ export default function EmployeeProfile({ employee }: Props) {
                   <span>{allocation.actualMonths} חודשי עבודה מתוכננים</span>
                 </div>
 
-                <button type="button">פתיחת מערכת</button>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/systems?systemId=${allocation.systemId}`)}
+                >
+                  פתיחת מערכת
+                </button>
               </div>
             ))}
           </div>
