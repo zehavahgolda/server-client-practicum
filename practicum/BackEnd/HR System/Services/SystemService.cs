@@ -25,9 +25,8 @@ namespace HR_System.Services
             _configuration = configuration;
         }
 
-        /// <summary>
+        
         /// שליפת רשימת מערכות עם סינון (שנה, סטטוס, מנהל או חיפוש חופשי).
-        /// </summary>
         public async Task<List<SystemListItemDto>> GetSystemsAsync(
             int? year = null, string? status = null, string? ownerManagerName = null, string? search = null)
         {
@@ -74,9 +73,7 @@ namespace HR_System.Services
                 .ToList();
         }
 
-        /// <summary>
         /// שליפת פרטים מלאים על מערכת אחת, כולל עובדים משויכים וניתוח תקציבי/סטייה.
-        /// </summary>
         public async Task<SystemDetailsDto?> GetSystemByIdAsync(string id)
         {
             var system = await _systemsCollection.Find(s => s.Id == id).FirstOrDefaultAsync();
@@ -84,110 +81,338 @@ namespace HR_System.Services
 
             var employees = await _employeesCollection.Find(_ => true).ToListAsync();
 
-            // איסוף כל ההקצאות ששייכות למערכת זו
-            var allocations = employees.SelectMany(e => (e.Allocations ?? []).Where(a => string.Equals(a.SystemId, id, StringComparison.OrdinalIgnoreCase)));
+            var allocations = employees.SelectMany(e =>
+                (e.Allocations ?? [])
+                .Where(a => string.Equals(a.SystemId, id, StringComparison.OrdinalIgnoreCase)));
 
-            // יצירת רשימת עובדים משויכים עם סטטוס הזמינות שלהם
             var assignedEmployees = employees
-                .SelectMany(e => (e.Allocations ?? []).Where(a => string.Equals(a.SystemId, id, StringComparison.OrdinalIgnoreCase))
-                .Select(a => new { Employee = e, Allocation = a }))
+                .SelectMany(e =>
+                    (e.Allocations ?? [])
+                    .Where(a => string.Equals(a.SystemId, id, StringComparison.OrdinalIgnoreCase))
+                    .Select(a => new { Employee = e, Allocation = a }))
                 .Select(x => new SystemAssignedEmployeeDto(
-                    x.Employee.Id ?? string.Empty, x.Employee.FullName, x.Employee.ProfessionalCategory,
-                    x.Employee.ProfessionalSubCategory, x.Employee.ManagerName, x.Allocation.RoleInSystem,
-                    x.Allocation.PlannedMonths, x.Allocation.ActualMonths, GetEmployeeAvailabilityStatus(x.Employee)))
-                .OrderBy(x => x.FullName).ToList();
+                    x.Employee.Id ?? string.Empty,
+                    x.Employee.FullName,
+                    x.Employee.ProfessionalCategory,
+                    x.Employee.ProfessionalSubCategory,
+                    x.Employee.ManagerName,
+                    x.Allocation.RoleInSystem,
+                    x.Allocation.PlannedMonths,
+                    x.Allocation.ActualMonths,
+                    GetEmployeeAvailabilityStatus(x.Employee)))
+                .OrderBy(x => x.FullName)
+                .ToList();
 
-            // חישובים פיננסיים וסטטיסטיים
             var allocatedMonths = GetAllocatedMonthsBySystemId(employees, id);
             var gap = system.RequiredCapacityMonths - allocatedMonths;
-            var costPerManMonth = _configuration.GetValue<decimal>("BudgetSettings:CostPerManMonth");
-            var budget = (decimal)allocatedMonths * costPerManMonth;
 
-            // חישוב ניתוח סטיות בין תכנון לביצוע בפועל
+            var costPerManMonth = _configuration.GetValue<decimal>("BudgetSettings:CostPerManMonth");
+            var allocatedBudget = system.AllocatedBudget;
+            var usedBudget = (decimal)allocatedMonths * costPerManMonth;
+            var budgetGap = allocatedBudget - usedBudget;
+
             int totalPlanned = allocations.Sum(a => a.PlannedMonths);
             int totalActual = allocatedMonths;
             double variancePercent = 0;
+
             if (totalPlanned > 0)
             {
                 variancePercent = ((double)(totalActual - totalPlanned) / totalPlanned) * 100;
             }
 
             return new SystemDetailsDto(
-                system.Id ?? string.Empty, system.Name, system.RequiredCapacityMonths,
-                allocatedMonths, gap, GetCapacityStatus(gap), GetAssignedEmployeesCount(employees, id),
-                system.ManagementNote, system.UpdatedAt?.ToString("yyyy-MM-dd"), assignedEmployees, [], budget,
-                totalPlanned, totalActual, Math.Round(variancePercent, 2)
+                system.Id ?? string.Empty,
+                system.Name,
+                system.RequiredCapacityMonths,
+                allocatedMonths,
+                gap,
+                GetCapacityStatus(gap),
+                GetAssignedEmployeesCount(employees, id),
+                system.ManagementNote,
+                system.UpdatedAt?.ToString("yyyy-MM-dd"),
+                assignedEmployees,
+                [],
+                allocatedBudget,
+                usedBudget,
+                budgetGap,
+                totalPlanned,
+                totalActual,
+                Math.Round(variancePercent, 2)
             );
         }
 
-        /// ייצוא דוח המערכות לקובץ אקסל.
-    
         public async Task<byte[]> ExportSystemsToExcelAsync(int? year = null, string? status = null)
         {
             var systems = await GetSystemsAsync(year, status);
             var employees = await _employeesCollection.Find(_ => true).ToListAsync();
 
-            using (var workbook = new XLWorkbook())
+            using var workbook = new XLWorkbook();
+
+            // =========================
+            // Sheet 1: Systems Summary
+            // =========================
+            var systemsSheet = workbook.Worksheets.Add("Systems Summary");
+
+            systemsSheet.Cell(1, 1).Value = "System Name";
+            systemsSheet.Cell(1, 2).Value = "Required Capacity";
+            systemsSheet.Cell(1, 3).Value = "Allocated";
+            systemsSheet.Cell(1, 4).Value = "Planned";
+            systemsSheet.Cell(1, 5).Value = "Actual";
+            systemsSheet.Cell(1, 6).Value = "Variance %";
+            systemsSheet.Cell(1, 7).Value = "Status";
+            systemsSheet.Cell(1, 8).Value = "Allocated Budget";
+            systemsSheet.Cell(1, 9).Value = "Used Budget";
+            systemsSheet.Cell(1, 10).Value = "Budget Gap";
+
+            int systemRow = 2;
+
+            foreach (var system in systems)
             {
-                var worksheet = workbook.Worksheets.Add("SystemsReport");
+                var systemId = system.Id;
 
-                // יצירת כותרות הטבלה
-                worksheet.Cell(1, 1).Value = "System Name";
-                worksheet.Cell(1, 2).Value = "Required Capacity";
-                worksheet.Cell(1, 3).Value = "Allocated";
-                worksheet.Cell(1, 4).Value = "Planned";
-                worksheet.Cell(1, 5).Value = "Actual";
-                worksheet.Cell(1, 6).Value = "Variance %";
-                worksheet.Cell(1, 7).Value = "Status";
+                var systemAllocations = employees
+                    .SelectMany(e => e.Allocations ?? [])
+                    .Where(a => string.Equals(a.SystemId, systemId, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
-                // מילוי הנתונים מהמערכות
-                int currentRow = 2;
-                foreach (var system in systems)
-                {
-                    var systemId = system.Id;
-                    var totalPlanned = employees.SelectMany(e => e.Allocations ?? [])
-                                               .Where(a => a.SystemId == systemId)
-                                               .Sum(a => a.PlannedMonths);
+                var totalPlanned = systemAllocations.Sum(a => a.PlannedMonths);
+                var totalActual = system.AllocatedMonths;
 
-                    var totalActual = system.AllocatedMonths;
-                    double variance = totalPlanned > 0 ? ((double)(totalActual - totalPlanned) / totalPlanned) * 100 : 0;
+                double variance = totalPlanned > 0
+                    ? ((double)(totalActual - totalPlanned) / totalPlanned) * 100
+                    : 0;
 
-                    worksheet.Cell(currentRow, 1).Value = system.Name;
-                    worksheet.Cell(currentRow, 2).Value = system.RequiredCapacityMonths;
-                    worksheet.Cell(currentRow, 3).Value = system.AllocatedMonths;
-                    worksheet.Cell(currentRow, 4).Value = totalPlanned;
-                    worksheet.Cell(currentRow, 5).Value = totalActual;
-                    worksheet.Cell(currentRow, 6).Value = Math.Round(variance, 2);
-                    worksheet.Cell(currentRow, 7).Value = system.CapacityStatus;
+                systemsSheet.Cell(systemRow, 1).Value = system.Name;
+                systemsSheet.Cell(systemRow, 2).Value = system.RequiredCapacityMonths;
+                systemsSheet.Cell(systemRow, 3).Value = system.AllocatedMonths;
+                systemsSheet.Cell(systemRow, 4).Value = totalPlanned;
+                systemsSheet.Cell(systemRow, 5).Value = totalActual;
+                systemsSheet.Cell(systemRow, 6).Value = Math.Round(variance, 2);
+                systemsSheet.Cell(systemRow, 7).Value = system.CapacityStatus;
+                systemsSheet.Cell(systemRow, 8).Value = system.AllocatedBudget;
+                systemsSheet.Cell(systemRow, 9).Value = system.UsedBudget;
+                systemsSheet.Cell(systemRow, 10).Value = system.BudgetGap;
 
-                    currentRow++;
-                }
-
-                // הוספת שורת סיכום עם נוסחאות SUM של אקסל
-                worksheet.Cell(currentRow, 1).Value = "TOTAL";
-                worksheet.Cell(currentRow, 2).FormulaA1 = $"SUM(B2:B{currentRow - 1})";
-                worksheet.Cell(currentRow, 3).FormulaA1 = $"SUM(C2:C{currentRow - 1})";
-                worksheet.Cell(currentRow, 4).FormulaA1 = $"SUM(D2:D{currentRow - 1})";
-                worksheet.Cell(currentRow, 5).FormulaA1 = $"SUM(E2:E{currentRow - 1})";
-
-                using (var stream = new MemoryStream())
-                {
-                    workbook.SaveAs(stream);
-                    return stream.ToArray();
-                }
+                systemRow++;
             }
+
+            systemsSheet.Cell(systemRow, 1).Value = "TOTAL";
+            systemsSheet.Cell(systemRow, 2).FormulaA1 = $"SUM(B2:B{systemRow - 1})";
+            systemsSheet.Cell(systemRow, 3).FormulaA1 = $"SUM(C2:C{systemRow - 1})";
+            systemsSheet.Cell(systemRow, 4).FormulaA1 = $"SUM(D2:D{systemRow - 1})";
+            systemsSheet.Cell(systemRow, 5).FormulaA1 = $"SUM(E2:E{systemRow - 1})";
+            systemsSheet.Cell(systemRow, 8).FormulaA1 = $"SUM(H2:H{systemRow - 1})";
+            systemsSheet.Cell(systemRow, 9).FormulaA1 = $"SUM(I2:I{systemRow - 1})";
+            systemsSheet.Cell(systemRow, 10).FormulaA1 = $"SUM(J2:J{systemRow - 1})";
+
+            systemsSheet.Range(1, 1, 1, 10).Style.Font.Bold = true;
+            systemsSheet.Range(1, 1, 1, 10).Style.Fill.BackgroundColor = XLColor.LightGray;
+            systemsSheet.Range(systemRow, 1, systemRow, 10).Style.Font.Bold = true;
+            systemsSheet.Range(systemRow, 1, systemRow, 10).Style.Fill.BackgroundColor = XLColor.LightYellow;
+            systemsSheet.Column(6).Style.NumberFormat.Format = "0.00";
+            systemsSheet.Columns(8, 10).Style.NumberFormat.Format = "#,##0";
+            systemsSheet.Columns().AdjustToContents();
+
+            // =========================
+            // Sheet 2: Employees Summary
+            // =========================
+            var employeesSheet = workbook.Worksheets.Add("Employees Summary");
+
+            employeesSheet.Cell(1, 1).Value = "Employee Name";
+            employeesSheet.Cell(1, 2).Value = "Manager";
+            employeesSheet.Cell(1, 3).Value = "Category";
+            employeesSheet.Cell(1, 4).Value = "Sub Category";
+            employeesSheet.Cell(1, 5).Value = "Yearly Capacity";
+            employeesSheet.Cell(1, 6).Value = "Planned Months";
+            employeesSheet.Cell(1, 7).Value = "Actual Months";
+            employeesSheet.Cell(1, 8).Value = "Remaining Months";
+            employeesSheet.Cell(1, 9).Value = "Assigned Systems";
+            employeesSheet.Cell(1, 10).Value = "Status";
+
+            int employeeRow = 2;
+
+            foreach (var employee in employees.OrderBy(e => e.FullName))
+            {
+                var allocations = employee.Allocations ?? [];
+
+                var plannedMonths = allocations.Sum(a => a.PlannedMonths);
+                var actualMonths = allocations.Sum(a => a.ActualMonths);
+                var remainingMonths = employee.YearlyCapacityMonths - actualMonths;
+                var assignedSystemsCount = allocations
+                    .Select(a => a.SystemId)
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .Distinct()
+                    .Count();
+
+                var employeeStatus =
+                    remainingMonths < 0 ? "Overloaded" :
+                    remainingMonths == 0 ? "Full" :
+                    "Available";
+
+                employeesSheet.Cell(employeeRow, 1).Value = employee.FullName;
+                employeesSheet.Cell(employeeRow, 2).Value = employee.ManagerName;
+                employeesSheet.Cell(employeeRow, 3).Value = employee.ProfessionalCategory;
+                employeesSheet.Cell(employeeRow, 4).Value = employee.ProfessionalSubCategory;
+                employeesSheet.Cell(employeeRow, 5).Value = employee.YearlyCapacityMonths;
+                employeesSheet.Cell(employeeRow, 6).Value = plannedMonths;
+                employeesSheet.Cell(employeeRow, 7).Value = actualMonths;
+                employeesSheet.Cell(employeeRow, 8).Value = remainingMonths;
+                employeesSheet.Cell(employeeRow, 9).Value = assignedSystemsCount;
+                employeesSheet.Cell(employeeRow, 10).Value = employeeStatus;
+
+                employeeRow++;
+            }
+
+            employeesSheet.Cell(employeeRow, 1).Value = "TOTAL";
+            employeesSheet.Cell(employeeRow, 5).FormulaA1 = $"SUM(E2:E{employeeRow - 1})";
+            employeesSheet.Cell(employeeRow, 6).FormulaA1 = $"SUM(F2:F{employeeRow - 1})";
+            employeesSheet.Cell(employeeRow, 7).FormulaA1 = $"SUM(G2:G{employeeRow - 1})";
+            employeesSheet.Cell(employeeRow, 8).FormulaA1 = $"SUM(H2:H{employeeRow - 1})";
+
+            employeesSheet.Range(1, 1, 1, 10).Style.Font.Bold = true;
+            employeesSheet.Range(1, 1, 1, 10).Style.Fill.BackgroundColor = XLColor.LightGray;
+            employeesSheet.Range(employeeRow, 1, employeeRow, 10).Style.Font.Bold = true;
+            employeesSheet.Range(employeeRow, 1, employeeRow, 10).Style.Fill.BackgroundColor = XLColor.LightYellow;
+            employeesSheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            // =========================
+            // Sheet 3: Allocations Matrix
+            // =========================
+            var matrixSheet = workbook.Worksheets.Add("Allocations Matrix");
+
+            var orderedSystems = systems
+                .OrderBy(s => s.Name)
+                .ToList();
+
+            var orderedEmployees = employees
+                .OrderBy(e => e.FullName)
+                .ToList();
+
+            matrixSheet.Cell(1, 1).Value = "Employee";
+
+            for (int i = 0; i < orderedSystems.Count; i++)
+            {
+                matrixSheet.Cell(1, i + 2).Value = orderedSystems[i].Name;
+            }
+
+            int totalColumn = orderedSystems.Count + 2;
+            matrixSheet.Cell(1, totalColumn).Value = "TOTAL";
+
+            int matrixRow = 2;
+
+            foreach (var employee in orderedEmployees)
+            {
+                matrixSheet.Cell(matrixRow, 1).Value = employee.FullName;
+
+                int employeeTotal = 0;
+
+                for (int i = 0; i < orderedSystems.Count; i++)
+                {
+                    var system = orderedSystems[i];
+
+                    var actualMonths = (employee.Allocations ?? [])
+                        .Where(a => string.Equals(a.SystemId, system.Id, StringComparison.OrdinalIgnoreCase))
+                        .Sum(a => a.ActualMonths);
+
+                    if (actualMonths > 0)
+                    {
+                        matrixSheet.Cell(matrixRow, i + 2).Value = actualMonths;
+                    }
+                    else
+                    {
+                        matrixSheet.Cell(matrixRow, i + 2).Value = "";
+                    }
+
+                    employeeTotal += actualMonths;
+                }
+
+                matrixSheet.Cell(matrixRow, totalColumn).Value = employeeTotal;
+                matrixRow++;
+            }
+
+            int totalRow = matrixRow;
+            matrixSheet.Cell(totalRow, 1).Value = "TOTAL";
+
+            for (int col = 2; col <= totalColumn; col++)
+            {
+                matrixSheet.Cell(totalRow, col).FormulaA1 =
+                    $"SUM({matrixSheet.Cell(2, col).Address}:{matrixSheet.Cell(totalRow - 1, col).Address})";
+            }
+
+            matrixSheet.Range(1, 1, 1, totalColumn).Style.Font.Bold = true;
+            matrixSheet.Range(1, 1, 1, totalColumn).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            matrixSheet.Range(totalRow, 1, totalRow, totalColumn).Style.Font.Bold = true;
+            matrixSheet.Range(totalRow, 1, totalRow, totalColumn).Style.Fill.BackgroundColor = XLColor.LightYellow;
+            int budgetAllocatedRow = totalRow + 1;
+            int budgetUsedRow = totalRow + 2;
+            int budgetGapRow = totalRow + 3;
+
+            matrixSheet.Cell(budgetAllocatedRow, 1).Value = "ALLOCATED BUDGET";
+            matrixSheet.Cell(budgetUsedRow, 1).Value = "USED BUDGET";
+            matrixSheet.Cell(budgetGapRow, 1).Value = "BUDGET GAP";
+
+            for (int i = 0; i < orderedSystems.Count; i++)
+            {
+                var system = orderedSystems[i];
+                int col = i + 2;
+
+                matrixSheet.Cell(budgetAllocatedRow, col).Value = system.AllocatedBudget;
+                matrixSheet.Cell(budgetUsedRow, col).Value = system.UsedBudget;
+                matrixSheet.Cell(budgetGapRow, col).Value = system.BudgetGap;
+            }
+
+            matrixSheet.Cell(budgetAllocatedRow, totalColumn).FormulaA1 =
+                $"SUM({matrixSheet.Cell(budgetAllocatedRow, 2).Address}:{matrixSheet.Cell(budgetAllocatedRow, totalColumn - 1).Address})";
+
+            matrixSheet.Cell(budgetUsedRow, totalColumn).FormulaA1 =
+                $"SUM({matrixSheet.Cell(budgetUsedRow, 2).Address}:{matrixSheet.Cell(budgetUsedRow, totalColumn - 1).Address})";
+
+            matrixSheet.Cell(budgetGapRow, totalColumn).FormulaA1 =
+                $"SUM({matrixSheet.Cell(budgetGapRow, 2).Address}:{matrixSheet.Cell(budgetGapRow, totalColumn - 1).Address})";
+
+            matrixSheet.Range(budgetAllocatedRow, 1, budgetGapRow, totalColumn).Style.Font.Bold = true;
+            matrixSheet.Range(budgetAllocatedRow, 1, budgetGapRow, totalColumn).Style.Fill.BackgroundColor = XLColor.FromHtml("#EAF4FF");
+            matrixSheet.Range(budgetAllocatedRow, 2, budgetGapRow, totalColumn).Style.NumberFormat.Format = "#,##0";
+
+            matrixSheet.Column(1).Style.Font.Bold = true;
+            matrixSheet.SheetView.FreezeRows(1);
+            matrixSheet.SheetView.FreezeColumns(1);
+
+            matrixSheet.Columns().AdjustToContents();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
         }
 
         // פונקציות עזר פנימיות
 
         // מיפוי מודל מערכת ל-DTO
-        private static SystemListItemDto MapToListItemDto(SystemModel system, IEnumerable<Employee> employees)
+        private SystemListItemDto MapToListItemDto(SystemModel system, IEnumerable<Employee> employees)
         {
             var systemId = system.Id ?? string.Empty;
             var allocatedMonths = GetAllocatedMonthsBySystemId(employees, systemId);
             var gap = system.RequiredCapacityMonths - allocatedMonths;
-            return new SystemListItemDto(systemId, system.Name, system.Year, system.RequiredCapacityMonths,
-                allocatedMonths, gap, GetCapacityStatus(gap), GetAssignedEmployeesCount(employees, systemId), system.ManagementNote);
+
+            var costPerManMonth = _configuration.GetValue<decimal>("BudgetSettings:CostPerManMonth");
+            var allocatedBudget = system.AllocatedBudget;
+            var usedBudget = (decimal)allocatedMonths * costPerManMonth;
+            var budgetGap = allocatedBudget - usedBudget;
+
+            return new SystemListItemDto(
+                systemId,
+                system.Name,
+                system.Year,
+                system.RequiredCapacityMonths,
+                allocatedMonths,
+                gap,
+                GetCapacityStatus(gap),
+                GetAssignedEmployeesCount(employees, systemId),
+                system.ManagementNote,
+                allocatedBudget,
+                usedBudget,
+                budgetGap
+            );
         }
 
         // סכימת חודשי עבודה בפועל עבור מערכת ספציפית

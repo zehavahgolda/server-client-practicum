@@ -1,14 +1,17 @@
 namespace HR_System.DTOs.Systems
 {
     public record SystemListItemDto(
-        string Id,  //מזהה
-        string Name,//שם מערכת
-        int Year,//שנה
-        int RequiredCapacityMonths,//חודשי עבודה נדרשים למערכת
-        int AllocatedMonths,//חודשי עבודה מוקצים למערכת
-        int Gap,//פער
+        string Id,
+        string Name,
+        int Year,
+        int RequiredCapacityMonths,
+        int AllocatedMonths,
+        int Gap,
         string CapacityStatus,
-        int AssignedEmployeesCount,//עובדים
-        string? ManagementNote//תובנות
+        int AssignedEmployeesCount,
+        string? ManagementNote,
+        decimal AllocatedBudget,
+        decimal UsedBudget,
+        decimal BudgetGap
     );
 }

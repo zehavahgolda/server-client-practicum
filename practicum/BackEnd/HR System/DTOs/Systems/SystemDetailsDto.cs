@@ -12,7 +12,9 @@ public record SystemDetailsDto(
     string? UpdatedAt,
     List<SystemAssignedEmployeeDto> AssignedEmployees,
     List<object> Changes,
-    decimal TotalBudget,
+    decimal AllocatedBudget,
+    decimal UsedBudget,
+    decimal BudgetGap,
     int TotalPlannedMonths,
     int TotalActualMonths,
     double VariancePercent

@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace HR_System.Models
 {
+    [BsonIgnoreExtraElements]
     public class Category
     {
         [BsonId]

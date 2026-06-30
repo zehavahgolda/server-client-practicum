@@ -1327,6 +1327,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "allocatedBudget": {
+            "type": "number",
+            "format": "double"
+          },
           "managementNote": {
             "type": "string",
             "nullable": true
@@ -1388,7 +1392,15 @@
             "items": { },
             "nullable": true
           },
-          "totalBudget": {
+          "allocatedBudget": {
+            "type": "number",
+            "format": "double"
+          },
+          "usedBudget": {
+            "type": "number",
+            "format": "double"
+          },
+          "budgetGap": {
             "type": "number",
             "format": "double"
           },
@@ -1445,6 +1457,18 @@
           "managementNote": {
             "type": "string",
             "nullable": true
+          },
+          "allocatedBudget": {
+            "type": "number",
+            "format": "double"
+          },
+          "usedBudget": {
+            "type": "number",
+            "format": "double"
+          },
+          "budgetGap": {
+            "type": "number",
+            "format": "double"
           }
         },
         "additionalProperties": false

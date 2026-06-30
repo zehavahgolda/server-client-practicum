@@ -294,3 +294,5 @@ C:\Users\eli7p\Desktop\פרקטיקום\server-client-practicum\practicum\BackEn
 C:\Users\eli7p\Desktop\פרקטיקום\server-client-practicum\practicum\BackEnd\HR System\obj\Debug\net9.0\HR System.pdb
 C:\Users\eli7p\Desktop\פרקטיקום\server-client-practicum\practicum\BackEnd\HR System\obj\Debug\net9.0\HR System.genruntimeconfig.cache
 C:\Users\eli7p\Desktop\פרקטיקום\server-client-practicum\practicum\BackEnd\HR System\obj\Debug\net9.0\ref\HR System.dll
+C:\Users\PC\Desktop\practicum\practicum_final\practicum\BackEnd\HR System\bin\Debug\net9.0\AutoMapper.dll
+C:\Users\PC\Desktop\practicum\practicum_final\practicum\BackEnd\HR System\bin\Debug\net9.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

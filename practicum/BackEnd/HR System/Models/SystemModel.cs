@@ -33,5 +33,8 @@ namespace HR_System.Models
 
         [BsonElement("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
+
+        [BsonElement("allocatedBudget")]//תקציב מהמערכת של התקציב
+        public decimal AllocatedBudget { get; set; }
     }
 }

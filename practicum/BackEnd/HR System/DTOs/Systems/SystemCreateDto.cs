@@ -1,4 +1,3 @@
-// DTO used when creating a new system via API.
 namespace HR_System.DTOs.Systems
 {
     public class SystemCreateDto
@@ -7,6 +6,7 @@ namespace HR_System.DTOs.Systems
         public string? OwnerManagerName { get; set; }
         public int Year { get; set; }
         public int RequiredCapacityMonths { get; set; }
+        public decimal AllocatedBudget { get; set; }
         public string? ManagementNote { get; set; }
         public bool IsActive { get; set; } = true;
     }
