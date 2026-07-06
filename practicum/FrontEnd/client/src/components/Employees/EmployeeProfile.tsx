@@ -2,26 +2,31 @@ import { useNavigate } from "react-router-dom";
 import type { EmployeeDetails } from "../../types";
 import "./EmployeeProfile.css";
 
+// מאפייני קומפוננטת פרופיל עובד.
 interface Props {
   employee: EmployeeDetails;
 }
 
+// קובע טון תצוגה לפי יתרת קיבולת העובד.
 function getAvailabilityTone(employee: EmployeeDetails) {
   if (employee.remainingMonths < 0) return "overloaded";
   if (employee.remainingMonths === 0) return "balanced";
   return "available";
 }
 
+// מחזיר תווית סטטוס זמינות קריאה למשתמש.
 function getAvailabilityLabel(employee: EmployeeDetails) {
   if (employee.remainingMonths < 0) return "עומס יתר";
   if (employee.remainingMonths === 0) return "זמינות מלאה";
   return "זמינות תקינה";
 }
 
+// מחלץ אות ראשונה לשימוש באווטאר העובד.
 function getEmployeeInitial(name: string) {
   return name.trim().charAt(0) || "ע";
 }
 
+// מציג מסך פרופיל עובד מלא עם מדדים, שיבוצים ותמונת ניהול.
 export default function EmployeeProfile({ employee }: Props) {
   const navigate = useNavigate();
   const tone = getAvailabilityTone(employee);
@@ -90,6 +95,7 @@ export default function EmployeeProfile({ employee }: Props) {
 
       <section className="employee-profile-content-grid">
         <div className="employee-profile-panel">
+          {/* רשימת שיבוצים פעילים וקישור מהיר למערכת משויכת */}
           <h3>שיבוצים פעילים</h3>
 
           <div className="employee-profile-allocations">
@@ -121,6 +127,7 @@ export default function EmployeeProfile({ employee }: Props) {
         </div>
 
         <aside className="employee-profile-panel manager-panel">
+          {/* אזור בקרה ניהולי עם הערות ותובנה תפעולית */}
           <h3>נקודות בקרה למנהל</h3>
 
           <div className="employee-profile-manager-note">

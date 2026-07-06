@@ -8,10 +8,14 @@ export interface AllocationUpsertPayload {
 }
 
 export const allocationService = {
+  // מוסיפה הקצאה חדשה לעובד במערכת מסוימת.
+  // הפונקציה שולחת את כל נתוני ההקצאה לשרת ונשענת על ה-API לשמירה בפועל.
   async addAllocation(employeeId: string, payload: AllocationUpsertPayload): Promise<void> {
     await httpClient.post(`/Employees/${employeeId}/allocations`, payload);
   },
 
+  // מעדכנת את חודשי הביצוע (actualMonths) של הקצאה קיימת לעובד.
+  // העדכון נשלח כ-query params לפי החוזה של ה-API, ולכן גוף הבקשה נשאר ריק (null).
   async updateAllocationMonths(payload: {
     employeeId: string;
     systemId: string;
@@ -19,11 +23,6 @@ export const allocationService = {
     actualMonths: number;
   }): Promise<void> {
     const { employeeId, systemId, roleInSystem, actualMonths } = payload;
-
-    // כאן ההדפסה שנוכל לראות ב-Console של הדפדפן
-    console.log("--- DEBUG: Attempting to update allocation ---");
-    console.log("Target URL:", `/Employees/${employeeId}/allocation-months`);
-    console.log("Payload Params:", { systemId, roleInSystem, actualMonths });
 
     await httpClient.put(`/Employees/${employeeId}/allocation-months`, null, {
       params: { systemId, roleInSystem, actualMonths }

@@ -3,6 +3,7 @@ import type { System } from "../../types";
 import SystemCard from "./SystemCard";
 import "./SystemGroup.css";
 
+// מאפייני קבוצת מערכות בתצוגה מקובצת.
 interface SystemGroupProps {
   title: string;
   subtitle: string;
@@ -12,17 +13,22 @@ interface SystemGroupProps {
   onSystemClick: (id: string) => void;
 }
 
+// מחשב סך חודשי קיבולת נדרשים בקבוצה.
 function sumRequired(systems: System[]) {
   return systems.reduce((sum, system) => sum + system.requiredCapacityMonths, 0);
 }
 
+// מחשב סך חודשי קיבולת מוקצים בקבוצה.
 function sumAllocated(systems: System[]) {
   return systems.reduce((sum, system) => sum + system.allocatedMonths, 0);
 }
 
+// מחשב פער מצטבר לכלל המערכות בקבוצה.
 function sumGap(systems: System[]) {
   return systems.reduce((sum, system) => sum + system.gap, 0);
 }
+
+// מציג קבוצת מערכות נפתחת עם סיכום ופריטי מערכת.
 export default function SystemGroup({
   title,
   subtitle,
@@ -33,6 +39,7 @@ export default function SystemGroup({
 }: SystemGroupProps) {
   const [open, setOpen] = useState(defaultOpen);
 
+  // נתוני סיכום לקבוצת המערכות בכותרת.
   const required = sumRequired(systems);
   const allocated = sumAllocated(systems);
   const gap = sumGap(systems);

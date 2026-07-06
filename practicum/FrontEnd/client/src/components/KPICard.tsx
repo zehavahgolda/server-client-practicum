@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+// מגדיר את ה-props של כרטיס KPI: כותרת, ערך, סטטוס, אייקון ואירוע לחיצה אופציונלי.
 interface KPICardProps {
   label: string;
   value: number | string;
@@ -8,6 +9,7 @@ interface KPICardProps {
   icon?: ReactNode;
 }
 
+// קומפוננטת כרטיס KPI להצגה מהירה של מדד יחיד עם צבע סטטוס ואפשרות לאינטראקציה.
 export function KPICard({ label, value, status, onClick, icon }: KPICardProps) {
   const statusClass = {
     ok: "kpi-ok",

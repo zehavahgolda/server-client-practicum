@@ -2,10 +2,24 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { changeService } from "../services/changeService";
 import type { Change, Timeline, ChangeFilters } from "../types";
 
+// טיפוס שגיאה מורחב לצורך קריאת קוד סטטוס HTTP כשזמין.
+type HttpError = Error & {
+  status?: number;
+};
+
+// מחזיר את שנת העבודה הפעילה כברירת מחדל לפילטרים.
+function getActiveYear() {
+  return new Date().getFullYear();
+}
+
 const RETRY_INTERVAL_SECONDS = 30;
 
+// Hook לניהול מסך השינויים: רשימה, ציר זמן, טעינה, שגיאות ופילטרים.
 export function useChanges(initialFilters: ChangeFilters = {}) {
-  const [filters, setFilters] = useState<ChangeFilters>(initialFilters);
+  const [filters, setFilters] = useState<ChangeFilters>({
+    ...initialFilters,
+    year: initialFilters.year ?? getActiveYear()
+  });
   const [changes, setChanges] = useState<Change[]>([]);
   const [timeline, setTimeline] = useState<Timeline[]>([]);
   const [loading, setLoading] = useState(false);
@@ -13,6 +27,7 @@ export function useChanges(initialFilters: ChangeFilters = {}) {
   const [endpointAvailable, setEndpointAvailable] = useState(true);
   const [retryInSeconds, setRetryInSeconds] = useState(RETRY_INTERVAL_SECONDS);
 
+  // טוען את רשימת השינויים לפי פילטרים ומטפל בתרחיש endpoint לא זמין.
   const loadChanges = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -23,7 +38,8 @@ export function useChanges(initialFilters: ChangeFilters = {}) {
       setRetryInSeconds(RETRY_INTERVAL_SECONDS);
     } catch (err) {
       const message = err instanceof Error ? err.message : "שגיאה בטעינת שינויים";
-      if (message.includes("404")) {
+      const status = (err as HttpError | null)?.status;
+      if (status === 404 || message.includes("404")) {
         setEndpointAvailable(false);
         setChanges([]);
         setError("פיצ'ר שינויים/Timeline עדיין לא זמין בשרת.");
@@ -35,6 +51,7 @@ export function useChanges(initialFilters: ChangeFilters = {}) {
     }
   }, [filters]);
 
+  // טוען נתוני ציר זמן לשנה הנבחרת כאשר השירות זמין.
   const loadTimeline = useCallback(async () => {
     if (!endpointAvailable) {
       return;
@@ -53,10 +70,12 @@ export function useChanges(initialFilters: ChangeFilters = {}) {
     }
   }, [endpointAvailable, filters.year]);
 
+  // מפעיל טעינה ראשונית של רשימת השינויים.
   useEffect(() => {
     loadChanges();
   }, [loadChanges]);
 
+  // מפעיל retry מחזורי כאשר endpoint לא זמין זמנית.
   useEffect(() => {
     if (endpointAvailable) {
       return;
@@ -79,6 +98,7 @@ export function useChanges(initialFilters: ChangeFilters = {}) {
     };
   }, [endpointAvailable, loadChanges]);
 
+  // מחשב נתוני סיכום לפי סוג שינוי להצגה מהירה ב-UI.
   const meta = useMemo(
     () => ({
       total: changes.length,

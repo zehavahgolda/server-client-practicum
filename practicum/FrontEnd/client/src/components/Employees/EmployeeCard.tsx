@@ -2,24 +2,28 @@ import type { EmployeeListItem } from "../../types";
 import "./EmployeeCard.css";
 import "./EmployeeFilters.css";
 
+// מאפייני כרטיס עובד בודד.
 interface EmployeeCardProps {
   employee: EmployeeListItem;
   selected?: boolean;
   onClick: () => void;
 }
 
+// קובע טון תצוגה לפי יתרת חודשי הקיבולת.
 function getTone(employee: EmployeeListItem) {
   if (employee.remainingMonths < 0) return "overloaded";
   if (employee.remainingMonths === 0) return "balanced";
   return "available";
 }
 
+// מחזיר תווית סטטוס קריאה למשתמש.
 function getStatusLabel(employee: EmployeeListItem) {
   if (employee.remainingMonths < 0) return "עומס יתר";
   if (employee.remainingMonths === 0) return "מלא";
   return "זמין";
 }
 
+// מציג כרטיס עובד עם נתוני קיבולת, סטטוס ופרטים תפעוליים.
 export default function EmployeeCard({
   employee,
   selected = false,

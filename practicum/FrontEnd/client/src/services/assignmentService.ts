@@ -6,6 +6,8 @@ import type {
 } from "../types";
 
 export const assignmentService = {
+  // מחזירה רשימת מועמדים לשיבוץ עבור מערכת מסוימת.
+  // אפשר להעביר שנה וחיפוש טקסטואלי כדי לסנן את התוצאות כבר בצד השרת.
   async getAssignmentCandidates(params: {
     systemId: string;
     year?: number;
@@ -19,6 +21,8 @@ export const assignmentService = {
     return response.data || [];
   },
 
+  // מבצעת שיבוץ מרובה של עובדים למערכת בפעולה אחת.
+  // הפונקציה שולחת DTO מרוכז ומחזירה תוצאה מפורטת מהשרת (הצלחות/כישלונות לפי החוזה).
   async bulkAssignEmployees(dto: BulkAssignEmployeesDto): Promise<BulkAssignEmployeesResult> {
     const response = await httpClient.post<BulkAssignEmployeesResult>(
       "/Employees/bulk-assign",

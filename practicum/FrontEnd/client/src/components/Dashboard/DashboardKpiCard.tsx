@@ -1,7 +1,9 @@
 import "./DashboardKpiCard.css";
 
+// וריאציות צבע/סגנון לכרטיס KPI בהתאם למשמעות המדד.
 type KpiVariant = "default" | "orange" | "blue" | "red";
 
+// מאפייני הכרטיס: כותרת, ערך מרכזי, תיאור וסגנון אופציונלי.
 interface DashboardKpiCardProps {
   title: string;
   value: string;
@@ -9,6 +11,7 @@ interface DashboardKpiCardProps {
   variant?: KpiVariant;
 }
 
+// קומפוננטת כרטיס KPI בודד להצגת מדד תמציתי בדשבורד.
 export default function DashboardKpiCard({
   title,
   value,

@@ -11,6 +11,8 @@ type ApiEmployee = Partial<EmployeeListItem> & {
   year?: number;
 };
 
+// מנרמלת אובייקט עובד שמגיע מה-API למבנה אחיד שה-UI מצפה לו.
+// הפונקציה משלימה שדות חסרים (למשל מזהה, שם, סטטוס וזמינות) עם ערכי ברירת מחדל.
 function normalizeEmployee(item: ApiEmployee): EmployeeListItem {
   const id = item.id || item._id || "";
   const allocatedMonths = item.allocatedMonths ?? item.totalActualMonths ?? 0;
@@ -34,6 +36,8 @@ function normalizeEmployee(item: ApiEmployee): EmployeeListItem {
 }
 
 export const employeeService = {
+  // מחזירה רשימת עובדים לפי פילטרים אופציונליים.
+  // לאחר השליפה, כל עובד עובר נרמול כדי להבטיח מבנה נתונים עקבי בכל המסכים.
   async getEmployees(filters: EmployeeFilters = {}): Promise<EmployeeListItem[]> {
     // חוזרים לנתיב המקורי ללא /api
     const response = await httpClient.get<ApiEmployee[]>("/Employees", {
@@ -42,11 +46,15 @@ export const employeeService = {
     return (response.data || []).map(normalizeEmployee);
   },
 
+  // מחזירה פרטי עובד מלאים לפי מזהה עובד.
+  // מבוצע נרמול לשדה ההקצאות כדי לוודא שתמיד מתקבל מערך תקין.
   async getEmployeeById(id: string): Promise<EmployeeDetails> {
     const response = await httpClient.get<EmployeeDetails>(`/Employees/${id}`);
     return { ...response.data, allocations: response.data.allocations || [] };
   },
 
+  // יוצרת עובד חדש בשרת ומחזירה אותו לאחר נרמול למבנה אחיד בקליינט.
+  // אם השרת מחזיר גוף ריק, מוחזר null כדי שהשכבה הקוראת תטפל בהתאם.
   async createEmployee(payload: EmployeeUpsertPayload): Promise<EmployeeListItem | null> {
     const response = await httpClient.post<ApiEmployee | null>("/Employees", payload);
     if (!response.data) {
@@ -56,6 +64,8 @@ export const employeeService = {
     return normalizeEmployee(response.data);
   },
 
+  // מעדכנת עובד קיים לפי מזהה ומחזירה את הנתון המעודכן לאחר נרמול.
+  // גם כאן null מציין תגובה ריקה מהשרת ודורש טיפול בצד המשתמש בפונקציה.
   async updateEmployee(id: string, payload: EmployeeUpsertPayload): Promise<EmployeeListItem | null> {
     const response = await httpClient.put<ApiEmployee | null>(`/Employees/${id}`, payload);
     if (!response.data) {
@@ -65,6 +75,8 @@ export const employeeService = {
     return normalizeEmployee(response.data);
   },
 
+  // מעדכנת את חודשי הביצוע של הקצאה לעובד ספציפי במערכת ספציפית.
+  // הפרמטרים נשלחים כ-query params בהתאם לחוזה ה-API, עם גוף בקשה ריק.
   async updateAllocationMonths(payload: {
     employeeId: string;
     systemId: string;

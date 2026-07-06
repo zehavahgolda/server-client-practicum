@@ -1,7 +1,9 @@
 import { systemService } from "../../services/systemService";
 import "./DashboardActions.css";
 
+// קומפוננטת פעולות בדשבורד (למשל ייצוא דוח).
 export default function DashboardActions() {
+  // מייצאת את נתוני המערכות לקובץ Excel ומפעילה הורדה בדפדפן.
   async function exportExcel() {
     const file = await systemService.exportToExcel();
 
@@ -19,7 +21,13 @@ export default function DashboardActions() {
     <section className="dashboard-actions">
       <span className="dashboard-actions-title">פעולות</span>
 
-      <button type="button" className="dashboard-actions-button">
+      <button
+        type="button"
+        className="dashboard-actions-button"
+        disabled
+        title="הפעולה תהיה זמינה בהמשך"
+        aria-disabled="true"
+      >
         איפוס תצוגה
       </button>
 

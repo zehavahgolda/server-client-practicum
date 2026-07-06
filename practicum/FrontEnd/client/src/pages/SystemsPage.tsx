@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, useSearchParams } from "react-router-dom";import { useSystems } from "../hooks/useSystems";
+import { useSearchParams } from "react-router-dom";
+import { useSystems } from "../hooks/useSystems";
 import { categoryService } from "../services/categoryService";
 import type { Category, System } from "../types";
 import SystemCard from "../components/Systems/SystemCard";
@@ -15,21 +16,30 @@ import PageTabs from "../components/PageTabs";
 type ViewMode = "all" | "status" | "gap";
 type UiStatus = "all" | "shortage" | "balanced" | "excess";
 
+// מחזיר את השנה הפעילה כברירת מחדל לפילטרים.
+function getActiveYear() {
+  return new Date().getFullYear();
+}
+
+// ממפה מערכת לגוון סטטוס חזותי לפי פער הקיבולת.
 function getSystemTone(system: System): "shortage" | "balanced" | "excess" {
   if (system.gap > 0) return "shortage";
   if (system.gap < 0) return "excess";
   return "balanced";
 }
 
+// מחשב כמה מערכות נמצאות במחסור.
 function getShortageCount(systems: System[]) {
   return systems.filter((system) => system.gap > 0).length;
 }
 
+// מסנן מערכת לפי סטטוס UI נבחר.
 function matchesStatus(system: System, status: UiStatus) {
   if (status === "all") return true;
   return getSystemTone(system) === status;
 }
 
+// מבצע חיפוש טקסטואלי חופשי על שדות רלוונטיים במערכת.
 function matchesSearch(system: System, search: string) {
   const value = search.trim().toLowerCase();
   if (!value) return true;
@@ -50,6 +60,7 @@ function matchesSearch(system: System, search: string) {
   return searchableText.includes(value);
 }
 
+// מקבץ מערכות לפי מצב עסקי (עודף/מאוזן/מחסור).
 function getStatusGroups(systems: System[]) {
   return {
     excess: systems.filter((system) => system.gap < 0),
@@ -58,6 +69,7 @@ function getStatusGroups(systems: System[]) {
   };
 }
 
+// מקבץ מערכות לפי חומרת פער הקיבולת.
 function getGapGroups(systems: System[]) {
   return {
     healthy: systems.filter((system) => system.gap <= 0),
@@ -66,7 +78,11 @@ function getGapGroups(systems: System[]) {
   };
 }
 
+// עמוד מערכות: מצבי תצוגה, פילטרים, פרופיל מערכת וניהול פעולות.
 export default function SystemsPage() {
+  const activeYear = getActiveYear();
+  const yearOptions = [activeYear - 1, activeYear, activeYear + 1];
+
   const [searchParams] = useSearchParams();
   const riskFilter = searchParams.get("risk");
   const systemIdFromUrl = searchParams.get("systemId");
@@ -105,6 +121,8 @@ export default function SystemsPage() {
 
     void loadCategories();
   }, []);
+
+  // טוען מערכת ספציפית אם הועבר מזהה ב-URL.
   useEffect(() => {
   if (!systemIdFromUrl) return;
 
@@ -127,12 +145,14 @@ export default function SystemsPage() {
   const statusGroups = useMemo(() => getStatusGroups(visibleSystems), [visibleSystems]);
   const gapGroups = useMemo(() => getGapGroups(visibleSystems), [visibleSystems]);
 
+  // מאפס את כלל הפילטרים והחיפוש המקומי.
   function clearFilters() {
     setFilters({});
     setUiStatus("all");
     setLocalSearch("");
   }
 
+  // מרענן נתונים לאחר שיוך עובדים למערכת.
   async function refreshAfterAssignment() {
     if (selectedSystem) {
       await loadSystemDetails(selectedSystem.id);
@@ -141,10 +161,12 @@ export default function SystemsPage() {
     await loadSystems();
   }
 
+  // מרענן רשימה לאחר יצירת מערכת חדשה.
   async function refreshAfterCreate() {
     await loadSystems();
   }
 
+  // מרענן פרופיל ורשימה לאחר עדכון מערכת.
   async function refreshAfterEdit() {
     if (!selectedSystem) return;
 
@@ -152,6 +174,7 @@ export default function SystemsPage() {
     await loadSystems();
   }
 
+  // מצב פרופיל: מוצג כאשר נבחרה מערכת ספציפית.
   if (selectedSystem) {
     return (
       <main className="systems-page-shell" dir="rtl">
@@ -170,7 +193,7 @@ export default function SystemsPage() {
         <AssignEmployeesDrawer
           open={assignDrawerOpen}
           system={selectedSystem}
-          year={filters.year ?? 2026}
+          year={filters.year ?? activeYear}
           onClose={() => setAssignDrawerOpen(false)}
           onAssigned={refreshAfterAssignment}
         />
@@ -187,16 +210,14 @@ export default function SystemsPage() {
 
   return (
     <main className="systems-page-shell" dir="rtl">
-    {
-    <PageTabs />
-   }
+      <PageTabs />
 
       <section className="systems-toolbar-card">
         <div className="systems-filter-row">
           <label>
             סינון
             <select
-              value={filters.year ?? 2026}
+                value={filters.year ?? activeYear}
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,
@@ -204,9 +225,9 @@ export default function SystemsPage() {
                 }))
               }
             >
-              <option value={2026}>2026</option>
-              <option value={2025}>2025</option>
-              <option value={2027}>2027</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
             </select>
           </label>
 
@@ -234,6 +255,8 @@ export default function SystemsPage() {
             מנהל
             <select
               value={filters.ownerManagerName ?? ""}
+              disabled
+              title="הסינון יהיה זמין בהמשך"
               onChange={(event) =>
                 setFilters((prev) => ({
                   ...prev,

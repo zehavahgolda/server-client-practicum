@@ -4,6 +4,7 @@ import { employeeService } from "../services/employeeService";
 import { type EmployeeFilters } from "../types/filters";
 import { type EmployeeDetails, type EmployeeListItem, type EmployeeUpsertPayload } from "../types/employee";
 
+// Hook לניהול מסך עובדים: טעינת רשימה/פירוט, יצירה/עדכון והקצאות.
 export function useEmployees(initialFilters: EmployeeFilters = {}) {
   const [filters, setFilters] = useState<EmployeeFilters>(initialFilters);
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
@@ -13,6 +14,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // טוען את רשימת העובדים לפי פילטרים ומעדכן סטייט של טעינה/שגיאה.
   const loadEmployees = useCallback(async () => {
     setLoadingList(true);
     setError(null);
@@ -27,6 +29,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     }
   }, [filters]);
 
+  // טוען פרטי עובד מלאים לפי מזהה לצורך תצוגת פרופיל ופעולות המשך.
   const loadEmployeeDetails = useCallback(async (id: string) => {
     setLoadingDetails(true);
     setError(null);
@@ -41,6 +44,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     }
   }, []);
 
+  // מעדכן חודשי ביצוע להקצאה קיימת ומרענן את נתוני העובד והרשימה.
   const updateActualMonths = useCallback(
     async (systemId: string, roleInSystem: string, actualMonths: number) => {
       if (!selectedEmployee?.id) return;
@@ -62,6 +66,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     [selectedEmployee?.id, loadEmployeeDetails, loadEmployees]
   );
 
+  // מוסיף הקצאה חדשה לעובד הנבחר ולאחר מכן מבצע רענון נתונים עקבי במסך.
   const addAllocation = useCallback(
     async (payload: { systemId: string; roleInSystem: string; plannedMonths: number; actualMonths: number }) => {
       if (!selectedEmployee?.id) return;
@@ -78,6 +83,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     [selectedEmployee?.id, loadEmployeeDetails, loadEmployees]
   );
 
+  // יוצר עובד חדש, מרענן את הרשימה, ואם נוצר מזהה טוען גם את פרטי העובד החדש.
   const createEmployee = useCallback(
     async (payload: EmployeeUpsertPayload) => {
       setLoadingCreate(true);
@@ -99,6 +105,7 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     [loadEmployeeDetails, loadEmployees]
   );
 
+  // מעדכן עובד קיים, מרענן את הרשימה, ואז טוען את פרטי העובד המעודכנים.
   const updateEmployee = useCallback(
     async (id: string, payload: EmployeeUpsertPayload) => {
       setError(null);
@@ -119,10 +126,12 @@ export function useEmployees(initialFilters: EmployeeFilters = {}) {
     [loadEmployeeDetails, loadEmployees]
   );
 
+  // טעינה ראשונית של רשימת עובדים בעת עליית הקומפוננטה או שינוי תלויות.
   useEffect(() => {
     loadEmployees();
   }, [loadEmployees]);
 
+  // מחשב נתוני סיכום על מצב העובדים להצגה מהירה ב-UI.
   const meta = useMemo(
     () => ({
       total: employees.length,

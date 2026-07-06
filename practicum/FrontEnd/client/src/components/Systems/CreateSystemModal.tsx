@@ -1,28 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { systemService } from "../../services/systemService";
 import type { SystemCreateDto } from "../../types";
 import "./CreateSystemModal.css";
 
+// מאפייני מודל יצירת מערכת חדשה.
 interface Props {
   open: boolean;
   onClose: () => void;
   onCreated: () => Promise<void> | void;
 }
 
-export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
-  const [form, setForm] = useState<SystemCreateDto>({
+// מחזיר את שנת העבודה הנוכחית כברירת מחדל.
+function getDefaultYear() {
+  return new Date().getFullYear();
+}
+
+// בונה את ערכי ברירת המחדל לטופס יצירת מערכת.
+function buildInitialForm(): SystemCreateDto {
+  return {
     name: "",
-    year: 2026,
+    year: getDefaultYear(),
     requiredCapacityMonths: 12,
     allocatedBudget: 0,
     managementNote: ""
-  });
+  };
+}
+
+// מודל יצירת מערכת כולל ולידציה בסיסית ושמירה לשרת.
+export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
+  const [form, setForm] = useState<SystemCreateDto>(() => buildInitialForm());
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // מאפס את הטופס בכל פתיחה חדשה של המודל.
+  useEffect(() => {
+    if (open) {
+      setForm(buildInitialForm());
+      setError("");
+      setSaving(false);
+    }
+  }, [open]);
+
   if (!open) return null;
 
+  // מאמת שדות ושומר מערכת חדשה בשרת.
   async function save() {
     if (!form.name.trim()) {
       setError("חובה להזין שם מערכת.");

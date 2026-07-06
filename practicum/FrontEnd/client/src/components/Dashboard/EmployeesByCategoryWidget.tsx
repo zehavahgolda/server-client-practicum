@@ -3,17 +3,14 @@ import { useEmployees } from "../../hooks/useEmployees";
 import DashboardChartCard from "./DashboardChartCard";
 import DashboardDonutChart from "./DashboardDonutChart";
 
+// פלטת צבעים להצגת קטגוריות עובדים בדונאט.
 const categoryColors = ["#1f6db3", "#149584", "#7550b9", "#cb6a0b", "#d1495b", "#4f8f5b"];
 
+// ווידג'ט המציג התפלגות עובדים לפי קטגוריה מקצועית.
 export default function EmployeesByCategoryWidget() {
   const { employees } = useEmployees({ year: 2026 });
-  console.log(
-  employees.map(e => ({
-    name: e.fullName,
-    category: e.professionalCategory
-  }))
-);
 
+  // מחשב ספירה לכל קטגוריה וממיר לפריטים תצוגתיים עם צבעים.
   const employeesByCategory = useMemo(() => {
     const counts = new Map<string, number>();
 

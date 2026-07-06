@@ -1,5 +1,6 @@
 export * from "./employee";
-export * from "./system"; // או הקובץ הרלוונטיexport * from "./kpi";
+export * from "./system";
+export * from "./kpi";
 export * from "./change";
 export * from "./category";
 export * from "./filters";

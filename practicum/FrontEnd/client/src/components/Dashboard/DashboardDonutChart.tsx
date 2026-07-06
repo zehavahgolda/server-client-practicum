@@ -1,26 +1,31 @@
 import "./DashboardDonutChart.css";
 
+// פריט יחיד בדונאט: תווית, ערך וצבע להצגה באגדה ובגרף.
 interface DonutItem {
 	label: string;
 	value: number;
 	color: string;
 }
 
+// מאפייני קומפוננטת הדונאט: פריטים, ערך מרכזי ושורות Footer אופציונליות.
 interface DashboardDonutChartProps {
 	items: DonutItem[];
 	centerValue?: number | string;
 	footerLines?: string[];
 }
 
+// מציגה תרשים דונאט עם אגדה וטקסט מרכזי על בסיס רשימת פריטים.
 export default function DashboardDonutChart({
 	items,
 	centerValue,
 	footerLines
 }: DashboardDonutChartProps) {
+	// מחשב ערך כולל בטוח כדי למנוע חלוקה באפס בעת יצירת הסגמנטים.
 	const total = items.reduce((sum, item) => sum + item.value, 0);
 	const safeTotal = total > 0 ? total : 1;
 	const centerText = centerValue ?? total;
 
+	// בונה את טווחי הצבעים עבור conic-gradient לפי פרופורציות הפריטים.
 	let progress = 0;
 	const segments = items
 		.filter((item) => item.value > 0)
@@ -31,6 +36,7 @@ export default function DashboardDonutChart({
 			return `${item.color} ${start}% ${end}%`;
 		});
 
+	// מגדיר מילוי ברירת מחדל אפור כאשר אין נתונים חיוביים להצגה.
 	const donutFill = segments.length
 		? `conic-gradient(${segments.join(", ")})`
 		: "conic-gradient(#e6e6e6 0% 100%)";

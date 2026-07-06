@@ -1,6 +1,12 @@
 import PageTabs from "../components/PageTabs";
 import { useCategories } from "../hooks/useCategories";
 
+// מחזיר את השנה הפעילה כברירת מחדל לפילטרים.
+function getActiveYear() {
+  return new Date().getFullYear();
+}
+
+// עמוד קטגוריות: רשימה, פרטים ומדדי ניצול לפי תחום מקצועי.
 export default function CategoriesPage() {
   const {
     categories,
@@ -15,7 +21,7 @@ export default function CategoriesPage() {
     loadCategoryDetails,
     meta
   } = useCategories({
-    year: 2026
+    year: getActiveYear()
   });
 
   return (

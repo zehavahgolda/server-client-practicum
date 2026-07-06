@@ -2,8 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { categoryService } from "../services/categoryService";
 import type { Category, CategoryDetails, CategoryFilters } from "../types";
 
+type HttpError = Error & {
+  status?: number;
+};
+
+// זמן ברירת מחדל לניסיון טעינה מחדש כשה-endpoint לא זמין.
 const RETRY_INTERVAL_SECONDS = 30;
 
+// Hook לניהול נתוני קטגוריות: רשימה, פריט נבחר, טעינות, שגיאות ופילטרים.
 export function useCategories(initialFilters: CategoryFilters = {}) {
   const [filters, setFilters] = useState<CategoryFilters>(initialFilters);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -14,6 +20,8 @@ export function useCategories(initialFilters: CategoryFilters = {}) {
   const [endpointAvailable, setEndpointAvailable] = useState(true);
   const [retryInSeconds, setRetryInSeconds] = useState(RETRY_INTERVAL_SECONDS);
 
+  // טוען את רשימת הקטגוריות לפי הפילטרים הנוכחיים ומעדכן סטייט תואם.
+  // במקרה של 404 מסמן שהפיצ'ר אינו זמין ומפעיל מנגנון retry מבוקר.
   const loadCategories = useCallback(async () => {
     setLoadingList(true);
     setError(null);
@@ -24,7 +32,8 @@ export function useCategories(initialFilters: CategoryFilters = {}) {
       setRetryInSeconds(RETRY_INTERVAL_SECONDS);
     } catch (err) {
       const message = err instanceof Error ? err.message : "שגיאה בטעינת קטגוריות";
-      if (message.includes("404")) {
+      const status = (err as HttpError | null)?.status;
+      if (status === 404 || message.includes("404")) {
         setEndpointAvailable(false);
         setCategories([]);
         setError("פיצ'ר קטגוריות עדיין לא זמין בשרת.");
@@ -36,6 +45,8 @@ export function useCategories(initialFilters: CategoryFilters = {}) {
     }
   }, [filters]);
 
+  // טוען פרטי קטגוריה מלאה לפי מזהה עבור תצוגת פירוט.
+  // הפעולה מדולגת אוטומטית אם ידוע שה-endpoint כרגע לא זמין.
   const loadCategoryDetails = useCallback(async (id: string) => {
     if (!endpointAvailable) {
       return;
@@ -54,10 +65,12 @@ export function useCategories(initialFilters: CategoryFilters = {}) {
     }
   }, [endpointAvailable]);
 
+  // מפעיל טעינה ראשונית ובכל שינוי של פונקציית הטעינה (למשל שינוי פילטרים).
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
 
+  // מפעיל ספירה לאחור וניסיון חוזר לטעינה כאשר השירות לא זמין זמנית.
   useEffect(() => {
     if (endpointAvailable) {
       return;
@@ -80,6 +93,7 @@ export function useCategories(initialFilters: CategoryFilters = {}) {
     };
   }, [endpointAvailable, loadCategories]);
 
+  // מחשב נתוני סיכום להצגה מהירה בכרטיסי KPI וברכיבי Header.
   const meta = useMemo(
     () => ({
       total: categories.length,

@@ -5,13 +5,20 @@ import { useSystems } from "./useSystems";
 import { employeeService } from "../services/employeeService";
 import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
 
+function getActiveYear() {
+  return new Date().getFullYear();
+}
+
+// Hook תזמור ברמת עמוד העובדים: חיבור נתונים, פילטרים, מודלים ופעולות משתמש.
 export function useEmployeesPage() {
+  const activeYear = getActiveYear();
+
   const [searchParams] = useSearchParams();
   const availabilityFilter = searchParams.get("availability");
   const employeeIdFromUrl = searchParams.get("employeeId");
   const profileRef = useRef<HTMLDivElement | null>(null);
 
-  const employeesHook = useEmployees({ year: 2026 });
+  const employeesHook = useEmployees({ year: activeYear });
   const { systems } = useSystems();
 
   const {
@@ -30,12 +37,13 @@ export function useEmployeesPage() {
     addAllocation,
     updateActualMonths
   } = employeesHook;
-  useEffect(() => {
-  if (!employeeIdFromUrl) return;
 
-  void loadEmployeeDetails(employeeIdFromUrl);
-}, [employeeIdFromUrl, loadEmployeeDetails]);
-  
+  // אם הגיע מזהה עובד ב-URL, טוען אוטומטית את פרטי העובד לפתיחת פרופיל ישירה.
+  useEffect(() => {
+    if (!employeeIdFromUrl) return;
+
+    void loadEmployeeDetails(employeeIdFromUrl);
+  }, [employeeIdFromUrl, loadEmployeeDetails]);
 
   const [employeesForFilterOptions, setEmployeesForFilterOptions] = useState<EmployeeListItem[]>([]);
 
@@ -48,16 +56,23 @@ export function useEmployeesPage() {
   const [savingAllocation, setSavingAllocation] = useState(false);
   const [savingAllocationUpdate, setSavingAllocationUpdate] = useState(false);
 
+  // טוען רשימת עובדים בסיסית לבניית אפשרויות פילטור (קטגוריות/מנהלים) לפי שנה נבחרת.
   useEffect(() => {
     let cancelled = false;
 
     async function loadFilterOptions() {
-      const data = await employeeService.getEmployees({
-        year: filters.year ?? 2026
-      });
+      try {
+        const data = await employeeService.getEmployees({
+          year: filters.year ?? activeYear
+        });
 
-      if (!cancelled) {
-        setEmployeesForFilterOptions(data);
+        if (!cancelled) {
+          setEmployeesForFilterOptions(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setEmployeesForFilterOptions([]);
+        }
       }
     }
 
@@ -66,8 +81,9 @@ export function useEmployeesPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters.year]);
+  }, [filters.year, activeYear]);
 
+  // מחיל סינון זמינות שמגיע מה-URL על רשימת העובדים הנוכחית.
   const filteredEmployees = useMemo(() => {
     if (availabilityFilter === "overloaded") {
       return employees.filter((employee) => employee.remainingMonths < 0);
@@ -80,6 +96,7 @@ export function useEmployeesPage() {
     return employees;
   }, [employees, availabilityFilter]);
 
+  // מחשב מדדי תצוגה למסך העובדים לאחר סינון.
   const viewMeta = useMemo(
     () => ({
       total: filteredEmployees.length,
@@ -89,6 +106,7 @@ export function useEmployeesPage() {
     [filteredEmployees]
   );
 
+  // מפיק רשימת קטגוריות ייחודיות וממוינות לבחירה בפילטר.
   const categories = useMemo(
     () =>
       [
@@ -101,6 +119,7 @@ export function useEmployeesPage() {
     [employeesForFilterOptions]
   );
 
+  // מפיק רשימת מנהלים ייחודיים וממוינים לבחירה בפילטר.
   const managers = useMemo(
     () =>
       [
@@ -113,6 +132,7 @@ export function useEmployeesPage() {
     [employeesForFilterOptions]
   );
 
+  // יוצר אפשרויות לבחירת הקצאה קיימת של העובד הנבחר לצורך עדכון מהיר.
   const allocationOptions = useMemo(() => {
     if (!selectedEmployee) return [];
 
@@ -124,6 +144,7 @@ export function useEmployeesPage() {
     }));
   }, [selectedEmployee]);
 
+  // מבצע גלילה אוטומטית לאזור הפרופיל כשנבחר עובד.
   useEffect(() => {
     if (!selectedEmployee) return;
 
@@ -135,21 +156,25 @@ export function useEmployeesPage() {
     });
   }, [selectedEmployee?.id]);
 
+  // מאפס את הפילטרים לברירת המחדל של המסך.
   function clearFilters() {
-    setFilters({ year: 2026 });
+    setFilters({ year: activeYear });
   }
 
+  // פותח מודל יצירת עובד חדש.
   function openCreateEmployeeModal() {
     setEmployeeModalMode("create");
     setEmployeeModalOpen(true);
   }
 
+  // פותח מודל עריכת עובד עבור העובד הנבחר.
   function openEditEmployeeModal() {
     if (!selectedEmployee) return;
     setEmployeeModalMode("edit");
     setEmployeeModalOpen(true);
   }
 
+  // שומר עובד: יוצר חדש או מעדכן קיים לפי מצב המודל, עם ניהול דגל שמירה.
   async function handleEmployeeSubmit(payload: EmployeeUpsertPayload) {
     setSavingEmployee(true);
 
@@ -166,6 +191,7 @@ export function useEmployeesPage() {
     }
   }
 
+  // מוסיף הקצאה לעובד הנבחר וסוגר את המודל לאחר הצלחה.
   async function handleAddAllocation(payload: {
     systemId: string;
     roleInSystem: string;
@@ -182,6 +208,7 @@ export function useEmployeesPage() {
     }
   }
 
+  // מעדכן חודשי ביצוע של הקצאה קיימת וסוגר את מודל העדכון לאחר הצלחה.
   async function handleUpdateAllocation(systemId: string, roleInSystem: string, actualMonths: number) {
     setSavingAllocationUpdate(true);
 

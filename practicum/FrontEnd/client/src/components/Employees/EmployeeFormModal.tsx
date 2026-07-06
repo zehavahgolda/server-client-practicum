@@ -4,6 +4,7 @@ import type { EmployeeDetails, EmployeeUpsertPayload } from "../../types";
 
 const MAX_MONTHS = 12;
 
+// מצב הטופס הפנימי ליצירה/עריכה של עובד.
 type EmployeeFormState = {
   fullName: string;
   professionalCategory: string;
@@ -16,6 +17,7 @@ type EmployeeFormState = {
   managerReviewNote: string;
 };
 
+// ערכי ברירת מחדל לטופס יצירת עובד.
 const emptyForm: EmployeeFormState = {
   fullName: "",
   professionalCategory: "",
@@ -28,6 +30,7 @@ const emptyForm: EmployeeFormState = {
   managerReviewNote: ""
 };
 
+// מגביל קלט חודשי עבודה לטווח תקין 0-12.
 function clampMonthsInput(value: string): string {
   if (value === "") return "";
 
@@ -39,6 +42,7 @@ function clampMonthsInput(value: string): string {
   return value;
 }
 
+// מאפייני מודל יצירה/עריכה של עובד.
 interface EmployeeFormModalProps {
   open: boolean;
   mode: "create" | "edit";
@@ -48,6 +52,7 @@ interface EmployeeFormModalProps {
   onSubmit: (payload: EmployeeUpsertPayload) => Promise<void>;
 }
 
+// מודל לניהול יצירה/עריכה של עובד כולל ולידציה ושליחת payload.
 export default function EmployeeFormModal({
   open,
   mode,
@@ -58,6 +63,7 @@ export default function EmployeeFormModal({
 }: EmployeeFormModalProps) {
   const [form, setForm] = useState<EmployeeFormState>(emptyForm);
 
+  // מאתחל את הטופס לפי מצב פתיחה: עריכה קיימת או יצירה חדשה.
   useEffect(() => {
     if (!open) return;
 
@@ -78,6 +84,7 @@ export default function EmployeeFormModal({
     }
   }, [open, mode, employee]);
 
+  // מחשב סך הקצאות מתוכננות לצורך התרעת חריגה בקיבולת בעריכה.
   const plannedAllocationTotal = useMemo(() => {
     if (mode !== "edit" || !employee) return 0;
     return employee.allocations.reduce((sum, allocation) => sum + allocation.plannedMonths, 0);
@@ -88,6 +95,7 @@ export default function EmployeeFormModal({
 
   if (!open) return null;
 
+  // מאמת שדות חובה וטווחים, ואז שולח את העובד לשמירה.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 

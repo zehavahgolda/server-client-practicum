@@ -2,6 +2,7 @@
 import type { EmployeeDetails } from "../../types";
 import EmployeeProfile from "./EmployeeProfile";
 
+// מאפייני מעטפת פרופיל עובד עם פעולות ניהול.
 interface EmployeeProfileSectionProps {
   employee: EmployeeDetails;
   loading: boolean;
@@ -12,6 +13,7 @@ interface EmployeeProfileSectionProps {
   onUpdateAllocation: () => void;
 }
 
+// מעטפת פרופיל העובד: Toolbar פעולות + תצוגת פרטים מלאה.
 export default function EmployeeProfileSection({
   employee,
   loading,

@@ -3,6 +3,7 @@ import type { EmployeeListItem } from "../../types";
 import EmployeeCard from "./EmployeeCard";
 import "./EmployeeGroup.css";
 
+// מאפייני קבוצת עובדים (כותרת, רשימה ובחירה).
 interface Props {
   title: string;
   employees: EmployeeListItem[];
@@ -11,6 +12,7 @@ interface Props {
   onSelectEmployee: (id: string) => void;
 }
 
+// מציג קבוצת עובדים נפתחת עם סיכום מהיר לפי זמינות.
 export default function EmployeeGroup({
   title,
   employees,
@@ -20,6 +22,7 @@ export default function EmployeeGroup({
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
 
+  // מחשב סיכום זמינות עבור כותרת הקבוצה.
   const summary = useMemo(() => {
     const available = employees.filter((e) => e.remainingMonths > 0).length;
     const balanced = employees.filter((e) => e.remainingMonths === 0).length;

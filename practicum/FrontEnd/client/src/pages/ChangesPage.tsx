@@ -1,6 +1,23 @@
 import { useMemo } from "react";
 import { useChanges } from "../hooks/useChanges";
 
+// מחזיר את השנה הפעילה כברירת מחדל לפילטרים.
+function getActiveYear() {
+  return new Date().getFullYear();
+}
+
+// ממיר רמת השפעה למחלקת עיצוב בטוחה מתוך ערכים ידועים.
+function getImpactClass(impact?: string) {
+  const normalized = impact?.trim().toLowerCase();
+
+  if (normalized === "high") return "impact-high";
+  if (normalized === "medium") return "impact-medium";
+  if (normalized === "low") return "impact-low";
+
+  return "impact-low";
+}
+
+// תרגום סוג שינוי לתווית תצוגה ידידותית.
 const changeTypeLabels = {
   allocation: "🔄 הקצאה",
   employee: "👤 עובד",
@@ -9,6 +26,7 @@ const changeTypeLabels = {
   other: "📝 אחר"
 };
 
+// עמוד שינויים: רשימת שינויים, פילטרים וציר זמן מפורט.
 export default function ChangesPage() {
   const {
     changes,
@@ -21,9 +39,10 @@ export default function ChangesPage() {
     setFilters,
     loadTimeline
   } = useChanges({
-    year: 2026
+    year: getActiveYear()
   });
 
+  // סוגי השינויים הזמינים לפילטר נוצרים דינמית מהנתונים.
   const types = useMemo(() => [...new Set(changes.map((c) => c.type))], [changes]);
 
   return (
@@ -94,7 +113,7 @@ export default function ChangesPage() {
                 <h4>{change.title}</h4>
                 <p>{change.description}</p>
                 <div className="change-footer">
-                  <span className={`impact impact-${change.impact?.toLowerCase()}`}>{change.impact}</span>
+                  <span className={`impact ${getImpactClass(change.impact)}`}>{change.impact}</span>
                   {change.relatedEntityName && (
                     <span className="entity">
                       {change.relatedEntityName}

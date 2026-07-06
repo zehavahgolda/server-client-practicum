@@ -2,6 +2,11 @@ import type { Dispatch, SetStateAction } from "react";
 import type { EmployeeFilters as EmployeeFiltersType } from "../../types";
 import "./EmployeeFilters.css";
 
+// שנה נוכחית ואפשרויות סינון סביב השנה הפעילה.
+const currentYear = new Date().getFullYear();
+const yearOptions = [currentYear - 1, currentYear, currentYear + 1];
+
+// מאפייני סרגל הפילטרים והפעולות במסך עובדים.
 interface EmployeeFiltersProps {
   filters: EmployeeFiltersType;
   categories: string[];
@@ -14,6 +19,7 @@ interface EmployeeFiltersProps {
   onClearFilters: () => void;
 }
 
+// סרגל פילטרים, פעולות וסטטיסטיקות להצגת רשימת עובדים.
 export default function EmployeeFilters({
   filters,
   categories,
@@ -39,9 +45,9 @@ export default function EmployeeFilters({
               }))
             }
           >
-            <option value={2026}>2026</option>
-            <option value={2025}>2025</option>
-            <option value={2027}>2027</option>
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </label>
 

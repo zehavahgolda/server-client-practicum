@@ -4,10 +4,12 @@ import type { System } from "../../types";
 import DashboardKpiCard from "./DashboardKpiCard";
 import "./DashboardKpiGrid.css";
 
+// ממיר ערך מספרי לאחוז מעוגל לתצוגה בכרטיסי KPI.
 function toPercent(value: number) {
   return `${Math.round(value)}%`;
 }
 
+// מעצב ערך כספי לפי פורמט מטבע ישראלי להצגה אחידה.
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
@@ -16,6 +18,7 @@ function formatCurrency(value: number) {
   }).format(value || 0);
 }
 
+// גריד KPI מרכזי בדשבורד שמחשב ומציג מדדים מתוך נתוני המערכות.
 export default function DashboardKpiGrid() {
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +26,7 @@ export default function DashboardKpiGrid() {
   useEffect(() => {
     let isMounted = true;
 
+    // טוען את רשימת המערכות ליצירת מדדי KPI ומונע עדכון סטייט אחרי unmount.
     async function loadSystems() {
       try {
         const data = await systemService.getSystems();
@@ -50,6 +54,7 @@ export default function DashboardKpiGrid() {
     };
   }, []);
 
+  // תצוגת ביניים בזמן טעינת נתוני הדשבורד.
   if (loading) {
     return (
       <section className="dashboard-kpi-grid">
@@ -62,6 +67,7 @@ export default function DashboardKpiGrid() {
     );
   }
 
+  // חישוב מדדי תקציב כוללים עבור כלל המערכות.
   const totalAllocatedBudget = systems.reduce(
     (sum, system) => sum + (system.allocatedBudget || 0),
     0
@@ -75,6 +81,7 @@ export default function DashboardKpiGrid() {
   const budgetUsagePercent =
     totalAllocatedBudget > 0 ? (totalUsedBudget / totalAllocatedBudget) * 100 : 0;
 
+  // חישוב מדדי קיבולת לצורך כרטיסי KPI תפעוליים.
   const totalRequiredCapacity = systems.reduce(
     (sum, system) => sum + (system.requiredCapacityMonths || 0),
     0
@@ -90,6 +97,7 @@ export default function DashboardKpiGrid() {
       ? (totalAllocatedCapacity / totalRequiredCapacity) * 100
       : 0;
 
+  // מדדי מצב מערכתיים: חוסר/איזון/חריגות תקציב.
   const totalCapacityGap = systems.reduce(
     (sum, system) => sum + Math.max(system.gap || 0, 0),
     0

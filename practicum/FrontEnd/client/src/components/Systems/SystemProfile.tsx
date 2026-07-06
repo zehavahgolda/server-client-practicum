@@ -3,6 +3,7 @@ import "./SystemProfile.css";
 import { useNavigate } from "react-router-dom";
 
 
+// מאפייני מסך פרופיל מערכת.
 interface SystemProfileProps {
   system: SystemDetails;
   loading?: boolean;
@@ -11,18 +12,21 @@ interface SystemProfileProps {
   onOpenEdit: () => void;
 }
 
+// קובע טון תצוגה לפי פער הקיבולת של המערכת.
 function getTone(gap: number) {
   if (gap > 0) return "shortage";
   if (gap < 0) return "excess";
   return "balanced";
 }
 
+// מחזיר תווית סטטוס לפי פער הקיבולת.
 function getStatusLabel(gap: number) {
   if (gap > 0) return "Shortage";
   if (gap < 0) return "Excess";
   return "Balanced";
 }
 
+// מעצב סכום כספי לפי פורמט מטבע ישראלי.
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
@@ -31,6 +35,7 @@ function formatCurrency(value: number) {
   }).format(value || 0);
 }
 
+// מחשב אחוז ניצול תקציב להצגת פס התקדמות תקציבי.
 function getBudgetUsagePercent(system: SystemDetails) {
   if (!system.allocatedBudget || system.allocatedBudget <= 0) return 0;
 
@@ -40,6 +45,7 @@ function getBudgetUsagePercent(system: SystemDetails) {
   );
 }
 
+// מציג מסך פרופיל מערכת מלא עם תקציב, קיבולת, הקצאות ותובנות ניהול.
 export default function SystemProfile({
   system,
   loading = false,
@@ -164,6 +170,7 @@ export default function SystemProfile({
 
       <div className="system-profile-content">
         <section className="system-profile-panel employees-panel">
+          {/* רשימת עובדים משויכים עם קישור מהיר לפרופיל עובד */}
           <h2>הקצאות עובדים</h2>
 
           {system.assignedEmployees.length === 0 ? (
@@ -196,6 +203,7 @@ export default function SystemProfile({
         </section>
 
         <section className="system-profile-panel insight-panel">
+          {/* אזור תובנות ניהול עם מצב מערכת ושינויים רלוונטיים */}
           <h2>תמונת ניהול</h2>
 
           <div className="system-note-box">

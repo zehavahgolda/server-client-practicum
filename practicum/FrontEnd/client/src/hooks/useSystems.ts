@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { systemService } from "../services/systemService";
 import type { System, SystemDetails, SystemFilters } from "../types";
 
+// מחזירה את שנת העבודה הפעילה כברירת מחדל לפילטרים.
 function getActiveYear() {
   return new Date().getFullYear();
 }
 
+// Hook לניהול נתוני מערכות: רשימה, פריט נבחר, טעינה, שגיאות ופילטרים.
 export function useSystems(initialFilters: SystemFilters = {}) {
   const [filters, setFilters] = useState<SystemFilters>({
     ...initialFilters,
@@ -18,6 +20,7 @@ export function useSystems(initialFilters: SystemFilters = {}) {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // טוען את רשימת המערכות לפי הפילטרים הנוכחיים ומעדכן סטייט תואם.
   const loadSystems = useCallback(async () => {
     setLoadingList(true);
     setError(null);
@@ -33,6 +36,7 @@ export function useSystems(initialFilters: SystemFilters = {}) {
     }
   }, [filters]);
 
+  // טוען פרטי מערכת מלאה לפי מזהה עבור תצוגת פירוט.
   const loadSystemDetails = useCallback(async (id: string) => {
     setLoadingDetails(true);
     setError(null);
@@ -48,10 +52,12 @@ export function useSystems(initialFilters: SystemFilters = {}) {
     }
   }, []);
 
+  // מפעיל טעינה ראשונית ובכל שינוי פילטרים (דרך שינוי loadSystems).
   useEffect(() => {
     void loadSystems();
   }, [loadSystems]);
 
+  // מחשב נתוני סיכום (KPI) על מצב המערכות להצגה מהירה ב-UI.
   const meta = useMemo(
     () => ({
       total: systems.length,

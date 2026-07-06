@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 
 const MAX_MONTHS = 12;
 
+// מגביל קלט חודשי עבודה לטווח תקין 0-12.
 function clampMonthsInput(value: string): string {
   if (value === "") return "";
 
@@ -14,6 +15,7 @@ function clampMonthsInput(value: string): string {
   return value;
 }
 
+// אפשרות בחירה לעדכון הקצאה קיימת.
 export interface AllocationOption {
   key: string;
   systemId: string;
@@ -21,6 +23,7 @@ export interface AllocationOption {
   label: string;
 }
 
+// מאפייני מודל עדכון חודשים בפועל.
 interface AllocationUpdateModalProps {
   open: boolean;
   options: AllocationOption[];
@@ -29,6 +32,7 @@ interface AllocationUpdateModalProps {
   onSubmit: (systemId: string, roleInSystem: string, actualMonths: number) => Promise<void>;
 }
 
+// מודל לעדכון חודשי ביצוע של הקצאה קיימת.
 export default function AllocationUpdateModal({
   open,
   options,
@@ -41,6 +45,7 @@ export default function AllocationUpdateModal({
 
   if (!open) return null;
 
+  // מאמת בחירה וערך חודשים לפני שליחת העדכון.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 

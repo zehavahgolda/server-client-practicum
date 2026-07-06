@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 import "./DashboardChartCard.css";
 
+// מגדיר את מאפייני הכרטיס: כותרת ותוכן פנימי דינמי.
 interface DashboardChartCardProps {
   title: string;
   children: ReactNode;
 }
 
+// מעטפת תצוגה אחידה לכל גרף/ווידג'ט בדשבורד עם Header ו-Body.
 export default function DashboardChartCard({
   title,
   children

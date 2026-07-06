@@ -4,6 +4,7 @@ import type { System } from "../../types";
 
 const MAX_MONTHS = 12;
 
+// מגביל קלט חודשי עבודה לטווח תקין 0-12.
 function clampMonthsInput(value: string): string {
   if (value === "") return "";
 
@@ -15,6 +16,7 @@ function clampMonthsInput(value: string): string {
   return value;
 }
 
+// מאפייני מודל הוספת הקצאה לעובד.
 interface AllocationModalProps {
   open: boolean;
   systems: System[];
@@ -28,6 +30,7 @@ interface AllocationModalProps {
   }) => Promise<void>;
 }
 
+// מודל ליצירת הקצאה חדשה עם ולידציה בסיסית ושמירה.
 export default function AllocationModal({
   open,
   systems,
@@ -44,6 +47,7 @@ export default function AllocationModal({
 
   if (!open) return null;
 
+  // מאמת את הטופס ושולח payload מסודר להוספת ההקצאה.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 

@@ -3,6 +3,7 @@ import { useSystems } from "../../hooks/useSystems";
 import DashboardChartCard from "./DashboardChartCard";
 import DashboardDonutChart from "./DashboardDonutChart";
 
+// מיפוי קבוצות סטטוס עם כינויים אפשריים וצבע תצוגה לכל קבוצה.
 const statusGroups = [
   {
     label: "בעודף",
@@ -21,9 +22,11 @@ const statusGroups = [
   }
 ];
 
+// ווידג'ט המציג התפלגות מערכות לפי סטטוס קיבולת.
 export default function SystemsStatusWidget() {
   const { systems } = useSystems();
 
+  // מחשב כמה מערכות שייכות לכל קבוצת סטטוס לפי הכינויים שהוגדרו.
   const systemsByStatus = useMemo(
     () =>
       statusGroups.map((group) => {

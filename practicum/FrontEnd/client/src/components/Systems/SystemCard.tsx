@@ -1,30 +1,35 @@
 import type { System } from "../../types";
 import "./SystemCard.css";
 
+// מאפייני כרטיס מערכת בודדת.
 interface SystemCardProps {
   system: System;
   selected?: boolean;
   onClick: () => void;
 }
 
+// קובע טון תצוגה לפי פער הקיבולת של המערכת.
 function getTone(system: System) {
   if (system.gap > 0) return "shortage";
   if (system.gap < 0) return "excess";
   return "balanced";
 }
 
+// מחזיר תווית סטטוס אנושית לפי פער הקיבולת.
 function getStatusLabel(system: System) {
   if (system.gap > 0) return "Shortage";
   if (system.gap < 0) return "Excess";
   return "Balanced";
 }
 
+// קובע טון תקציבי לפי מצב התקציב והחריגה.
 function getBudgetTone(system: System) {
   if (!system.allocatedBudget || system.allocatedBudget <= 0) return "neutral";
   if (system.budgetGap < 0) return "shortage";
   return "balanced";
 }
 
+// מעצב סכום כספי לפי פורמט מטבע ישראלי.
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
@@ -33,6 +38,7 @@ function formatCurrency(value: number) {
   }).format(value || 0);
 }
 
+// מציג כרטיס מערכת עם נתוני קיבולת ותקציב תמציתיים.
 export default function SystemCard({ system, selected = false, onClick }: SystemCardProps) {
   const tone = getTone(system);
   const budgetTone = getBudgetTone(system);

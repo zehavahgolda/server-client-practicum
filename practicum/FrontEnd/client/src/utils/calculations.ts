@@ -2,6 +2,7 @@ import type { EmployeeListItem } from "../types/employee";
 import type { System } from "../types/system";
 import type { KPIMetrics } from "../types/kpi";
 
+// מחשבת מדדי KPI מרכזיים לפי נתוני עובדים ומערכות.
 export const calculateKPIs = (employees: EmployeeListItem[], systems: System[]): KPIMetrics => {
   // Systems analysis
   const systemsAtRisk = systems.filter((s) => s.gap > 4).length;
@@ -38,6 +39,7 @@ export const calculateKPIs = (employees: EmployeeListItem[], systems: System[]):
   };
 };
 
+// מחזירה צבע סטטוס לתצוגה לפי ערך הסטטוס.
 export const getStatusColor = (status: string): string => {
   const normalizedStatus = status.trim().toLowerCase();
 
@@ -52,6 +54,7 @@ export const getStatusColor = (status: string): string => {
   return "var(--status-success)";
 };
 
+// ממפה ערך פער לקטגוריית טון: חוסר, עודף או מאוזן.
 export const getGapTone = (gap: number): "shortage" | "surplus" | "balanced" => {
   if (gap > 0) {
     return "shortage";

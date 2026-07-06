@@ -8,7 +8,9 @@ import AllocationUpdateModal from "../components/Employees/AllocationUpdateModal
 import PageTabs from "../components/PageTabs";
 import "./EmployeesPage.css";
 
+// עמוד עובדים: מציג רשימה, פרופיל, פילטרים ומודלים לפעולות ניהול.
 export default function EmployeesPage() {
+  // מרכז את כל הלוגיקה והמצבים של העמוד דרך hook ייעודי.
   const page = useEmployeesPage();
 
   return (
@@ -34,6 +36,7 @@ export default function EmployeesPage() {
 
       {page.error && <div className="error-box">{page.error}</div>}
 
+      {/* פרופיל העובד הנבחר מוצג מעל הרשימה כאשר קיים selectedEmployee */}
       {page.selectedEmployee && (
         <div ref={page.profileRef}>
           <EmployeeProfileSection

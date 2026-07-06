@@ -9,6 +9,7 @@ import SystemsStatusWidget from "../components/Dashboard/SystemsStatusWidget";
 import "./DashboardPage.css";
 import PageTabs from "../components/PageTabs";
 
+// עמוד הדשבורד הראשי: KPI + ווידג'טים גרפיים מרכזיים.
 export default function DashboardPage() {
   return (
     <main className="dashboard-page">

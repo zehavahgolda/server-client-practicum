@@ -8,6 +8,7 @@ import type {
 } from "../../types";
 import "./AssignEmployeesDrawer.css";
 
+// מאפייני המגירה לשיבוץ עובדים למערכת.
 interface AssignEmployeesDrawerProps {
   open: boolean;
   system: SystemDetails | null;
@@ -16,12 +17,15 @@ interface AssignEmployeesDrawerProps {
   onAssigned: () => Promise<void> | void;
 }
 
+// מבנה הנתונים של עובדים שנבחרו לשיבוץ (employeeId -> פרטי שיבוץ).
 type SelectedMap = Record<string, EmployeeAssignmentItem>;
 
+// מחזיר תפקיד ברירת מחדל לשיבוץ לפי נתוני העובד.
 function getDefaultRole(employee: EmployeeAssignmentCandidate) {
   return employee.professionalSubCategory || employee.professionalCategory || "עובד מערכת";
 }
 
+// מגביל חודשי שיבוץ לטווח חוקי בהתאם ליתרת הקיבולת של העובד.
 function clampMonths(value: number, max: number) {
   if (Number.isNaN(value)) return 1;
   if (value < 1) return 1;
@@ -29,6 +33,7 @@ function clampMonths(value: number, max: number) {
   return value;
 }
 
+// מגירת שיבוץ עובדים: טעינה, חיפוש, בחירה ושמירה מרוכזת.
 export default function AssignEmployeesDrawer({
   open,
   system,
@@ -43,6 +48,7 @@ export default function AssignEmployeesDrawer({
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
+  // טוען מועמדים לשיבוץ לפי מערכת/שנה/חיפוש עם debounce קצר.
   useEffect(() => {
     if (!open || !system) return;
     const currentSystem = system;
@@ -65,7 +71,8 @@ export default function AssignEmployeesDrawer({
         }
       } catch (error) {
         if (!cancelled) {
-          setErrors(["שגיאה בטעינת עובדים לשיבוץ."]);
+          const message = error instanceof Error ? error.message : "שגיאה בטעינת עובדים לשיבוץ.";
+          setErrors([message]);
         }
       } finally {
         if (!cancelled) {
@@ -82,6 +89,7 @@ export default function AssignEmployeesDrawer({
     };
   }, [open, system, year, search]);
 
+  // מאפס מצב מקומי בכל סגירה של המגירה.
   useEffect(() => {
     if (!open) {
       setSearch("");
@@ -92,6 +100,7 @@ export default function AssignEmployeesDrawer({
 
   const selectedCount = Object.keys(selected).length;
 
+  // מסנן עובדים מקומית לפי מחרוזת חיפוש.
   const visibleEmployees = useMemo(() => {
     return employees.filter((employee) => {
       const q = search.trim().toLowerCase();
@@ -110,6 +119,7 @@ export default function AssignEmployeesDrawer({
     });
   }, [employees, search]);
 
+  // מוסיף/מסיר עובד מרשימת העובדים שנבחרו לשיבוץ.
   function toggleEmployee(employee: EmployeeAssignmentCandidate) {
     if (!employee.canAssign) return;
 
@@ -132,6 +142,7 @@ export default function AssignEmployeesDrawer({
     });
   }
 
+  // מעדכן חודשי שיבוץ לעובד נבחר תוך שמירה על טווח תקין.
   function updateMonths(employee: EmployeeAssignmentCandidate, months: number) {
     const fixedMonths = clampMonths(months, employee.remainingMonths);
 
@@ -145,6 +156,7 @@ export default function AssignEmployeesDrawer({
     }));
   }
 
+  // שומר את כל הבחירות בפעולה מרוכזת מול השרת.
   async function saveAssignments() {
     if (!system) return;
 
@@ -173,9 +185,9 @@ export default function AssignEmployeesDrawer({
 
       await onAssigned();
       onClose();
-    } catch (error: any) {
-      const serverErrors = error?.response?.data?.errors;
-      setErrors(Array.isArray(serverErrors) ? serverErrors : ["שגיאה בשמירת השיבוץ."]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "שגיאה בשמירת השיבוץ.";
+      setErrors([message]);
     } finally {
       setSaving(false);
     }

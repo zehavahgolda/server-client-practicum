@@ -3,6 +3,7 @@ import { systemService } from "../../services/systemService";
 import type { SystemDetails, SystemUpdateDto } from "../../types";
 import "./EditSystemModal.css";
 
+// מאפייני מודל עריכת מערכת.
 interface Props {
   open: boolean;
   system: SystemDetails | null;
@@ -10,6 +11,7 @@ interface Props {
   onUpdated: () => Promise<void> | void;
 }
 
+// בונה מצב טופס התחלתי לפי המערכת שנבחרה לעריכה.
 function buildInitialForm(system: SystemDetails | null): SystemUpdateDto {
   return {
     name: system?.name ?? "",
@@ -18,11 +20,13 @@ function buildInitialForm(system: SystemDetails | null): SystemUpdateDto {
   };
 }
 
+// מודל עריכת מערכת עם ולידציה ושמירת שינויים.
 export default function EditSystemModal({ open, system, onClose, onUpdated }: Props) {
   const [form, setForm] = useState<SystemUpdateDto>(() => buildInitialForm(system));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // מסנכרן את ערכי הטופס עם המערכת הפעילה בכל פתיחה.
   useEffect(() => {
     if (open) {
       setForm(buildInitialForm(system));
@@ -37,6 +41,7 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
 
   const systemId = currentSystem.id;
 
+  // מאמת קלט ושומר עדכון מערכת בשרת.
   async function save() {
     const name = form.name.trim();
 
