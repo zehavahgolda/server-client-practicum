@@ -33,8 +33,9 @@
 
 .dashboard-donut-legend-label {
   text-align: right;
-  font-size: 17px;
-  color: #263445;
+  font-size: 14px;
+  font-family: "Heebo", sans-serif;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -42,19 +43,21 @@
 
 .dashboard-donut-legend-value {
   text-align: left;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
-  color: #0f172a;
+  font-family: "Heebo", sans-serif;
+  color: var(--text-primary);
   line-height: 1;
 }
 
 .dashboard-donut-footer {
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px dashed #d7dde5;
+  border-top: 1px dashed var(--border-color);
   text-align: right;
-  color: #6a7380;
+  color: var(--text-secondary);
   font-size: 13px;
+  font-family: "Heebo", sans-serif;
   line-height: 1.5;
 }
 
@@ -84,7 +87,7 @@
   width: 92px;
   height: 92px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--surface-bg);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -93,7 +96,8 @@
 .dashboard-donut-center span {
   font-size: 26px;
   font-weight: 900;
-  color: #000;
+  font-family: "Heebo", sans-serif;
+  color: var(--text-primary);
   line-height: 1;
 }
 

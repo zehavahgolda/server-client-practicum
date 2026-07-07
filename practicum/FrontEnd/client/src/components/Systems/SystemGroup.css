@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 14px;
+  padding: 24px 32px;
 }
 
 .system-group {
@@ -123,9 +123,28 @@
 
 .systems-cards-grid.group-grid {
   padding-top: 12px;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+}
+
+@media (max-width: 1280px) {
+  .systems-groups-stack {
+    padding: 22px 26px;
+  }
+}
+
+@media (max-width: 980px) {
+  .systems-groups-stack {
+    padding: 18px 20px;
+  }
 }
 
 @media (max-width: 640px) {
+  .systems-groups-stack {
+    padding: 14px;
+  }
+
   .system-group-header {
     align-items: flex-start;
     flex-direction: column;

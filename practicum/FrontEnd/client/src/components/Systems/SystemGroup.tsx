@@ -11,6 +11,7 @@ interface SystemGroupProps {
   systems: System[];
   defaultOpen?: boolean;
   onSystemClick: (id: string) => void;
+  selectedSystemId?: string | null;
 }
 
 // מחשב סך חודשי קיבולת נדרשים בקבוצה.
@@ -35,7 +36,8 @@ export default function SystemGroup({
   tone,
   systems,
   defaultOpen = false,
-  onSystemClick
+  onSystemClick,
+  selectedSystemId = null
 }: SystemGroupProps) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -82,7 +84,7 @@ export default function SystemGroup({
               <SystemCard
                 key={system.id}
                 system={system}
-                selected={false}
+                selected={selectedSystemId === system.id}
                 onClick={() => onSystemClick(system.id)}
               />
             ))}

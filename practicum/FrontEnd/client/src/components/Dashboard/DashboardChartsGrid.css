@@ -7,3 +7,9 @@
   width: 100%;
   box-sizing: border-box;
 }
+
+@media (max-width: 900px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}

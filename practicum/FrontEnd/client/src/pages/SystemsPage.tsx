@@ -1,9 +1,8 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSystems } from "../hooks/useSystems";
-import { categoryService } from "../services/categoryService";
-import type { Category, System } from "../types";
+import type { System } from "../types";
 import SystemCard from "../components/Systems/SystemCard";
 import SystemProfile from "../components/Systems/SystemProfile";
 import SystemGroup from "../components/Systems/SystemGroup";
@@ -90,10 +89,10 @@ export default function SystemsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [uiStatus, setUiStatus] = useState<UiStatus>("all");
   const [localSearch, setLocalSearch] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
   const [assignDrawerOpen, setAssignDrawerOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   const {
     systems,
@@ -107,20 +106,6 @@ export default function SystemsPage() {
     loadSystemDetails,
     setSelectedSystem
   } = useSystems();
-
-  useEffect(() => {
-    async function loadCategories() {
-      try {
-        const data = await categoryService.getCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error("Failed to load categories", err);
-        setCategories([]);
-      }
-    }
-
-    void loadCategories();
-  }, []);
 
   // טוען מערכת ספציפית אם הועבר מזהה ב-URL.
   useEffect(() => {
@@ -144,6 +129,18 @@ export default function SystemsPage() {
 
   const statusGroups = useMemo(() => getStatusGroups(visibleSystems), [visibleSystems]);
   const gapGroups = useMemo(() => getGapGroups(visibleSystems), [visibleSystems]);
+
+  // מבצע גלילה אוטומטית לאזור פרופיל המערכת הנבחרת.
+  useEffect(() => {
+    if (!selectedSystem) return;
+
+    requestAnimationFrame(() => {
+      profileRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }, [selectedSystem?.id]);
 
   // מאפס את כלל הפילטרים והחיפוש המקומי.
   function clearFilters() {
@@ -174,40 +171,6 @@ export default function SystemsPage() {
     await loadSystems();
   }
 
-  // מצב פרופיל: מוצג כאשר נבחרה מערכת ספציפית.
-  if (selectedSystem) {
-    return (
-      <main className="systems-page-shell" dir="rtl">
-        <SystemProfile
-          system={selectedSystem}
-          loading={loadingDetails}
-          onBack={() => {
-            setEditModalOpen(false);
-            setAssignDrawerOpen(false);
-            setSelectedSystem(null);
-          }}
-          onOpenAssign={() => setAssignDrawerOpen(true)}
-          onOpenEdit={() => setEditModalOpen(true)}
-        />
-
-        <AssignEmployeesDrawer
-          open={assignDrawerOpen}
-          system={selectedSystem}
-          year={filters.year ?? activeYear}
-          onClose={() => setAssignDrawerOpen(false)}
-          onAssigned={refreshAfterAssignment}
-        />
-
-        <EditSystemModal
-          open={editModalOpen}
-          system={selectedSystem}
-          onClose={() => setEditModalOpen(false)}
-          onUpdated={refreshAfterEdit}
-        />
-      </main>
-    );
-  }
-
   return (
     <main className="systems-page-shell" dir="rtl">
       <PageTabs />
@@ -228,26 +191,6 @@ export default function SystemsPage() {
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>{year}</option>
                 ))}
-            </select>
-          </label>
-
-          <label>
-            קטגוריה
-            <select
-              value={filters.categoryName ?? ""}
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  categoryName: event.target.value || undefined
-                }))
-              }
-            >
-              <option value="">כל הקטגוריות</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
             </select>
           </label>
 
@@ -308,32 +251,20 @@ export default function SystemsPage() {
           </button>
         </div>
 
-        <div className="systems-view-row">
-          <span>תצוגה</span>
+        <div className="systems-toolbar-footer">
+          <div className="systems-summary-row">
+            <span className={`employee-stat-pill neutral ${viewMode === "all" ? "active" : ""}`} onClick={() => setViewMode("all")} role="button" tabIndex={0}>
+              כל המערכות
+            </span>
 
-          <button
-            type="button"
-            className={`view-pill ${viewMode === "all" ? "active" : ""}`}
-            onClick={() => setViewMode("all")}
-          >
-            כל המערכות
-          </button>
+            <span className={`employee-stat-pill warning ${viewMode === "status" ? "active" : ""}`} onClick={() => setViewMode("status")} role="button" tabIndex={0}>
+              קיבוץ לפי מצב
+            </span>
 
-          <button
-            type="button"
-            className={`view-pill ${viewMode === "status" ? "active" : ""}`}
-            onClick={() => setViewMode("status")}
-          >
-            קיבוץ לפי מצב
-          </button>
-
-          <button
-            type="button"
-            className={`view-pill ${viewMode === "gap" ? "active" : ""}`}
-            onClick={() => setViewMode("gap")}
-          >
-            קיבוץ לפי פער קיבולת
-          </button>
+            <span className={`employee-stat-pill danger ${viewMode === "gap" ? "active" : ""}`} onClick={() => setViewMode("gap")} role="button" tabIndex={0}>
+              קיבוץ לפי פער קיבולת
+            </span>
+          </div>
         </div>
       </section>
 
@@ -341,6 +272,22 @@ export default function SystemsPage() {
         <h1>מבט מערכות</h1>
         <p>סקירת כל המערכות, קיבוץ לפי מצב עסקי או פער קיבולת, וכניסה לפרופיל מערכת.</p>
       </section>
+
+      {selectedSystem && (
+        <div ref={profileRef} className="systems-profile-board">
+          <SystemProfile
+            system={selectedSystem}
+            loading={loadingDetails}
+            onBack={() => {
+              setEditModalOpen(false);
+              setAssignDrawerOpen(false);
+              setSelectedSystem(null);
+            }}
+            onOpenAssign={() => setAssignDrawerOpen(true)}
+            onOpenEdit={() => setEditModalOpen(true)}
+          />
+        </div>
+      )}
 
       {error && <div className="error-box">{error}</div>}
 
@@ -364,7 +311,7 @@ export default function SystemsPage() {
               <SystemCard
                 key={system.id}
                 system={system}
-                selected={false}
+                selected={selectedSystem?.id === system.id}
                 onClick={() => loadSystemDetails(system.id)}
               />
             ))}
@@ -380,6 +327,7 @@ export default function SystemsPage() {
               systems={statusGroups.excess}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -389,6 +337,7 @@ export default function SystemsPage() {
               systems={statusGroups.balanced}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -398,6 +347,7 @@ export default function SystemsPage() {
               systems={statusGroups.shortage}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
           </div>
         )}
@@ -411,6 +361,7 @@ export default function SystemsPage() {
               systems={gapGroups.healthy}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -420,6 +371,7 @@ export default function SystemsPage() {
               systems={gapGroups.regularShortage}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -429,6 +381,7 @@ export default function SystemsPage() {
               systems={gapGroups.criticalShortage}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
           </div>
         )}
@@ -442,6 +395,21 @@ export default function SystemsPage() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onCreated={refreshAfterCreate}
+      />
+
+      <AssignEmployeesDrawer
+        open={assignDrawerOpen}
+        system={selectedSystem}
+        year={filters.year ?? activeYear}
+        onClose={() => setAssignDrawerOpen(false)}
+        onAssigned={refreshAfterAssignment}
+      />
+
+      <EditSystemModal
+        open={editModalOpen}
+        system={selectedSystem}
+        onClose={() => setEditModalOpen(false)}
+        onUpdated={refreshAfterEdit}
       />
     </main>
   );

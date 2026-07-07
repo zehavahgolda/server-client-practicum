@@ -11,10 +11,12 @@ interface EmployeeFiltersProps {
   filters: EmployeeFiltersType;
   categories: string[];
   managers: string[];
+  viewMode: "all" | "status" | "category";
   total: number;
   lowCapacity: number;
   overloaded: number;
   onChangeFilters: Dispatch<SetStateAction<EmployeeFiltersType>>;
+  onChangeViewMode: (mode: "all" | "status" | "category") => void;
   onCreateEmployee: () => void;
   onClearFilters: () => void;
 }
@@ -24,10 +26,12 @@ export default function EmployeeFilters({
   filters,
   categories,
   managers,
+  viewMode,
   total,
   lowCapacity,
   overloaded,
   onChangeFilters,
+  onChangeViewMode,
   onCreateEmployee,
   onClearFilters
 }: EmployeeFiltersProps) {
@@ -112,18 +116,50 @@ export default function EmployeeFilters({
 
       <div className="employees-toolbar-divider" />
 
-      <div className="employees-actions-row">
-        <span>פעולות</span>
+      <div className="employees-toolbar-footer">
+        <div className="employees-summary-row">
+          <span className="employee-stat-pill neutral">סה״כ: {total}</span>
+          <span className="employee-stat-pill warning">בלחץ: {lowCapacity}</span>
+          <span className="employee-stat-pill danger">עומס יתר: {overloaded}</span>
+        </div>
 
-        <button type="button" className="primary-btn" onClick={onCreateEmployee}>
-          + הוספת עובד
-        </button>
-      </div>
+        <div className="employees-toolbar-right">
+          <div className="employees-view-row toolbar-row">
+            <span>תצוגה</span>
 
-      <div className="employees-stats-row">
-        <span className="employee-stat-pill neutral">סה״כ: {total}</span>
-        <span className="employee-stat-pill warning">בלחץ: {lowCapacity}</span>
-        <span className="employee-stat-pill danger">עומס יתר: {overloaded}</span>
+            <button
+              type="button"
+              className={`view-pill ${viewMode === "all" ? "active" : ""}`}
+              onClick={() => onChangeViewMode("all")}
+            >
+              כל העובדים
+            </button>
+
+            <button
+              type="button"
+              className={`view-pill ${viewMode === "status" ? "active" : ""}`}
+              onClick={() => onChangeViewMode("status")}
+            >
+              קיבוץ לפי זמינות
+            </button>
+
+            <button
+              type="button"
+              className={`view-pill ${viewMode === "category" ? "active" : ""}`}
+              onClick={() => onChangeViewMode("category")}
+            >
+              קיבוץ לפי קטגוריה
+            </button>
+          </div>
+
+          <div className="employees-actions-row toolbar-row">
+            <span>פעולות</span>
+
+            <button type="button" className="primary-btn" onClick={onCreateEmployee}>
+              + הוספת עובד
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );

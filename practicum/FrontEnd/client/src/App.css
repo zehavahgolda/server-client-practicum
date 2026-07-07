@@ -345,6 +345,11 @@ body {
   color: var(--text-primary);
 }
 
+.app-wrapper {
+  min-height: 100vh;
+  background: var(--app-bg);
+}
+
 .app-header {
   background: var(--surface-bg);
   border: 1px solid var(--border-color);

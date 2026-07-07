@@ -5,6 +5,10 @@
   color: var(--text-primary);
 }
 
+.grouped-board {
+  overflow: hidden;
+}
+
 @media (max-width: 1280px) {
   .employees-page-shell {
     padding: 20px 42px 44px;
