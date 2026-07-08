@@ -21,6 +21,22 @@
   flex-shrink: 0;
 }
 
+.dashboard-horizontal-row.is-clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 4px;
+  transition: background 0.15s ease;
+}
+
+.dashboard-horizontal-row.is-clickable:hover {
+  background: var(--surface-alt);
+}
+
+.dashboard-horizontal-row.is-clickable:focus-visible {
+  outline: 2px solid var(--status-surplus);
+  outline-offset: 2px;
+}
+
 .dashboard-horizontal-value {
   font-size: 12px;
   font-weight: 800;

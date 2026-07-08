@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useEmployeesPage } from "../hooks/useEmployeesPage";
 import EmployeeFilters from "../components/Employees/EmployeeFilters";
 import EmployeeBoard from "../components/Employees/EmployeeBoard";
@@ -74,11 +75,35 @@ function getCategoryGroups(employees: ReturnType<typeof getVisibleEmployees>) {
 export default function EmployeesPage() {
   // מרכז את כל הלוגיקה והמצבים של העמוד דרך hook ייעודי.
   const page = useEmployeesPage();
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<EmployeeViewMode>("all");
+
+  useEffect(() => {
+    const requestedView = searchParams.get("view");
+    if (requestedView === "status" || requestedView === "category" || requestedView === "all") {
+      setViewMode(requestedView);
+    }
+
+    const requestedCategory = searchParams.get("professionalCategory")?.trim();
+    if (requestedCategory) {
+      page.setFilters((prev) => ({
+        ...prev,
+        professionalCategory: requestedCategory
+      }));
+    }
+  }, [searchParams, page.setFilters]);
 
   const visibleEmployees = useMemo(() => getVisibleEmployees(page), [page]);
   const statusGroups = useMemo(() => getStatusGroups(visibleEmployees), [visibleEmployees]);
   const categoryGroups = useMemo(() => getCategoryGroups(visibleEmployees), [visibleEmployees]);
+  const employeeSummary = useMemo(
+    () => ({
+      available: page.filteredEmployees.filter((employee) => employee.remainingMonths > 0).length,
+      balanced: page.filteredEmployees.filter((employee) => employee.remainingMonths === 0).length,
+      overloaded: page.filteredEmployees.filter((employee) => employee.remainingMonths < 0).length
+    }),
+    [page.filteredEmployees]
+  );
 
   return (
     
@@ -90,9 +115,9 @@ export default function EmployeesPage() {
         categories={page.categories}
         managers={page.managers}
         viewMode={viewMode}
-        total={page.viewMeta.total}
-        lowCapacity={page.viewMeta.lowCapacity}
-        overloaded={page.viewMeta.overloaded}
+        available={employeeSummary.available}
+        balanced={employeeSummary.balanced}
+        overloaded={employeeSummary.overloaded}
         onChangeFilters={page.setFilters}
         onChangeViewMode={setViewMode}
         onCreateEmployee={page.openCreateEmployeeModal}

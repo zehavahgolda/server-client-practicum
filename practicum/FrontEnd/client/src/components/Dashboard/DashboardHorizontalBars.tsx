@@ -10,11 +10,13 @@ interface BarItem {
 // מאפייני הקומפוננטה להצגת רשימת עמודות אופקיות.
 interface DashboardHorizontalBarsProps {
   items: BarItem[];
+  onItemClick?: (item: BarItem) => void;
 }
 
 // מציגה גרף עמודות אופקי שבו כל רוחב עמודה מחושב ביחס למקסימום.
 export default function DashboardHorizontalBars({
-  items
+  items,
+  onItemClick
 }: DashboardHorizontalBarsProps) {
   // משמש לנרמול רוחב כל עמודה לאחוז יחסי מהערך הגבוה ביותר.
   const maxValue = Math.max(...items.map((item) => item.value), 1);
@@ -22,7 +24,20 @@ export default function DashboardHorizontalBars({
   return (
     <div className="dashboard-horizontal-bars">
       {items.map((item) => (
-        <div className="dashboard-horizontal-row" key={item.label}>
+        <div
+          className={`dashboard-horizontal-row ${onItemClick ? "is-clickable" : ""}`}
+          key={item.label}
+          onClick={() => onItemClick?.(item)}
+          onKeyDown={(event) => {
+            if (!onItemClick) return;
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onItemClick(item);
+            }
+          }}
+          role={onItemClick ? "button" : undefined}
+          tabIndex={onItemClick ? 0 : undefined}
+        >
           <span className="dashboard-horizontal-value">{item.value}</span>
 
           <div className="dashboard-horizontal-track">

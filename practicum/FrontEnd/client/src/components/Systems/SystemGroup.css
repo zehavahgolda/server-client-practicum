@@ -48,11 +48,11 @@
 }
 
 .system-group.balanced .system-group-color-line {
-  background: var(--status-success);
+  background: var(--status-surplus);
 }
 
 .system-group.excess .system-group-color-line {
-  background: var(--status-surplus);
+  background: var(--status-success);
 }
 .system-group-header h3 {
   margin: 0;
@@ -89,13 +89,13 @@
 }
 
 .system-group-gap.balanced {
-  background: var(--status-success-soft);
-  color: var(--status-success);
+  background: var(--status-surplus-soft);
+  color: var(--status-surplus);
 }
 
 .system-group-gap.excess {
-  background: var(--status-surplus-soft);
-  color: var(--status-surplus);
+  background: var(--status-success-soft);
+  color: var(--status-success);
 }
 
 .system-group-toggle {

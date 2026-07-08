@@ -24,6 +24,22 @@
   gap: 10px;
 }
 
+.dashboard-donut-legend-row.is-clickable {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 4px;
+  transition: background 0.15s ease;
+}
+
+.dashboard-donut-legend-row.is-clickable:hover {
+  background: var(--surface-alt);
+}
+
+.dashboard-donut-legend-row.is-clickable:focus-visible {
+  outline: 2px solid var(--status-surplus);
+  outline-offset: 2px;
+}
+
 .dashboard-donut-legend-dot {
   width: 10px;
   height: 10px;

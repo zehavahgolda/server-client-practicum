@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { systemService } from "../../services/systemService";
 import type { System } from "../../types";
 import DashboardKpiCard from "./DashboardKpiCard";
@@ -20,6 +21,7 @@ function formatCurrency(value: number) {
 
 // גריד KPI מרכזי בדשבורד שמחשב ומציג מדדים מתוך נתוני המערכות.
 export default function DashboardKpiGrid() {
+  const navigate = useNavigate();
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +64,7 @@ export default function DashboardKpiGrid() {
           title="טוען..."
           value="..."
           description="מחשב נתוני דשבורד"
+          onClick={() => navigate("/systems")}
         />
       </section>
     );
@@ -123,12 +126,14 @@ export default function DashboardKpiGrid() {
         )}
         description={`${balancedOrExcessCount} מאוזנות/עודף מתוך ${systems.length}`}
         variant="blue"
+        onClick={() => navigate("/systems?view=status")}
       />
 
       <DashboardKpiCard
         title="ניצול קיבולת"
         value={toPercent(capacityUsagePercent)}
         description={`${totalAllocatedCapacity} מתוך ${totalRequiredCapacity}`}
+        onClick={() => navigate("/employees?availability=low")}
       />
 
       <DashboardKpiCard
@@ -136,6 +141,7 @@ export default function DashboardKpiGrid() {
         value={String(totalCapacityGap)}
         description="חודשי עבודה חסרים"
         variant={totalCapacityGap > 0 ? "red" : "default"}
+        onClick={() => navigate("/employees?availability=overloaded")}
       />
 
       <DashboardKpiCard

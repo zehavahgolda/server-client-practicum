@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardChartCard from "./DashboardChartCard";
 import DashboardHorizontalBars from "./DashboardHorizontalBars";
 import { systemService } from "../../services/systemService";
@@ -15,6 +16,7 @@ interface WorkforceBarItem {
 
 // ווידג'ט המציג ביקוש כוח עבודה לפי מערכת בגרף עמודות אופקי.
 export default function WorkforceBySystemWidget() {
+  const navigate = useNavigate();
   const [workforceBySystem, setWorkforceBySystem] = useState<WorkforceBarItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,13 +59,21 @@ export default function WorkforceBySystemWidget() {
   }, []);
 
   return (
-    <DashboardChartCard title="ביקוש כוח עבודה לפי מערכת">
+    <DashboardChartCard
+      title="ביקוש כוח עבודה לפי מערכת"
+      onClick={() => navigate("/systems?view=gap")}
+    >
       {loading ? (
         <p className="empty-text">טוען נתונים...</p>
       ) : workforceBySystem.length === 0 ? (
         <p className="empty-text">אין נתוני ביקוש להצגה.</p>
       ) : (
-        <DashboardHorizontalBars items={workforceBySystem} />
+        <DashboardHorizontalBars
+          items={workforceBySystem}
+          onItemClick={(item) =>
+            navigate(`/systems?view=gap&search=${encodeURIComponent(item.label)}`)
+          }
+        />
       )}
     </DashboardChartCard>
   );

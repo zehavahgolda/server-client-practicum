@@ -9,6 +9,7 @@ interface DashboardKpiCardProps {
   value: string;
   description: string;
   variant?: KpiVariant;
+  onClick?: () => void;
 }
 
 // קומפוננטת כרטיס KPI בודד להצגת מדד תמציתי בדשבורד.
@@ -16,10 +17,23 @@ export default function DashboardKpiCard({
   title,
   value,
   description,
-  variant = "default"
+  variant = "default",
+  onClick
 }: DashboardKpiCardProps) {
   return (
-    <article className={`dashboard-kpi-card dashboard-kpi-card--${variant}`}>
+    <article
+      className={`dashboard-kpi-card dashboard-kpi-card--${variant} ${onClick ? "is-clickable" : ""}`}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (!onClick) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <h3>{title}</h3>
       <strong>{value}</strong>
       <p>{description}</p>

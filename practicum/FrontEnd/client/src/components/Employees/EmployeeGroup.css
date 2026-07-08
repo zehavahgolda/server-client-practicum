@@ -1,3 +1,10 @@
+.employees-groups-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 32px;
+}
+
 .employee-group {
     background: var(--surface-bg);
     border: 1px solid var(--border-color);
@@ -27,6 +34,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 }
 
 .employee-group-color-line {
@@ -56,7 +64,15 @@
     letter-spacing: -0.2px;
 }
 
+.employee-group-title-wrap p {
+    margin: 3px 0 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.2;
+}
+
 .employee-group-header span {
+    display: block;
     margin: 4px 0 0;
     color: var(--text-secondary);
     font-size: 12px;
@@ -147,17 +163,25 @@
 
 .employee-group-grid .employees-cards-grid {
     padding: 0;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 12px;
 }
 
 @media (max-width: 980px) {
+    .employees-groups-stack {
+        padding: 18px 20px;
+    }
+
     .employee-group-grid .employees-cards-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 }
 
 @media (max-width: 640px) {
+    .employees-groups-stack {
+        padding: 14px;
+    }
+
     .employee-group-header {
         align-items: flex-start;
         flex-direction: column;
