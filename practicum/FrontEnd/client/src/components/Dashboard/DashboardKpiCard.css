@@ -8,6 +8,16 @@
   box-sizing: border-box;
 }
 
+.dashboard-kpi-card--interactive {
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dashboard-kpi-card--interactive:hover {
+  box-shadow: 0 4px 14px rgba(31, 112, 193, 0.12);
+}
+
 .dashboard-kpi-card h3 {
   margin: 0 0 4px;
   font-size: 13px;

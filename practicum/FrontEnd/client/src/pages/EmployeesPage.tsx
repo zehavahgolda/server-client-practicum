@@ -38,17 +38,15 @@ export default function EmployeesPage() {
 
       {/* פרופיל העובד הנבחר מוצג מעל הרשימה כאשר קיים selectedEmployee */}
       {page.selectedEmployee && (
-        <div ref={page.profileRef}>
-          <EmployeeProfileSection
-            employee={page.selectedEmployee}
-            loading={page.loadingDetails}
-            allocationOptionsCount={page.allocationOptions.length}
-            onClose={() => page.setSelectedEmployee(null)}
-            onEdit={page.openEditEmployeeModal}
-            onAddAllocation={() => page.setAllocationModalOpen(true)}
-            onUpdateAllocation={() => page.setAllocationUpdateModalOpen(true)}
-          />
-        </div>
+        <EmployeeProfileSection
+          employee={page.selectedEmployee}
+          loading={page.loadingDetails}
+          allocationOptionsCount={page.allocationOptions.length}
+          onClose={() => page.setSelectedEmployee(null)}
+          onEdit={page.openEditEmployeeModal}
+          onAddAllocation={() => page.setAllocationModalOpen(true)}
+          onUpdateAllocation={() => page.setAllocationUpdateModalOpen(true)}
+        />
       )}
 
       <EmployeeBoard

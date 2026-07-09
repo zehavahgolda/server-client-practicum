@@ -1,4 +1,11 @@
 import httpClient from "./api/httpClient";
+import { normalizeMonthValue } from "../utils/months";
+
+// ממיר ערך חודשים למחרוזת query בפורמט עשרוני סטנדרטי ל-API.
+function toMonthQueryParam(value: number): string {
+  const normalizedValue = normalizeMonthValue(value);
+  return String(normalizedValue);
+}
 
 export interface AllocationUpsertPayload {
   systemId: string;
@@ -11,7 +18,11 @@ export const allocationService = {
   // מוסיפה הקצאה חדשה לעובד במערכת מסוימת.
   // הפונקציה שולחת את כל נתוני ההקצאה לשרת ונשענת על ה-API לשמירה בפועל.
   async addAllocation(employeeId: string, payload: AllocationUpsertPayload): Promise<void> {
-    await httpClient.post(`/Employees/${employeeId}/allocations`, payload);
+    await httpClient.post(`/Employees/${employeeId}/allocations`, {
+      ...payload,
+      plannedMonths: normalizeMonthValue(payload.plannedMonths),
+      actualMonths: normalizeMonthValue(payload.actualMonths)
+    });
   },
 
   // מעדכנת את חודשי הביצוע (actualMonths) של הקצאה קיימת לעובד.
@@ -25,7 +36,11 @@ export const allocationService = {
     const { employeeId, systemId, roleInSystem, actualMonths } = payload;
 
     await httpClient.put(`/Employees/${employeeId}/allocation-months`, null, {
-      params: { systemId, roleInSystem, actualMonths }
+      params: {
+        systemId,
+        roleInSystem,
+        actualMonths: toMonthQueryParam(actualMonths)
+      }
     });
   }
 };

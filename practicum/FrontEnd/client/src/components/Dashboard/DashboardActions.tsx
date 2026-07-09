@@ -19,9 +19,9 @@ export default function DashboardActions() {
 
   return (
     <section className="dashboard-actions">
-      <span className="dashboard-actions-title">פעולות</span>
+      {/* <span className="dashboard-actions-title">פעולות</span> */}
 
-      <button
+      {/* <button
         type="button"
         className="dashboard-actions-button"
         disabled
@@ -29,7 +29,7 @@ export default function DashboardActions() {
         aria-disabled="true"
       >
         איפוס תצוגה
-      </button>
+      </button> */}
 
       <button type="button" className="dashboard-actions-button primary" onClick={exportExcel}>
         ייצוא לאקסל

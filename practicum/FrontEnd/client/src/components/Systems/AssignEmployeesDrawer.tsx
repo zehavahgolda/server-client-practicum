@@ -7,6 +7,7 @@ import type {
   SystemDetails
 } from "../../types";
 import "./AssignEmployeesDrawer.css";
+import { normalizeMonthValue } from "../../utils/months";
 
 // מאפייני המגירה לשיבוץ עובדים למערכת.
 interface AssignEmployeesDrawerProps {
@@ -27,10 +28,7 @@ function getDefaultRole(employee: EmployeeAssignmentCandidate) {
 
 // מגביל חודשי שיבוץ לטווח חוקי בהתאם ליתרת הקיבולת של העובד.
 function clampMonths(value: number, max: number) {
-  if (Number.isNaN(value)) return 1;
-  if (value < 1) return 1;
-  if (value > max) return max;
-  return value;
+  return normalizeMonthValue(value, { min: 1, max });
 }
 
 // מגירת שיבוץ עובדים: טעינה, חיפוש, בחירה ושמירה מרוכזת.
@@ -289,6 +287,7 @@ export default function AssignEmployeesDrawer({
                         <input
                           type="number"
                           min={1}
+                          step={0.5}
                           max={employee.remainingMonths}
                           value={selectedData.actualMonths}
                           onChange={(event) =>

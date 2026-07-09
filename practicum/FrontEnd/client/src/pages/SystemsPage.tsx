@@ -174,40 +174,6 @@ export default function SystemsPage() {
     await loadSystems();
   }
 
-  // מצב פרופיל: מוצג כאשר נבחרה מערכת ספציפית.
-  if (selectedSystem) {
-    return (
-      <main className="systems-page-shell" dir="rtl">
-        <SystemProfile
-          system={selectedSystem}
-          loading={loadingDetails}
-          onBack={() => {
-            setEditModalOpen(false);
-            setAssignDrawerOpen(false);
-            setSelectedSystem(null);
-          }}
-          onOpenAssign={() => setAssignDrawerOpen(true)}
-          onOpenEdit={() => setEditModalOpen(true)}
-        />
-
-        <AssignEmployeesDrawer
-          open={assignDrawerOpen}
-          system={selectedSystem}
-          year={filters.year ?? activeYear}
-          onClose={() => setAssignDrawerOpen(false)}
-          onAssigned={refreshAfterAssignment}
-        />
-
-        <EditSystemModal
-          open={editModalOpen}
-          system={selectedSystem}
-          onClose={() => setEditModalOpen(false)}
-          onUpdated={refreshAfterEdit}
-        />
-      </main>
-    );
-  }
-
   return (
     <main className="systems-page-shell" dir="rtl">
       <PageTabs />
@@ -443,6 +409,37 @@ export default function SystemsPage() {
         onClose={() => setCreateModalOpen(false)}
         onCreated={refreshAfterCreate}
       />
+
+      {selectedSystem && (
+        <>
+          <SystemProfile
+            system={selectedSystem}
+            loading={loadingDetails}
+            onBack={() => {
+              setEditModalOpen(false);
+              setAssignDrawerOpen(false);
+              setSelectedSystem(null);
+            }}
+            onOpenAssign={() => setAssignDrawerOpen(true)}
+            onOpenEdit={() => setEditModalOpen(true)}
+          />
+
+          <AssignEmployeesDrawer
+            open={assignDrawerOpen}
+            system={selectedSystem}
+            year={filters.year ?? activeYear}
+            onClose={() => setAssignDrawerOpen(false)}
+            onAssigned={refreshAfterAssignment}
+          />
+
+          <EditSystemModal
+            open={editModalOpen}
+            system={selectedSystem}
+            onClose={() => setEditModalOpen(false)}
+            onUpdated={refreshAfterEdit}
+          />
+        </>
+      )}
     </main>
   );
 }

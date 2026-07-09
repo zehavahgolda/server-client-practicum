@@ -254,13 +254,7 @@ export default function EmployeeFormModal({
                 />
               </label>
 
-              <label>
-                הערת מנהל
-                <textarea
-                  value={form.managerReviewNote}
-                  onChange={(e) => setForm((p) => ({ ...p, managerReviewNote: e.target.value }))}
-                />
-              </label>
+          
             </div>
           </section>
 

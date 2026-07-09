@@ -1,8 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { System } from "../../types";
-
-const MAX_MONTHS = 12;
+import { isValidHalfMonthValue, MAX_MONTHS, normalizeMonthValue } from "../../utils/months";
 
 // מגביל קלט חודשי עבודה לטווח תקין 0-12.
 function clampMonthsInput(value: string): string {
@@ -10,10 +9,8 @@ function clampMonthsInput(value: string): string {
 
   const numericValue = Number(value);
   if (Number.isNaN(numericValue)) return "";
-  if (numericValue < 0) return "0";
-  if (numericValue > MAX_MONTHS) return String(MAX_MONTHS);
 
-  return value;
+  return String(normalizeMonthValue(numericValue, { min: 0, max: MAX_MONTHS }));
 }
 
 // מאפייני מודל הוספת הקצאה לעובד.
@@ -59,10 +56,8 @@ export default function AllocationModal({
     if (
       Number.isNaN(plannedMonths) ||
       Number.isNaN(actualMonths) ||
-      plannedMonths < 0 ||
-      actualMonths < 0 ||
-      plannedMonths > MAX_MONTHS ||
-      actualMonths > MAX_MONTHS
+      !isValidHalfMonthValue(plannedMonths, { min: 0, max: MAX_MONTHS }) ||
+      !isValidHalfMonthValue(actualMonths, { min: 0, max: MAX_MONTHS })
     ) {
       return;
     }
@@ -128,6 +123,7 @@ export default function AllocationModal({
                 type="number"
                 min={0}
                 max={MAX_MONTHS}
+                step={0.5}
                 value={form.plannedMonths}
                 onChange={(e) => setForm((p) => ({ ...p, plannedMonths: clampMonthsInput(e.target.value) }))}
                 required
@@ -140,6 +136,7 @@ export default function AllocationModal({
                 type="number"
                 min={0}
                 max={MAX_MONTHS}
+                step={0.5}
                 value={form.actualMonths}
                 onChange={(e) => setForm((p) => ({ ...p, actualMonths: clampMonthsInput(e.target.value) }))}
               />

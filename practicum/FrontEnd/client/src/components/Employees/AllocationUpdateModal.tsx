@@ -1,21 +1,22 @@
+
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { isValidHalfMonthValue, MAX_MONTHS, normalizeMonthValue } from "../../utils/months";
 
-const MAX_MONTHS = 12;
-
-// מגביל קלט חודשי עבודה לטווח תקין 0-12.
 function clampMonthsInput(value: string): string {
   if (value === "") return "";
 
-  const numericValue = Number(value);
+  // המרה מנורמלת: החלפת פסיק בנקודה לטיפול בהגדרות שפה של דפדפנים
+  const normalizedValue = value.replace(',', '.');
+  const numericValue = Number(normalizedValue);
+  
   if (Number.isNaN(numericValue)) return "";
-  if (numericValue < 0) return "0";
-  if (numericValue > MAX_MONTHS) return String(MAX_MONTHS);
 
-  return value;
+  // החזרת הערך הנורמלי כסטרינג עם נקודה
+  const clamped = normalizeMonthValue(numericValue, { min: 0, max: MAX_MONTHS });
+  return String(clamped);
 }
 
-// אפשרות בחירה לעדכון הקצאה קיימת.
 export interface AllocationOption {
   key: string;
   systemId: string;
@@ -23,7 +24,6 @@ export interface AllocationOption {
   label: string;
 }
 
-// מאפייני מודל עדכון חודשים בפועל.
 interface AllocationUpdateModalProps {
   open: boolean;
   options: AllocationOption[];
@@ -32,7 +32,6 @@ interface AllocationUpdateModalProps {
   onSubmit: (systemId: string, roleInSystem: string, actualMonths: number) => Promise<void>;
 }
 
-// מודל לעדכון חודשי ביצוע של הקצאה קיימת.
 export default function AllocationUpdateModal({
   open,
   options,
@@ -45,16 +44,18 @@ export default function AllocationUpdateModal({
 
   if (!open) return null;
 
-  // מאמת בחירה וערך חודשים לפני שליחת העדכון.
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const selected = options.find((option) => option.key === selectedKey);
     if (!selected) return;
 
-    const numericMonths = Number(actualMonths);
-    if (Number.isNaN(numericMonths) || numericMonths < 0 || numericMonths > MAX_MONTHS) return;
+    // שימוש ב-parseFloat כדי להבטיח קריאה של הנקודה העשרונית
+    const numericMonths = parseFloat(actualMonths.replace(',', '.'));
+    
+    if (!isValidHalfMonthValue(numericMonths, { min: 0, max: MAX_MONTHS })) return;
 
+    // שליחת ה-ID התקין שנלקח מהאופציה הנבחרת
     await onSubmit(selected.systemId, selected.roleInSystem, numericMonths);
 
     setSelectedKey("");
@@ -96,6 +97,7 @@ export default function AllocationUpdateModal({
               חודשים בפועל
               <input
                 type="number"
+                step={0.5}
                 min={0}
                 max={MAX_MONTHS}
                 value={actualMonths}

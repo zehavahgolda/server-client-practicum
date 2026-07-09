@@ -24,7 +24,7 @@
 }
 
 .employee-card.available::after { background: var(--status-success); }
-.employee-card.balanced::after { background: #f59e0b; }
+.employee-card.balanced::after { background: blue; }
 .employee-card.overloaded::after { background: var(--status-danger); }
 
 .employee-card:hover {
@@ -65,22 +65,14 @@
   font-size: 11px;
 }
 
-.employee-status-pill {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-}
+
 
 .employee-status-pill.available {
   background: var(--status-success-soft);
   color: var(--status-success);
 }
 
-.employee-status-pill.balanced {
-  background: #fff3cd;
-  color: #8a5a00;
-}
+
 
 .employee-status-pill.overloaded {
   background: var(--status-danger-soft);

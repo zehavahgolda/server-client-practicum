@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
@@ -16,7 +16,6 @@ export function useEmployeesPage() {
   const [searchParams] = useSearchParams();
   const availabilityFilter = searchParams.get("availability");
   const employeeIdFromUrl = searchParams.get("employeeId");
-  const profileRef = useRef<HTMLDivElement | null>(null);
 
   const employeesHook = useEmployees({ year: activeYear });
   const { systems } = useSystems();
@@ -144,18 +143,6 @@ export function useEmployeesPage() {
     }));
   }, [selectedEmployee]);
 
-  // מבצע גלילה אוטומטית לאזור הפרופיל כשנבחר עובד.
-  useEffect(() => {
-    if (!selectedEmployee) return;
-
-    requestAnimationFrame(() => {
-      profileRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-    });
-  }, [selectedEmployee?.id]);
-
   // מאפס את הפילטרים לברירת המחדל של המסך.
   function clearFilters() {
     setFilters({ year: activeYear });
@@ -221,7 +208,6 @@ export function useEmployeesPage() {
   }
 
   return {
-    profileRef,
     systems,
     selectedEmployee,
     loadingList,

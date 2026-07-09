@@ -1,5 +1,12 @@
 import httpClient from "./api/httpClient";
 import type { EmployeeDetails, EmployeeFilters, EmployeeListItem, EmployeeUpsertPayload } from "../types";
+import { normalizeMonthValue } from "../utils/months";
+
+// ממיר ערך חודשים למחרוזת query בפורמט עשרוני סטנדרטי ל-API.
+function toMonthQueryParam(value: number): string {
+  const normalizedValue = normalizeMonthValue(value);
+  return String(normalizedValue);
+}
 
 type ApiEmployee = Partial<EmployeeListItem> & {
   id?: string;
@@ -15,9 +22,18 @@ type ApiEmployee = Partial<EmployeeListItem> & {
 // הפונקציה משלימה שדות חסרים (למשל מזהה, שם, סטטוס וזמינות) עם ערכי ברירת מחדל.
 function normalizeEmployee(item: ApiEmployee): EmployeeListItem {
   const id = item.id || item._id || "";
-  const allocatedMonths = item.allocatedMonths ?? item.totalActualMonths ?? 0;
-  const yearlyCapacityMonths = item.yearlyCapacityMonths ?? 12;
-  const remainingMonths = item.remainingMonths ?? yearlyCapacityMonths - allocatedMonths;
+  const allocatedMonths = normalizeMonthValue(item.allocatedMonths ?? item.totalActualMonths ?? 0, {
+    min: Number.NEGATIVE_INFINITY,
+    max: Number.POSITIVE_INFINITY
+  });
+  const yearlyCapacityMonths = normalizeMonthValue(item.yearlyCapacityMonths ?? 12, { min: 0, max: 12 });
+  const remainingMonths = normalizeMonthValue(
+    item.remainingMonths ?? yearlyCapacityMonths - allocatedMonths,
+    {
+      min: Number.NEGATIVE_INFINITY,
+      max: Number.POSITIVE_INFINITY
+    }
+  );
   const fullName = item.fullName?.trim() || item.name?.trim() || `עובד ${id.slice(-4)}`;
   const professionalCategory = item.professionalCategory?.trim() || item.departmentId?.trim() || "לא מוגדר";
 
@@ -50,7 +66,23 @@ export const employeeService = {
   // מבוצע נרמול לשדה ההקצאות כדי לוודא שתמיד מתקבל מערך תקין.
   async getEmployeeById(id: string): Promise<EmployeeDetails> {
     const response = await httpClient.get<EmployeeDetails>(`/Employees/${id}`);
-    return { ...response.data, allocations: response.data.allocations || [] };
+    return {
+      ...response.data,
+      yearlyCapacityMonths: normalizeMonthValue(response.data.yearlyCapacityMonths, { min: 0, max: 12 }),
+      allocatedMonths: normalizeMonthValue(response.data.allocatedMonths, {
+        min: Number.NEGATIVE_INFINITY,
+        max: Number.POSITIVE_INFINITY
+      }),
+      remainingMonths: normalizeMonthValue(response.data.remainingMonths, {
+        min: Number.NEGATIVE_INFINITY,
+        max: Number.POSITIVE_INFINITY
+      }),
+      allocations: (response.data.allocations || []).map((allocation) => ({
+        ...allocation,
+        plannedMonths: normalizeMonthValue(allocation.plannedMonths, { min: 0, max: 12 }),
+        actualMonths: normalizeMonthValue(allocation.actualMonths, { min: 0, max: 12 })
+      }))
+    };
   },
 
   // יוצרת עובד חדש בשרת ומחזירה אותו לאחר נרמול למבנה אחיד בקליינט.
@@ -86,7 +118,11 @@ export const employeeService = {
     const { employeeId, systemId, roleInSystem, actualMonths } = payload;
     // נשתמש בנתיב המלא כפי שמופיע ב-Swagger, אבל בלי /api הפעם
     await httpClient.put(`/Employees/${employeeId}/allocation-months`, null, {
-      params: { systemId, roleInSystem, actualMonths }
+      params: {
+        systemId,
+        roleInSystem,
+        actualMonths: toMonthQueryParam(actualMonths)
+      }
     });
   }
 };
