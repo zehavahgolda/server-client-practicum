@@ -12,13 +12,15 @@ interface DashboardDonutChartProps {
 	items: DonutItem[];
 	centerValue?: number | string;
 	footerLines?: string[];
+	onItemClick?: (item: DonutItem) => void;
 }
 
 // מציגה תרשים דונאט עם אגדה וטקסט מרכזי על בסיס רשימת פריטים.
 export default function DashboardDonutChart({
 	items,
 	centerValue,
-	footerLines
+	footerLines,
+	onItemClick
 }: DashboardDonutChartProps) {
 	// מחשב ערך כולל בטוח כדי למנוע חלוקה באפס בעת יצירת הסגמנטים.
 	const total = items.reduce((sum, item) => sum + item.value, 0);
@@ -45,7 +47,20 @@ export default function DashboardDonutChart({
 		<div className="dashboard-donut-chart">
 			<div className="dashboard-donut-legend">
 				{items.map((item) => (
-					<div className="dashboard-donut-legend-row" key={item.label}>
+					<div
+						className={`dashboard-donut-legend-row ${onItemClick ? "is-clickable" : ""}`}
+						key={item.label}
+						onClick={() => onItemClick?.(item)}
+						onKeyDown={(event) => {
+							if (!onItemClick) return;
+							if (event.key === "Enter" || event.key === " ") {
+								event.preventDefault();
+								onItemClick(item);
+							}
+						}}
+						role={onItemClick ? "button" : undefined}
+						tabIndex={onItemClick ? 0 : undefined}
+					>
 						<span className="dashboard-donut-legend-value">{item.value}</span>
 						<span className="dashboard-donut-legend-label">{item.label}</span>
 						<span

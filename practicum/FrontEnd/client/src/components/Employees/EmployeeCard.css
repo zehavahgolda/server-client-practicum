@@ -71,8 +71,10 @@
   background: var(--status-success-soft);
   color: var(--status-success);
 }
-
-
+.employee-status-pill.balanced {
+  background: var(--status-surplus-soft);
+  color: var(--status-surplus);
+}
 
 .employee-status-pill.overloaded {
   background: var(--status-danger-soft);

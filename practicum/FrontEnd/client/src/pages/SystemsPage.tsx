@@ -1,15 +1,16 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSystems } from "../hooks/useSystems";
-import { categoryService } from "../services/categoryService";
-import type { Category, System } from "../types";
+import type { System } from "../types";
 import SystemCard from "../components/Systems/SystemCard";
+import { getSystemCardTone } from "../components/Systems/SystemCard";
 import SystemProfile from "../components/Systems/SystemProfile";
 import SystemGroup from "../components/Systems/SystemGroup";
 import AssignEmployeesDrawer from "../components/Systems/AssignEmployeesDrawer";
 import CreateSystemModal from "../components/Systems/CreateSystemModal";
 import EditSystemModal from "../components/Systems/EditSystemModal";
+import UnifiedToolbar from "../components/shared/UnifiedToolbar";
 import "./SystemsPage.css";
 import PageTabs from "../components/PageTabs";
 
@@ -26,11 +27,6 @@ function getSystemTone(system: System): "shortage" | "balanced" | "excess" {
   if (system.gap > 0) return "shortage";
   if (system.gap < 0) return "excess";
   return "balanced";
-}
-
-// מחשב כמה מערכות נמצאות במחסור.
-function getShortageCount(systems: System[]) {
-  return systems.filter((system) => system.gap > 0).length;
 }
 
 // מסנן מערכת לפי סטטוס UI נבחר.
@@ -86,14 +82,17 @@ export default function SystemsPage() {
   const [searchParams] = useSearchParams();
   const riskFilter = searchParams.get("risk");
   const systemIdFromUrl = searchParams.get("systemId");
+  const requestedView = searchParams.get("view");
+  const requestedStatus = searchParams.get("status");
+  const requestedSearch = searchParams.get("search");
 
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [uiStatus, setUiStatus] = useState<UiStatus>("all");
   const [localSearch, setLocalSearch] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
   const [assignDrawerOpen, setAssignDrawerOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   const {
     systems,
@@ -108,26 +107,26 @@ export default function SystemsPage() {
     setSelectedSystem
   } = useSystems();
 
-  useEffect(() => {
-    async function loadCategories() {
-      try {
-        const data = await categoryService.getCategories();
-        setCategories(data);
-      } catch (err) {
-        console.error("Failed to load categories", err);
-        setCategories([]);
-      }
-    }
-
-    void loadCategories();
-  }, []);
-
   // טוען מערכת ספציפית אם הועבר מזהה ב-URL.
   useEffect(() => {
   if (!systemIdFromUrl) return;
 
   void loadSystemDetails(systemIdFromUrl);
 }, [systemIdFromUrl, loadSystemDetails]);
+
+  useEffect(() => {
+    if (requestedView === "all" || requestedView === "status" || requestedView === "gap") {
+      setViewMode(requestedView);
+    }
+
+    if (requestedStatus === "all" || requestedStatus === "shortage" || requestedStatus === "balanced" || requestedStatus === "excess") {
+      setUiStatus(requestedStatus);
+    }
+
+    if (requestedSearch) {
+      setLocalSearch(requestedSearch);
+    }
+  }, [requestedView, requestedStatus, requestedSearch]);
 
   const visibleSystems = useMemo(() => {
     let result = systems;
@@ -144,6 +143,28 @@ export default function SystemsPage() {
 
   const statusGroups = useMemo(() => getStatusGroups(visibleSystems), [visibleSystems]);
   const gapGroups = useMemo(() => getGapGroups(visibleSystems), [visibleSystems]);
+
+  const summaryCounts = useMemo(() => {
+    const tones = visibleSystems.map(getSystemCardTone);
+
+    return {
+      green: tones.filter((tone) => tone === "excess").length,
+      balanced: tones.filter((tone) => tone === "balanced").length,
+      red: tones.filter((tone) => tone === "shortage").length
+    };
+  }, [visibleSystems]);
+
+  // מבצע גלילה אוטומטית לאזור פרופיל המערכת הנבחרת.
+  useEffect(() => {
+    if (!selectedSystem) return;
+
+    requestAnimationFrame(() => {
+      profileRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }, [selectedSystem?.id]);
 
   // מאפס את כלל הפילטרים והחיפוש המקומי.
   function clearFilters() {
@@ -178,8 +199,9 @@ export default function SystemsPage() {
     <main className="systems-page-shell" dir="rtl">
       <PageTabs />
 
-      <section className="systems-toolbar-card">
-        <div className="systems-filter-row">
+      <UnifiedToolbar
+        filters={(
+          <>
           <label>
             סינון
             <select
@@ -194,26 +216,6 @@ export default function SystemsPage() {
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>{year}</option>
                 ))}
-            </select>
-          </label>
-
-          <label>
-            קטגוריה
-            <select
-              value={filters.categoryName ?? ""}
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  categoryName: event.target.value || undefined
-                }))
-              }
-            >
-              <option value="">כל הקטגוריות</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
             </select>
           </label>
 
@@ -256,15 +258,46 @@ export default function SystemsPage() {
             />
           </label>
 
-          <button type="button" className="secondary-btn clean-btn" onClick={clearFilters}>
+          <button type="button" className="secondary-btn unified-clean-btn" onClick={clearFilters}>
             ניקוי
           </button>
-        </div>
+          </>
+        )}
+        summary={(
+          <>
+            {summaryCounts.red > 0 && <span className="unified-stat-pill danger">חוסר: {summaryCounts.red}</span>}
+            {summaryCounts.green > 0 && <span className="unified-stat-pill green">זמין: {summaryCounts.green}</span>}
+            {summaryCounts.balanced > 0 && <span className="unified-stat-pill neutral">מאוזן: {summaryCounts.balanced}</span>}
+          </>
+        )}
+        grouping={(
+          <>
+            <button
+              type="button"
+              className={`unified-view-pill ${viewMode === "all" ? "active" : ""}`}
+              onClick={() => setViewMode("all")}
+            >
+              כל המערכות
+            </button>
 
-        <div className="systems-toolbar-divider" />
+            <button
+              type="button"
+              className={`unified-view-pill ${viewMode === "status" ? "active" : ""}`}
+              onClick={() => setViewMode("status")}
+            >
+              קיבוץ לפי מצב
+            </button>
 
-        <div className="systems-actions-row">
-          <span>פעולות</span>
+            <button
+              type="button"
+              className={`unified-view-pill ${viewMode === "gap" ? "active" : ""}`}
+              onClick={() => setViewMode("gap")}
+            >
+              קיבוץ לפי פער קיבולת
+            </button>
+          </>
+        )}
+        actionButton={(
           <button
             type="button"
             className="primary-btn"
@@ -272,41 +305,26 @@ export default function SystemsPage() {
           >
             + הוספת מערכת
           </button>
+        )}
+      />
+
+    
+
+      {selectedSystem && (
+        <div ref={profileRef} className="systems-profile-board">
+          <SystemProfile
+            system={selectedSystem}
+            loading={loadingDetails}
+            onBack={() => {
+              setEditModalOpen(false);
+              setAssignDrawerOpen(false);
+              setSelectedSystem(null);
+            }}
+            onOpenAssign={() => setAssignDrawerOpen(true)}
+            onOpenEdit={() => setEditModalOpen(true)}
+          />
         </div>
-
-        <div className="systems-view-row">
-          <span>תצוגה</span>
-
-          <button
-            type="button"
-            className={`view-pill ${viewMode === "all" ? "active" : ""}`}
-            onClick={() => setViewMode("all")}
-          >
-            כל המערכות
-          </button>
-
-          <button
-            type="button"
-            className={`view-pill ${viewMode === "status" ? "active" : ""}`}
-            onClick={() => setViewMode("status")}
-          >
-            קיבוץ לפי מצב
-          </button>
-
-          <button
-            type="button"
-            className={`view-pill ${viewMode === "gap" ? "active" : ""}`}
-            onClick={() => setViewMode("gap")}
-          >
-            קיבוץ לפי פער קיבולת
-          </button>
-        </div>
-      </section>
-
-      <section className="systems-overview-title">
-        <h1>מבט מערכות</h1>
-        <p>סקירת כל המערכות, קיבוץ לפי מצב עסקי או פער קיבולת, וכניסה לפרופיל מערכת.</p>
-      </section>
+      )}
 
       {error && <div className="error-box">{error}</div>}
 
@@ -318,7 +336,7 @@ export default function SystemsPage() {
           </div>
 
           <span className="shortage-counter">
-            {getShortageCount(visibleSystems)} במחסור
+            {summaryCounts.red} במחסור
           </span>
         </header>
 
@@ -330,7 +348,7 @@ export default function SystemsPage() {
               <SystemCard
                 key={system.id}
                 system={system}
-                selected={false}
+                selected={selectedSystem?.id === system.id}
                 onClick={() => loadSystemDetails(system.id)}
               />
             ))}
@@ -346,6 +364,7 @@ export default function SystemsPage() {
               systems={statusGroups.excess}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -355,6 +374,7 @@ export default function SystemsPage() {
               systems={statusGroups.balanced}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -364,6 +384,7 @@ export default function SystemsPage() {
               systems={statusGroups.shortage}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
           </div>
         )}
@@ -377,6 +398,7 @@ export default function SystemsPage() {
               systems={gapGroups.healthy}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -386,6 +408,7 @@ export default function SystemsPage() {
               systems={gapGroups.regularShortage}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
 
             <SystemGroup
@@ -395,6 +418,7 @@ export default function SystemsPage() {
               systems={gapGroups.criticalShortage}
               // defaultOpen
               onSystemClick={loadSystemDetails}
+              selectedSystemId={selectedSystem?.id ?? null}
             />
           </div>
         )}
@@ -409,37 +433,20 @@ export default function SystemsPage() {
         onClose={() => setCreateModalOpen(false)}
         onCreated={refreshAfterCreate}
       />
+      <AssignEmployeesDrawer
+        open={assignDrawerOpen}
+        system={selectedSystem}
+        year={filters.year ?? activeYear}
+        onClose={() => setAssignDrawerOpen(false)}
+        onAssigned={refreshAfterAssignment}
+      />
 
-      {selectedSystem && (
-        <>
-          <SystemProfile
-            system={selectedSystem}
-            loading={loadingDetails}
-            onBack={() => {
-              setEditModalOpen(false);
-              setAssignDrawerOpen(false);
-              setSelectedSystem(null);
-            }}
-            onOpenAssign={() => setAssignDrawerOpen(true)}
-            onOpenEdit={() => setEditModalOpen(true)}
-          />
-
-          <AssignEmployeesDrawer
-            open={assignDrawerOpen}
-            system={selectedSystem}
-            year={filters.year ?? activeYear}
-            onClose={() => setAssignDrawerOpen(false)}
-            onAssigned={refreshAfterAssignment}
-          />
-
-          <EditSystemModal
-            open={editModalOpen}
-            system={selectedSystem}
-            onClose={() => setEditModalOpen(false)}
-            onUpdated={refreshAfterEdit}
-          />
-        </>
-      )}
+      <EditSystemModal
+        open={editModalOpen}
+        system={selectedSystem}
+        onClose={() => setEditModalOpen(false)}
+        onUpdated={refreshAfterEdit}
+      />
     </main>
   );
 }

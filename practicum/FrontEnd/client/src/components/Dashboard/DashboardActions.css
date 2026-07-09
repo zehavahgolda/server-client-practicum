@@ -1,27 +1,47 @@
 .dashboard-actions {
   height: 60px;
-  background: #ffffff;
-  border: 1px solid #e3e3e3;
-  border-radius: 6px;
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
   padding: 0 24px;
-
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
+  box-shadow: var(--shadow-soft);
 }
 
 .dashboard-actions-title {
   font-size: 13px;
   font-weight: 700;
-  color: #666;
+  color: var(--text-secondary);
+  font-family: "Heebo", sans-serif;
 }
 
 .dashboard-actions-button {
-  background: #ffffff;
-  border: 1px solid #cfcfcf;
-  border-radius: 6px;
+  background: var(--surface-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   padding: 8px 16px;
   font-size: 13px;
+  font-weight: 700;
+  font-family: "Heebo", sans-serif;
+  color: var(--text-primary);
   cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dashboard-actions-button:hover {
+  background: var(--surface-alt);
+  border-color: var(--status-surplus);
+  color: var(--status-surplus);
+}
+
+@media (max-width: 640px) {
+  .dashboard-actions {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    gap: 10px;
+  }
 }

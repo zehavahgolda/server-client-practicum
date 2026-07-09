@@ -6,6 +6,8 @@ import "./EmployeeGroup.css";
 // מאפייני קבוצת עובדים (כותרת, רשימה ובחירה).
 interface Props {
   title: string;
+  subtitle?: string;
+  tone: "available" | "balanced" | "overloaded";
   employees: EmployeeListItem[];
   selectedEmployeeId?: string;
   defaultOpen?: boolean;
@@ -15,6 +17,8 @@ interface Props {
 // מציג קבוצת עובדים נפתחת עם סיכום מהיר לפי זמינות.
 export default function EmployeeGroup({
   title,
+  subtitle,
+  tone,
   employees,
   selectedEmployeeId,
   defaultOpen = false,
@@ -35,55 +39,55 @@ export default function EmployeeGroup({
     };
   }, [employees]);
 
-  return (
-    <section className="employee-group">
+  if (employees.length === 0) return null;
 
+  return (
+    <section className={`employee-group ${tone}`}>
       <button
         type="button"
         className="employee-group-header"
         onClick={() => setOpen((prev) => !prev)}
       >
-        <div>
-          <h2>{title}</h2>
-          <span>{employees.length} עובדים</span>
+        <div className="employee-group-title-wrap">
+          <span className="employee-group-color-line" />
+          <div>
+            <h2>{title}</h2>
+            {subtitle && <p>{subtitle}</p>}
+            <span>{employees.length} עובדים</span>
+          </div>
         </div>
 
-        <div className="employee-group-summary">
-
-          <span className="available">
-            {summary.available} זמינים
+        <div className="employee-group-left">
+          <span className={`employee-group-gap ${tone}`}>
+            עומס {summary.overloaded}
           </span>
 
-          <span className="balanced">
-            {summary.balanced} מלאים
+          <span className="employee-group-toggle">
+            {open ? "▲" : "▼"}
           </span>
-
-          <span className="overloaded">
-            {summary.overloaded} עומס
-          </span>
-
-          <strong>{open ? "−" : "+"}</strong>
-
         </div>
       </button>
 
       {open && (
+        <div className="employee-group-body">
+          <div className="employee-group-summary">
+            <span className="available">{summary.available} זמינים</span>
+            <span className="balanced">{summary.balanced} מלאים</span>
+            <span className="overloaded">{summary.overloaded} עומס יתר</span>
+          </div>
 
-        <div className="employee-group-grid">
-
-          {employees.map((employee) => (
-            <EmployeeCard
-              key={employee.id}
-              employee={employee}
-              selected={employee.id === selectedEmployeeId}
-              onClick={() => onSelectEmployee(employee.id)}
-            />
-          ))}
-
+          <div className="employees-cards-grid employee-group-grid">
+            {employees.map((employee) => (
+              <EmployeeCard
+                key={employee.id}
+                employee={employee}
+                selected={employee.id === selectedEmployeeId}
+                onClick={() => onSelectEmployee(employee.id)}
+              />
+            ))}
+          </div>
         </div>
-
       )}
-
     </section>
   );
 }

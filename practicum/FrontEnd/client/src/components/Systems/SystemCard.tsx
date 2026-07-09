@@ -9,7 +9,7 @@ interface SystemCardProps {
 }
 
 // קובע טון תצוגה לפי פער הקיבולת של המערכת.
-function getTone(system: System) {
+export function getSystemCardTone(system: System) {
   if (system.gap > 0) return "shortage";
   if (system.gap < 0) return "excess";
   return "balanced";
@@ -17,9 +17,9 @@ function getTone(system: System) {
 
 // מחזיר תווית סטטוס אנושית לפי פער הקיבולת.
 function getStatusLabel(system: System) {
-  if (system.gap > 0) return "Shortage";
-  if (system.gap < 0) return "Excess";
-  return "Balanced";
+  if (system.gap > 0) return "חוסר";
+  if (system.gap < 0) return "עודף";
+  return "מאוזן";
 }
 
 // קובע טון תקציבי לפי מצב התקציב והחריגה.
@@ -40,7 +40,7 @@ function formatCurrency(value: number) {
 
 // מציג כרטיס מערכת עם נתוני קיבולת ותקציב תמציתיים.
 export default function SystemCard({ system, selected = false, onClick }: SystemCardProps) {
-  const tone = getTone(system);
+  const tone = getSystemCardTone(system);
   const budgetTone = getBudgetTone(system);
   const hasBudget = system.allocatedBudget > 0;
 
@@ -57,7 +57,7 @@ export default function SystemCard({ system, selected = false, onClick }: System
         </div>
 
         <span className={`system-status-pill ${tone}`}>
-          {/* {getStatusLabel(system)} */}
+          {getStatusLabel(system)}
         </span>
       </div>
 

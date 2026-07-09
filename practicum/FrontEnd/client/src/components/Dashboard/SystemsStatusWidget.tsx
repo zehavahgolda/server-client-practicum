@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSystems } from "../../hooks/useSystems";
 import DashboardChartCard from "./DashboardChartCard";
 import DashboardDonutChart from "./DashboardDonutChart";
@@ -24,6 +25,7 @@ const statusGroups = [
 
 // ווידג'ט המציג התפלגות מערכות לפי סטטוס קיבולת.
 export default function SystemsStatusWidget() {
+  const navigate = useNavigate();
   const { systems } = useSystems();
 
   // מחשב כמה מערכות שייכות לכל קבוצת סטטוס לפי הכינויים שהוגדרו.
@@ -41,11 +43,28 @@ export default function SystemsStatusWidget() {
   );
 
   return (
-    <DashboardChartCard title="מערכות לפי סטטוס">
+    <DashboardChartCard
+      title="מערכות לפי סטטוס"
+      onClick={() => navigate("/systems?view=status")}
+    >
       <DashboardDonutChart
         items={systemsByStatus}
         centerValue={systems.length}
         footerLines={[`סה"כ מערכות: ${systems.length}`]}
+        onItemClick={(item) => {
+          const normalized = item.label.trim();
+          if (normalized === "במחסור") {
+            navigate("/systems?view=status&status=shortage");
+            return;
+          }
+
+          if (normalized === "מאוזן") {
+            navigate("/systems?view=status&status=balanced");
+            return;
+          }
+
+          navigate("/systems?view=status&status=excess");
+        }}
       />
     </DashboardChartCard>
   );

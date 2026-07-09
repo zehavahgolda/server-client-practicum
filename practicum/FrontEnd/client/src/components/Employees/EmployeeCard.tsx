@@ -18,9 +18,9 @@ function getTone(employee: EmployeeListItem) {
 
 // מחזיר תווית סטטוס קריאה למשתמש.
 function getStatusLabel(employee: EmployeeListItem) {
-  // if (employee.remainingMonths < 0) return "עומס יתר";
-  // if (employee.remainingMonths === 0) return "מלא";
-  // return "זמין";
+  if (employee.remainingMonths < 0) return "עומס יתר";
+  if (employee.remainingMonths === 0) return "מלא";
+  return "זמין";
 }
 
 // מציג כרטיס עובד עם נתוני קיבולת, סטטוס ופרטים תפעוליים.
@@ -53,7 +53,7 @@ export default function EmployeeCard({
         </div>
 
         <span className={`employee-status-pill ${tone}`}>
-          {/* {getStatusLabel(employee)} */}
+          {getStatusLabel(employee)}
         </span>
 
       </div>

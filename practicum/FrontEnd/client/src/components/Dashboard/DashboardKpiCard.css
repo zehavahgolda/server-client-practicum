@@ -1,11 +1,27 @@
 .dashboard-kpi-card {
   height: 100px;
-  border-radius: 6px;
-  border: 1px solid #dedede;
-  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-bg);
   padding: 12px;
   text-align: right;
   box-sizing: border-box;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dashboard-kpi-card.is-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.dashboard-kpi-card.is-clickable {
+  cursor: pointer;
+}
+
+.dashboard-kpi-card.is-clickable:focus-visible {
+  outline: 2px solid var(--status-surplus);
+  outline-offset: 2px;
 }
 
 .dashboard-kpi-card--interactive {
@@ -22,7 +38,8 @@
   margin: 0 0 4px;
   font-size: 13px;
   font-weight: 700;
-  color: #666;
+  color: var(--text-secondary);
+  font-family: "Heebo", sans-serif;
 }
 
 .dashboard-kpi-card strong {
@@ -30,38 +47,51 @@
   font-size: 28px;
   line-height: 1;
   font-weight: 800;
-  color: #111;
+  color: var(--text-primary);
+  font-family: "Heebo", sans-serif;
 }
 
 .dashboard-kpi-card p {
   margin: 6px 0 0;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
+  font-family: "Heebo", sans-serif;
 }
 
 .dashboard-kpi-card--orange {
-  background: #fff3df;
-  border-color: #b87517;
+  background: var(--status-warning-soft);
+  border-color: var(--status-warning);
 }
 
 .dashboard-kpi-card--orange strong {
-  color: #006b57;
+  color: var(--status-success);
 }
 
 .dashboard-kpi-card--blue {
-  background: #eaf4ff;
-  border-color: #1f70c1;
+  background: var(--status-surplus-soft);
+  border-color: var(--status-surplus);
 }
 
 .dashboard-kpi-card--blue strong {
-  color: #ad2c2c;
+  color: var(--status-danger);
 }
 
 .dashboard-kpi-card--red {
-  background: #fde8ea;
-  border-color: #d72e2e;
+  background: var(--status-danger-soft);
+  border-color: var(--status-danger);
 }
 
 .dashboard-kpi-card--red strong {
-  color: #ad2c2c;
+  color: var(--status-danger);
+}
+
+@media (max-width: 640px) {
+  .dashboard-kpi-card {
+    height: auto;
+    min-height: 80px;
+  }
+
+  .dashboard-kpi-card strong {
+    font-size: 24px;
+  }
 }

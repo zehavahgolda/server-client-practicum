@@ -1,110 +1,36 @@
-.employees-toolbar-card {
-  background: var(--surface-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: var(--shadow-soft);
-  margin-bottom: 22px;
-}
-
-.employees-filter-row {
+.unified-filter-row {
   display: grid;
-  grid-template-columns: 140px 180px 180px minmax(280px, 1fr) 76px;
-  gap: 12px;
-  align-items: end;
+  grid-template-columns: 120px 150px 150px minmax(240px, 1fr) 64px;
 }
 
-.employees-filter-row label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.employees-filter-row select,
-.employees-filter-row input {
-  height: 48px;
-  border: 1px solid var(--input-border);
-  border-radius: 10px;
-  background: var(--input-bg);
-  color: var(--text-primary);
-  padding: 0 14px;
-  font-family: inherit;
-  font-size: 14px;
-}
-
-.employees-filter-row input::placeholder {
+.unified-filter-row input::placeholder {
   color: var(--text-secondary);
 }
 
-.employees-toolbar-divider {
-  height: 1px;
-  background: var(--border-color);
-  margin: 16px 0;
-}
-
-.employees-actions-row,
-.employees-stats-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.employees-actions-row span {
-  min-width: 70px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.employee-stat-pill {
-  border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.employee-stat-pill.neutral {
-  background: var(--status-surplus-soft);
-  color: var(--status-surplus);
-}
-
-.employee-stat-pill.warning {
-  background: var(--status-warning-soft);
-  color: var(--status-warning);
-}
-
-.employee-stat-pill.danger {
-  background: var(--status-danger-soft);
-  color: var(--status-danger);
-}
-
-@media (max-width: 980px) {
-  .employees-filter-row {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 1280px) {
+  .unified-filter-row {
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
   }
 
   .employees-search-label {
-    grid-column: span 2;
+    grid-column: 1 / 3;
+  }
+}
+
+@media (max-width: 980px) {
+  .unified-filter-row {
+    grid-template-columns: 1fr 1fr auto;
+  }
+
+  .employees-search-label {
+    grid-column: 1 / 3;
   }
 }
 
 @media (max-width: 640px) {
-  .employees-filter-row {
-    grid-template-columns: 1fr;
-  }
-
   .employees-search-label {
     grid-column: auto;
   }
-
-  .employees-actions-row,
-  .employees-stats-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
 }
+

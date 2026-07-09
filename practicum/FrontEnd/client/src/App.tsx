@@ -18,46 +18,6 @@ function App() {
           <Route path="/changes" element={<ChangesPage />} />
         </Routes>
       </div>
-
-      <style>{`
-        .app-wrapper {
-          min-height: 100vh;
-          background: #f3f4f6;
-        }
-
-        .app-nav {
-          background: #ffffff;
-          border-bottom: 2px solid #e5e7eb;
-          display: flex;
-          justify-content: flex-end;
-          gap: 24px;
-          padding: 10px 20px;
-          position: sticky;
-          top: 0;
-          z-index: 100;
-        }
-
-        .nav-link {
-          text-decoration: none;
-          color: #4b5563;
-          font-weight: 600;
-          padding: 8px 12px;
-          border-radius: 8px;
-          transition: all 0.2s;
-          cursor: pointer;
-          font-size: 15px;
-        }
-
-        .nav-link:hover {
-          background: #f3f4f6;
-          color: #1f2937;
-        }
-
-        .nav-link.active {
-          background: #2864a6;
-          color: #ffffff;
-        }
-      `}</style>
     </Router>
   );
 }

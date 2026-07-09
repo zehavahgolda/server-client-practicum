@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { EmployeeFilters as EmployeeFiltersType } from "../../types";
+import UnifiedToolbar from "../shared/UnifiedToolbar";
 import "./EmployeeFilters.css";
 
 // שנה נוכחית ואפשרויות סינון סביב השנה הפעילה.
@@ -11,10 +12,12 @@ interface EmployeeFiltersProps {
   filters: EmployeeFiltersType;
   categories: string[];
   managers: string[];
-  total: number;
-  lowCapacity: number;
+  viewMode: "all" | "status" | "category";
+  available: number;
+  balanced: number;
   overloaded: number;
   onChangeFilters: Dispatch<SetStateAction<EmployeeFiltersType>>;
+  onChangeViewMode: (mode: "all" | "status" | "category") => void;
   onCreateEmployee: () => void;
   onClearFilters: () => void;
 }
@@ -24,16 +27,19 @@ export default function EmployeeFilters({
   filters,
   categories,
   managers,
-  total,
-  lowCapacity,
+  viewMode,
+  available,
+  balanced,
   overloaded,
   onChangeFilters,
+  onChangeViewMode,
   onCreateEmployee,
   onClearFilters
 }: EmployeeFiltersProps) {
   return (
-    <section className="employees-toolbar-card">
-      <div className="employees-filter-row">
+    <UnifiedToolbar
+      filters={(
+        <>
         <label>
           שנה
           <select
@@ -105,26 +111,50 @@ export default function EmployeeFilters({
           />
         </label>
 
-        <button type="button" className="secondary-btn clean-btn" onClick={onClearFilters}>
+        <button type="button" className="secondary-btn unified-clean-btn" onClick={onClearFilters}>
           ניקוי
         </button>
-      </div>
+        </>
+      )}
+      summary={(
+        <>
+          {available > 0 && <span className="unified-stat-pill green">זמין: {available}</span>}
+          {balanced > 0 && <span className="unified-stat-pill warning">מלא: {balanced}</span>}
+          {overloaded > 0 && <span className="unified-stat-pill danger">עומס יתר: {overloaded}</span>}
+        </>
+      )}
+      grouping={(
+        <>
+          <button
+            type="button"
+            className={`unified-view-pill ${viewMode === "all" ? "active" : ""}`}
+            onClick={() => onChangeViewMode("all")}
+          >
+            כל העובדים
+          </button>
 
-      <div className="employees-toolbar-divider" />
+          <button
+            type="button"
+            className={`unified-view-pill ${viewMode === "status" ? "active" : ""}`}
+            onClick={() => onChangeViewMode("status")}
+          >
+            קיבוץ לפי זמינות
+          </button>
 
-      <div className="employees-actions-row">
-        <span>פעולות</span>
-
+          <button
+            type="button"
+            className={`unified-view-pill ${viewMode === "category" ? "active" : ""}`}
+            onClick={() => onChangeViewMode("category")}
+          >
+            קיבוץ לפי קטגוריה
+          </button>
+        </>
+      )}
+      actionButton={(
         <button type="button" className="primary-btn" onClick={onCreateEmployee}>
           + הוספת עובד
         </button>
-      </div>
-
-      <div className="employees-stats-row">
-        <span className="employee-stat-pill neutral">סה״כ: {total}</span>
-        <span className="employee-stat-pill warning">בלחץ: {lowCapacity}</span>
-        <span className="employee-stat-pill danger">עומס יתר: {overloaded}</span>
-      </div>
-    </section>
+      )}
+    />
   );
 }

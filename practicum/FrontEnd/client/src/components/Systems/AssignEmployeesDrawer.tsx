@@ -31,6 +31,11 @@ function clampMonths(value: number, max: number) {
   return normalizeMonthValue(value, { min: 1, max });
 }
 
+// מגדיר תקרת חודשים לעריכה כך שגם עובד שכבר משויך יישאר ניתן לעדכון.
+function getMaxEditableMonths(employee: EmployeeAssignmentCandidate) {
+  return Math.max(1, employee.yearlyCapacityMonths);
+}
+
 // מגירת שיבוץ עובדים: טעינה, חיפוש, בחירה ושמירה מרוכזת.
 export default function AssignEmployeesDrawer({
   open,
@@ -119,7 +124,8 @@ export default function AssignEmployeesDrawer({
 
   // מוסיף/מסיר עובד מרשימת העובדים שנבחרו לשיבוץ.
   function toggleEmployee(employee: EmployeeAssignmentCandidate) {
-    if (!employee.canAssign) return;
+    const isBlocked = !employee.canAssign && !employee.alreadyAssignedToSystem;
+    if (isBlocked) return;
 
     setSelected((prev) => {
       if (prev[employee.id]) {
@@ -142,7 +148,7 @@ export default function AssignEmployeesDrawer({
 
   // מעדכן חודשי שיבוץ לעובד נבחר תוך שמירה על טווח תקין.
   function updateMonths(employee: EmployeeAssignmentCandidate, months: number) {
-    const fixedMonths = clampMonths(months, employee.remainingMonths);
+    const fixedMonths = clampMonths(months, getMaxEditableMonths(employee));
 
     setSelected((prev) => ({
       ...prev,
@@ -233,13 +239,14 @@ export default function AssignEmployeesDrawer({
             visibleEmployees.map((employee) => {
               const isSelected = Boolean(selected[employee.id]);
               const selectedData = selected[employee.id];
+              const isBlocked = !employee.canAssign && !employee.alreadyAssignedToSystem;
 
               return (
                 <button
                   type="button"
                   key={employee.id}
                   className={`assign-employee-row ${isSelected ? "selected" : ""} ${
-                    !employee.canAssign ? "disabled" : ""
+                    isBlocked ? "disabled" : ""
                   }`}
                   onClick={() => toggleEmployee(employee)}
                 >
@@ -288,7 +295,7 @@ export default function AssignEmployeesDrawer({
                           type="number"
                           min={1}
                           step={0.5}
-                          max={employee.remainingMonths}
+                          max={getMaxEditableMonths(employee)}
                           value={selectedData.actualMonths}
                           onChange={(event) =>
                             updateMonths(employee, Number(event.target.value))

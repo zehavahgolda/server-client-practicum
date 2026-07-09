@@ -435,7 +435,7 @@ Health Score = average(system_balance, gap_ratio, employee_balance)
 
 ---
 
-## 💰 מודל תקציבי
+##  מודל תקציבי
 
 ### **עלות בסיסית**
 

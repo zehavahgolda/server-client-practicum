@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { systemService } from "../../services/systemService";
 import type { System, SystemDetails } from "../../types";
 import AssignEmployeesDrawer from "../Systems/AssignEmployeesDrawer";
@@ -32,6 +33,7 @@ function formatCurrency(value: number) {
 
 // גריד KPI מרכזי בדשבורד שמחשב ומציג מדדים מתוך נתוני המערכות.
 export default function DashboardKpiGrid() {
+  const navigate = useNavigate();
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
   const [shortageModalOpen, setShortageModalOpen] = useState(false);
@@ -79,6 +81,7 @@ export default function DashboardKpiGrid() {
           title="טוען..."
           value="..."
           description="מחשב נתוני דשבורד"
+          onClick={() => navigate("/systems")}
         />
       </section>
     );
@@ -104,6 +107,14 @@ export default function DashboardKpiGrid() {
     0
   );
 
+  const totalAllocatedCapacity = systems.reduce(
+    (sum, system) => sum + (system.allocatedMonths || 0),
+    0
+  );
+
+  const capacityUsagePercent =
+    totalRequiredCapacity > 0 ? (totalAllocatedCapacity / totalRequiredCapacity) * 100 : 0;
+
   // מדדי מצב מערכתיים: חוסר/איזון/חריגות תקציב.
   const totalCapacityGap = systems.reduce(
     (sum, system) => sum + Math.max(system.gap || 0, 0),
@@ -111,6 +122,7 @@ export default function DashboardKpiGrid() {
   );
 
   const shortageCount = systems.filter((system) => system.gap > 0).length;
+  const balancedOrExcessCount = systems.filter((system) => system.gap <= 0).length;
   const budgetOverrunCount = systems.filter((system) => system.budgetGap < 0).length;
   const shortageSystems = systems.filter((system) => system.gap > 0);
 
@@ -158,18 +170,20 @@ export default function DashboardKpiGrid() {
         />
 
         <DashboardKpiCard
-          title="מערכות בחוסר"
-          value={formatMetricValue(shortageCount)}
-          description={`${shortageCount} מערכות בחוסר מתוך ${systems.length}`}
+          title="שיבוץ כח אדם במערכת"
+          value={toPercent(
+            systems.length > 0 ? (balancedOrExcessCount / systems.length) * 100 : 0
+          )}
+          description={`${balancedOrExcessCount} מאוזנות/עודף מתוך ${systems.length}`}
           variant="blue"
-          onClick={() => setShortageModalOpen(true)}
+          onClick={() => navigate("/systems?view=status")}
         />
 
         <DashboardKpiCard
-          title="קיבולת חסרה"
-          value={formatMetricValue(totalCapacityGap)}
-          description={`${totalCapacityGap} חודשי עבודה חסרים מתוך ${totalRequiredCapacity}`}
-          onClick={() => setShortageModalOpen(true)}
+          title="ניצול חודשי עבודה"
+          value={toPercent(capacityUsagePercent)}
+          description={`${formatMetricValue(totalAllocatedCapacity)} מתוך ${formatMetricValue(totalRequiredCapacity)}`}
+          onClick={() => navigate("/employees?availability=low")}
         />
 
         <DashboardKpiCard
@@ -177,6 +191,7 @@ export default function DashboardKpiGrid() {
           value={formatMetricValue(totalCapacityGap)}
           description="חודשי עבודה חסרים"
           variant={totalCapacityGap > 0 ? "red" : "default"}
+          onClick={() => setShortageModalOpen(true)}
         />
 
         <DashboardKpiCard
