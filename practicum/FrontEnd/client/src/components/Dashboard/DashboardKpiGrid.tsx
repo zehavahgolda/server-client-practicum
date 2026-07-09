@@ -120,7 +120,7 @@ export default function DashboardKpiGrid() {
       />
 
       <DashboardKpiCard
-        title="מצב כללי"
+        title=" שיבוץ כח אדם במערכת"
         value={toPercent(
           systems.length > 0 ? (balancedOrExcessCount / systems.length) * 100 : 0
         )}
@@ -130,19 +130,19 @@ export default function DashboardKpiGrid() {
       />
 
       <DashboardKpiCard
-        title="ניצול קיבולת"
+        title="ניצול חודשי עבודה"
         value={toPercent(capacityUsagePercent)}
         description={`${totalAllocatedCapacity} מתוך ${totalRequiredCapacity}`}
         onClick={() => navigate("/employees?availability=low")}
       />
 
-      <DashboardKpiCard
+      {/* <DashboardKpiCard
         title="פער קיבולת כולל"
         value={String(totalCapacityGap)}
         description="חודשי עבודה חסרים"
         variant={totalCapacityGap > 0 ? "red" : "default"}
         onClick={() => navigate("/employees?availability=overloaded")}
-      />
+      /> */}
 
       <DashboardKpiCard
         title="מערכות בחריגת תקציב"

@@ -308,10 +308,7 @@ export default function SystemsPage() {
         )}
       />
 
-      <section className="systems-overview-title">
-        <h1>מבט מערכות</h1>
-        <p>סקירת כל המערכות, קיבוץ לפי מצב עסקי או פער קיבולת, וכניסה לפרופיל מערכת.</p>
-      </section>
+    
 
       {selectedSystem && (
         <div ref={profileRef} className="systems-profile-board">

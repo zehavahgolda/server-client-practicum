@@ -17,9 +17,10 @@ export function getSystemCardTone(system: System) {
 
 // מחזיר תווית סטטוס אנושית לפי פער הקיבולת.
 function getStatusLabel(system: System) {
-  if (system.gap > 0) return "חוסר";
-  if (system.gap < 0) return "זמין";
-  return "מאוזן";
+//   // if (system.gap > 0) return "חוסר";
+//   // if (system.gap < 0) return "זמין";
+//   // return "מאוזן";
+ return;
 }
 
 // קובע טון תקציבי לפי מצב התקציב והחריגה.
@@ -57,21 +58,21 @@ export default function SystemCard({ system, selected = false, onClick }: System
         </div>
 
         <span className={`system-status-pill ${tone}`}>
-          {getStatusLabel(system)}
+          {/* {getStatusLabel(system)} */}
         </span>
       </div>
 
       <div className={`system-budget-mini ${budgetTone}`}>
         {hasBudget ? (
           <>
-            <span>💰 תקציב: {formatCurrency(system.allocatedBudget)}</span>
+            <span> תקציב: {formatCurrency(system.allocatedBudget)}</span>
             <span>
               {system.budgetGap < 0 ? "חריגה" : "יתרה"}:{" "}
               {formatCurrency(Math.abs(system.budgetGap))}
             </span>
           </>
         ) : (
-          <span>💰 תקציב לא הוגדר</span>
+          <span> תקציב לא הוגדר</span>
         )}
       </div>
 

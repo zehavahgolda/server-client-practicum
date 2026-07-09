@@ -2,7 +2,7 @@
  .employee-card {
   position: relative;
   width: 100%;
-  min-height: 0;
+  min-height: 132px;
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
   border-radius: 14px;
@@ -10,7 +10,7 @@
   text-align: right;
   cursor: pointer;
   transition: all .18s ease;
-  overflow: visible;
+  overflow: hidden;
   box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
 }
 
@@ -24,7 +24,7 @@
 }
 
 .employee-card.available::after { background: var(--status-success); }
-.employee-card.balanced::after { background: #f59e0b; }
+.employee-card.balanced::after { background: blue; }
 .employee-card.overloaded::after { background: var(--status-danger); }
 
 .employee-card:hover {
@@ -78,8 +78,8 @@
 }
 
 .employee-status-pill.balanced {
-  background: #fff3cd;
-  color: #8a5a00;
+  background: rgba(0, 0, 255, 0.038);
+  color: blue;
 }
 
 .employee-status-pill.overloaded {
@@ -162,8 +162,8 @@
 .employees-cards-grid {
   padding: 24px 32px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+  gap: 14px;
   align-items: stretch;
 }
 
@@ -212,23 +212,23 @@
 
 @media (max-width: 1280px) {
   .employees-cards-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
     padding: 22px 26px;
-    gap: 12px;
+    gap: 14px;
   }
 }
 
 @media (max-width: 980px) {
   .employees-cards-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     padding: 18px 20px;
-    gap: 12px;
+    gap: 14px;
   }
 }
 
 @media (max-width: 640px) {
   .employees-cards-grid {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     padding: 14px;
     gap: 12px;
   }
@@ -241,6 +241,7 @@
   }
 
   .employee-card {
+    min-height: 128px;
     padding: 11px;
   }
 }
