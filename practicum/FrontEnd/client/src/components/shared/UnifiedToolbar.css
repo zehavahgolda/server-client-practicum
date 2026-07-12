@@ -83,7 +83,7 @@
 
 .unified-stat-pill.warning {
   background: var(--status-warning-soft);
-  color: var(--status-warning);
+  color: blue; /* var(--status-warning); */ 
 }
 
 .unified-stat-pill.danger {

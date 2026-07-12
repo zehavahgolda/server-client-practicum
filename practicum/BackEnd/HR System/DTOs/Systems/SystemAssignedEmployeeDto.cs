@@ -8,8 +8,8 @@ namespace HR_System.DTOs.Systems
         string? ProfessionalSubCategory,
         string ManagerName,
         string RoleInSystem,
-        int PlannedMonths,
-        int ActualMonths,
+        double PlannedMonths,
+        double ActualMonths,
         string AvailabilityStatus //אולי יהיה שימושי לצבעים.. לשאול את חני 
     );
 }

@@ -3,9 +3,9 @@ using HR_System.DTOs.Systems;
 public record SystemDetailsDto(
     string Id,
     string Name,
-    int RequiredCapacityMonths,
-    int AllocatedMonths,
-    int Gap,
+    double RequiredCapacityMonths,
+    double AllocatedMonths,
+    double Gap,
     string CapacityStatus,
     int AssignedEmployeesCount,
     string? ManagementNote,
@@ -15,7 +15,7 @@ public record SystemDetailsDto(
     decimal AllocatedBudget,
     decimal UsedBudget,
     decimal BudgetGap,
-    int TotalPlannedMonths,
-    int TotalActualMonths,
+    double TotalPlannedMonths,
+    double TotalActualMonths,
     double VariancePercent
 );

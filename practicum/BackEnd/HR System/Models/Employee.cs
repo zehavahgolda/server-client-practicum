@@ -26,7 +26,7 @@ namespace HR_System.Models
         public int Year { get; set; } // שנה
 
         [BsonElement("yearlyCapacityMonths")]
-        public int YearlyCapacityMonths { get; set; } = 12; // חודשים מוקצים לשנה
+        public double YearlyCapacityMonths { get; set; } = 12; // חודשים מוקצים לשנה
 
         [BsonElement("upcomingEvent")]
         public string? UpcomingEvent { get; set; } // ארוע מגיע
@@ -52,10 +52,10 @@ namespace HR_System.Models
         public string RoleInSystem { get; set; } = null!;
 
         [BsonElement("plannedMonths")]
-        public int PlannedMonths { get; set; }
+        public double PlannedMonths { get; set; }
 
         [BsonElement("actualMonths")]
-        public int ActualMonths { get; set; }
+        public double ActualMonths { get; set; }
 
     }
 }

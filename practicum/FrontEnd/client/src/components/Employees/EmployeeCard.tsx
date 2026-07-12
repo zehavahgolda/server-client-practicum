@@ -9,18 +9,42 @@ interface EmployeeCardProps {
   onClick: () => void;
 }
 
+type EmployeeBudgetIndicators = {
+  budgetStatus?: string;
+  remainingBudget?: number;
+};
+
+// בודק האם מצב התקציב של העובד נחשב ירוק.
+function isBudgetGreen(employee: EmployeeListItem): boolean {
+  const withBudget = employee as EmployeeListItem & EmployeeBudgetIndicators;
+
+  if (typeof withBudget.remainingBudget === "number") {
+    return withBudget.remainingBudget > 0;
+  }
+
+  if (typeof withBudget.budgetStatus === "string") {
+    const normalized = withBudget.budgetStatus.trim().toLowerCase();
+    return normalized === "balanced" || normalized === "within budget" || normalized === "green";
+  }
+
+  return false;
+}
+
 // קובע טון תצוגה לפי יתרת חודשי הקיבולת.
 function getTone(employee: EmployeeListItem) {
+  const monthsGreen = employee.remainingMonths > 0;
+  const budgetGreen = isBudgetGreen(employee);
+
+  if (monthsGreen && budgetGreen) return "available";
   if (employee.remainingMonths < 0) return "overloaded";
-  if (employee.remainingMonths === 0) return "balanced";
-  return "available";
+  return "balanced";
 }
 
 // מחזיר תווית סטטוס קריאה למשתמש.
 function getStatusLabel(employee: EmployeeListItem) {
-  if (employee.remainingMonths < 0) return "עומס יתר";
-  if (employee.remainingMonths === 0) return "מלא";
-  return "זמין";
+  // if (employee.remainingMonths < 0) return "עומס יתר";
+  // if (employee.remainingMonths === 0) return "מלא";
+  // return "זמין";
 }
 
 // מציג כרטיס עובד עם נתוני קיבולת, סטטוס ופרטים תפעוליים.
@@ -53,7 +77,7 @@ export default function EmployeeCard({
         </div>
 
         <span className={`employee-status-pill ${tone}`}>
-          {getStatusLabel(employee)}
+         {/* {getStatusLabel(employee)} */}
         </span>
 
       </div>
@@ -63,7 +87,7 @@ export default function EmployeeCard({
       <div className="employee-card-metrics">
 
         <div>
-          <span>קיבולת</span>
+          <span>מכסה  שנתית</span>
           <strong>{employee.yearlyCapacityMonths}</strong>
         </div>
 

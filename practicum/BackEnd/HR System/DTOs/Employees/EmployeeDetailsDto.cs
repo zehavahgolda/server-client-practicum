@@ -9,10 +9,10 @@ using System.Collections.Generic;
             string ProfessionalCategory,
             string? ProfessionalSubCategory,
             int Year,
-            int YearlyCapacityMonths, // קיבולת שנתית לעובד
+            double YearlyCapacityMonths, // קיבולת שנתית לעובד
             string? UpcomingEvent, // אירוע עתידי
-            int AllocatedMonths, // חודשים מוקצים
-            int RemainingMonths, // יתרת חודשים, חודשים פנויים
+            double AllocatedMonths, // חודשים מוקצים
+            double RemainingMonths, // יתרת חודשים, חודשים פנויים
             string AvailabilityStatus, // סטטוס זמינות 
             int AssignedSystemsCount, // מספר המערכות המשויכות אליו   
             string? Notes,

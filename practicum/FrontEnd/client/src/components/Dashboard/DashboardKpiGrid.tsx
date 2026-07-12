@@ -169,32 +169,30 @@ export default function DashboardKpiGrid() {
           variant={budgetOverrunCount > 0 ? "red" : "orange"}
         />
 
-        <DashboardKpiCard
-          title="שיבוץ כח אדם במערכת"
-          value={toPercent(
-            systems.length > 0 ? (balancedOrExcessCount / systems.length) * 100 : 0
-          )}
-          description={`${balancedOrExcessCount} מאוזנות/עודף מתוך ${systems.length}`}
-          variant="blue"
-          onClick={() => navigate("/systems?view=status")}
-        />
+      <DashboardKpiCard
+        title="דורש שיבוץ כוח אדם"
+        value={String(shortageCount)}
+        description={`${shortageCount} מערכות בחוסר מתוך ${systems.length}`}
+        variant={shortageCount > 0 ? "red" : "default"}
+        onClick={() => navigate("/systems?view=status")}
+      />
 
-        <DashboardKpiCard
-          title="ניצול חודשי עבודה"
-          value={toPercent(capacityUsagePercent)}
-          description={`${formatMetricValue(totalAllocatedCapacity)} מתוך ${formatMetricValue(totalRequiredCapacity)}`}
+          <DashboardKpiCard
+          title="חודשי עבודה חסרים"
+          value={formatMetricValue(totalRequiredCapacity - totalAllocatedCapacity)}
+          description={`${formatMetricValue(totalAllocatedCapacity)} בשימוש מתוך ${formatMetricValue(totalRequiredCapacity)}`}
           onClick={() => navigate("/employees?availability=low")}
         />
 
-        <DashboardKpiCard
-          title="פער קיבולת כולל"
-          value={formatMetricValue(totalCapacityGap)}
-          description="חודשי עבודה חסרים"
-          variant={totalCapacityGap > 0 ? "red" : "default"}
-          onClick={() => setShortageModalOpen(true)}
-        />
+       <DashboardKpiCard
+        title="????????????"
+        value={formatMetricValue(totalCapacityGap)}
+        description={`${formatMetricValue(totalCapacityGap)} חודשים חסרים מתוך ${formatMetricValue(totalRequiredCapacity)} נדרשים`}
+        variant={totalCapacityGap > 0 ? "red" : "default"}
+        onClick={() => setShortageModalOpen(true)}
+      />
 
-        <DashboardKpiCard
+        {/* <DashboardKpiCard
           title="מערכות בחריגת תקציב"
           value={String(budgetOverrunCount)}
           description={
@@ -203,7 +201,7 @@ export default function DashboardKpiGrid() {
               : `אין חריגות תקציב · ${shortageCount} מערכות בחוסר קיבולת`
           }
           variant={budgetOverrunCount > 0 ? "red" : "default"}
-        />
+        /> */}
       </section>
 
       {shortageModalOpen && !selectedSystem && (

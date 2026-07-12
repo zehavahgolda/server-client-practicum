@@ -7,7 +7,7 @@ namespace HR_System.DTOs.Employees
         string SystemName,
         string SystemCapacityStatus,
         string RoleInSystem,
-        int PlannedMonths,
-        int ActualMonths
+        double PlannedMonths,
+        double ActualMonths
     );
 }

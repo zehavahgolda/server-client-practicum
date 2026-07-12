@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSystems } from "../hooks/useSystems";
@@ -12,7 +11,6 @@ import CreateSystemModal from "../components/Systems/CreateSystemModal";
 import EditSystemModal from "../components/Systems/EditSystemModal";
 import UnifiedToolbar from "../components/shared/UnifiedToolbar";
 import "./SystemsPage.css";
-import PageTabs from "../components/PageTabs";
 
 type ViewMode = "all" | "status" | "gap";
 type UiStatus = "all" | "shortage" | "balanced" | "excess";
@@ -69,7 +67,9 @@ function getStatusGroups(systems: System[]) {
 function getGapGroups(systems: System[]) {
   return {
     healthy: systems.filter((system) => system.gap <= 0),
-    regularShortage: systems.filter((system) => system.gap > 0 && system.gap <= 4),
+    regularShortage: systems.filter(
+      (system) => system.gap > 0 && system.gap <= 4
+    ),
     criticalShortage: systems.filter((system) => system.gap > 4)
   };
 }
@@ -109,17 +109,26 @@ export default function SystemsPage() {
 
   // טוען מערכת ספציפית אם הועבר מזהה ב-URL.
   useEffect(() => {
-  if (!systemIdFromUrl) return;
+    if (!systemIdFromUrl) return;
 
-  void loadSystemDetails(systemIdFromUrl);
-}, [systemIdFromUrl, loadSystemDetails]);
+    void loadSystemDetails(systemIdFromUrl);
+  }, [systemIdFromUrl, loadSystemDetails]);
 
   useEffect(() => {
-    if (requestedView === "all" || requestedView === "status" || requestedView === "gap") {
+    if (
+      requestedView === "all" ||
+      requestedView === "status" ||
+      requestedView === "gap"
+    ) {
       setViewMode(requestedView);
     }
 
-    if (requestedStatus === "all" || requestedStatus === "shortage" || requestedStatus === "balanced" || requestedStatus === "excess") {
+    if (
+      requestedStatus === "all" ||
+      requestedStatus === "shortage" ||
+      requestedStatus === "balanced" ||
+      requestedStatus === "excess"
+    ) {
       setUiStatus(requestedStatus);
     }
 
@@ -131,9 +140,17 @@ export default function SystemsPage() {
   const visibleSystems = useMemo(() => {
     let result = systems;
 
-    if (riskFilter === "at-risk") result = result.filter((system) => system.gap > 4);
-    if (riskFilter === "shortage") result = result.filter((system) => system.gap > 0);
-    if (riskFilter === "balanced") result = result.filter((system) => system.gap <= 0);
+    if (riskFilter === "at-risk") {
+      result = result.filter((system) => system.gap > 4);
+    }
+
+    if (riskFilter === "shortage") {
+      result = result.filter((system) => system.gap > 0);
+    }
+
+    if (riskFilter === "balanced") {
+      result = result.filter((system) => system.gap <= 0);
+    }
 
     result = result.filter((system) => matchesStatus(system, uiStatus));
     result = result.filter((system) => matchesSearch(system, localSearch));
@@ -141,8 +158,15 @@ export default function SystemsPage() {
     return result;
   }, [systems, riskFilter, uiStatus, localSearch]);
 
-  const statusGroups = useMemo(() => getStatusGroups(visibleSystems), [visibleSystems]);
-  const gapGroups = useMemo(() => getGapGroups(visibleSystems), [visibleSystems]);
+  const statusGroups = useMemo(
+    () => getStatusGroups(visibleSystems),
+    [visibleSystems]
+  );
+
+  const gapGroups = useMemo(
+    () => getGapGroups(visibleSystems),
+    [visibleSystems]
+  );
 
   const summaryCounts = useMemo(() => {
     const tones = visibleSystems.map(getSystemCardTone);
@@ -197,84 +221,106 @@ export default function SystemsPage() {
 
   return (
     <main className="systems-page-shell" dir="rtl">
-      <PageTabs />
-
       <UnifiedToolbar
-        filters={(
+        filters={
           <>
-          <label>
-            סינון
-            <select
+            <label>
+              סינון
+              <select
                 value={filters.year ?? activeYear}
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  year: Number(event.target.value)
-                }))
-              }
-            >
+                onChange={(event) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    year: Number(event.target.value)
+                  }))
+                }
+              >
                 {yearOptions.map((year) => (
-                  <option key={year} value={year}>{year}</option>
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
                 ))}
-            </select>
-          </label>
+              </select>
+            </label>
 
-          <label>
-            מנהל
-            <select
-              value={filters.ownerManagerName ?? ""}
-              disabled
-              title="הסינון יהיה זמין בהמשך"
-              onChange={(event) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  ownerManagerName: event.target.value || undefined
-                }))
-              }
+            <label>
+              מנהל
+              <select
+                value={filters.ownerManagerName ?? ""}
+                disabled
+                title="הסינון יהיה זמין בהמשך"
+                onChange={(event) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    ownerManagerName: event.target.value || undefined
+                  }))
+                }
+              >
+                <option value="">כל המנהלים</option>
+              </select>
+            </label>
+
+            <label>
+              סטטוס
+              <select
+                value={uiStatus}
+                onChange={(event) =>
+                  setUiStatus(event.target.value as UiStatus)
+                }
+              >
+                <option value="all">כל הסטטוסים</option>
+                <option value="shortage">מחסור</option>
+                <option value="balanced">מאוזן</option>
+                <option value="excess">עודף</option>
+              </select>
+            </label>
+
+            <label className="systems-search-label">
+              חיפוש
+              <input
+                value={localSearch}
+                onChange={(event) => setLocalSearch(event.target.value)}
+                placeholder="חיפוש מערכת לפי שם או תחום בעייתי"
+              />
+            </label>
+
+            <button
+              type="button"
+              className="secondary-btn unified-clean-btn"
+              onClick={clearFilters}
             >
-              <option value="">כל המנהלים</option>
-            </select>
-          </label>
-
-          <label>
-            סטטוס
-            <select
-              value={uiStatus}
-              onChange={(event) => setUiStatus(event.target.value as UiStatus)}
-            >
-              <option value="all">כל הסטטוסים</option>
-              <option value="shortage">מחסור</option>
-              <option value="balanced">מאוזן</option>
-              <option value="excess">עודף</option>
-            </select>
-          </label>
-
-          <label className="systems-search-label">
-            חיפוש
-            <input
-              value={localSearch}
-              onChange={(event) => setLocalSearch(event.target.value)}
-              placeholder="חיפוש מערכת לפי שם או תחום בעייתי"
-            />
-          </label>
-
-          <button type="button" className="secondary-btn unified-clean-btn" onClick={clearFilters}>
-            ניקוי
-          </button>
+              ניקוי
+            </button>
           </>
-        )}
-        summary={(
+        }
+        summary={
           <>
-            {summaryCounts.red > 0 && <span className="unified-stat-pill danger">חוסר: {summaryCounts.red}</span>}
-            {summaryCounts.green > 0 && <span className="unified-stat-pill green">זמין: {summaryCounts.green}</span>}
-            {summaryCounts.balanced > 0 && <span className="unified-stat-pill neutral">מאוזן: {summaryCounts.balanced}</span>}
+            {summaryCounts.red > 0 && (
+              <span className="unified-stat-pill danger">
+                חוסר: {summaryCounts.red}
+              </span>
+            )}
+
+            {summaryCounts.green > 0 && (
+              <span className="unified-stat-pill green">
+                זמין: {summaryCounts.green}
+              </span>
+            )}
+
+            {summaryCounts.balanced > 0 && (
+              <span className="unified-stat-pill neutral">
+                מאוזן: {summaryCounts.balanced}
+              </span>
+            )}
           </>
-        )}
-        grouping={(
+        }
+        grouping={
           <>
             <button
               type="button"
-              className={`unified-view-pill ${viewMode === "all" ? "active" : ""}`}
+              className={`unified-view-pill ${
+                viewMode === "all" ? "active" : ""
+              }`}
               onClick={() => setViewMode("all")}
             >
               כל המערכות
@@ -282,7 +328,9 @@ export default function SystemsPage() {
 
             <button
               type="button"
-              className={`unified-view-pill ${viewMode === "status" ? "active" : ""}`}
+              className={`unified-view-pill ${
+                viewMode === "status" ? "active" : ""
+              }`}
               onClick={() => setViewMode("status")}
             >
               קיבוץ לפי מצב
@@ -290,14 +338,16 @@ export default function SystemsPage() {
 
             <button
               type="button"
-              className={`unified-view-pill ${viewMode === "gap" ? "active" : ""}`}
+              className={`unified-view-pill ${
+                viewMode === "gap" ? "active" : ""
+              }`}
               onClick={() => setViewMode("gap")}
             >
               קיבוץ לפי פער קיבולת
             </button>
           </>
-        )}
-        actionButton={(
+        }
+        actionButton={
           <button
             type="button"
             className="primary-btn"
@@ -305,10 +355,8 @@ export default function SystemsPage() {
           >
             + הוספת מערכת
           </button>
-        )}
+        }
       />
-
-    
 
       {selectedSystem && (
         <div ref={profileRef} className="systems-profile-board">
@@ -340,7 +388,9 @@ export default function SystemsPage() {
           </span>
         </header>
 
-        {loadingList && <div className="system-note-box">טוען מערכות...</div>}
+        {loadingList && (
+          <div className="system-note-box">טוען מערכות...</div>
+        )}
 
         {!loadingList && viewMode === "all" && (
           <div className="systems-cards-grid">
@@ -433,6 +483,7 @@ export default function SystemsPage() {
         onClose={() => setCreateModalOpen(false)}
         onCreated={refreshAfterCreate}
       />
+
       <AssignEmployeesDrawer
         open={assignDrawerOpen}
         system={selectedSystem}

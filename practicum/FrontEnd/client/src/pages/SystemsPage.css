@@ -1,7 +1,7 @@
 .systems-page-shell {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 22px 56px 48px;
+  padding: 12px 56px 48px;
   color: var(--text-primary);
 }
 
@@ -75,7 +75,7 @@
 
 @media (max-width: 1280px) {
   .systems-page-shell {
-    padding: 20px 42px 44px;
+    padding: 12px 42px 44px;
   }
 
   .systems-cards-grid {
@@ -94,9 +94,24 @@
   }
 }
 
+@media (max-width: 980px) {
+  .systems-page-shell {
+    padding: 12px 24px 38px;
+  }
+
+  .unified-filter-row {
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+  }
+
+  .systems-search-label {
+    grid-column: 1 / 3;
+  }
+}
+
 @media (max-width: 640px) {
   .systems-page-shell {
-    padding: 12px 14px 28px;
+    padding: 10px 14px 28px;
   }
 
   .systems-search-label {

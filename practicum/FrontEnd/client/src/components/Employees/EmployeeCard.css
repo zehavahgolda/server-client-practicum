@@ -114,7 +114,7 @@
 }
 
 .employee-card-metrics strong.available { color: var(--status-success); }
-.employee-card-metrics strong.balanced { color: #8a5a00; }
+.employee-card-metrics strong.balanced { color: #180c9b; }
 .employee-card-metrics strong.overloaded { color: var(--status-danger); }
 
 .employees-board {

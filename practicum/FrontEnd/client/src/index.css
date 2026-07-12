@@ -1,3 +1,7 @@
+:root {
+  --app-font: "Assistant", "Heebo", Arial, sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -10,14 +14,40 @@ body,
 }
 
 body {
-  font-family: "Heebo", "Assistant", "Segoe UI", Arial, sans-serif;
+  font-family: var(--app-font);
   background: #f1f2f4;
   color: #1f2937;
 }
 
-h1, h2, h3, h4, h5, h6, p, span, label, button, input, select, textarea, a, li, td, th {
-  font-family: "Heebo", "Assistant", "Segoe UI", Arial, sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+label,
+button,
+input,
+select,
+textarea,
+a,
+li,
+td,
+th,
+strong,
+small {
+  font-family: var(--app-font);
 }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 .empty-text {
   width: 100%;
   min-height: 96px;

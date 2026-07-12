@@ -9,7 +9,7 @@ namespace HR_System.DTOs.Employees
         public string? ProfessionalSubCategory { get; init; }
         public string? ManagerName { get; init; }
         public int? Year { get; init; }
-        public int? YearlyCapacityMonths { get; init; } // קיבולת שנתית
+        public double? YearlyCapacityMonths { get; init; } // קיבולת שנתית
         public string? UpcomingEvent { get; init; }
         public string? Notes { get; init; }
         public bool? IsActive { get; init; }

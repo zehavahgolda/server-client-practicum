@@ -7,9 +7,9 @@ namespace HR_System.DTOs.Employees
         string ProfessionalCategory, // קטגוריה מקצועית
         string? ProfessionalSubCategory, // תת תחום 
         string ManagerName, // שם מנהל
-        int YearlyCapacityMonths, // קיבולת שנתית בחודשים
-        int AllocatedMonths, // חודשים מוקצים
-        int RemainingMonths, // יתרת חודשים, חודשים פנויים 
+        double YearlyCapacityMonths, // קיבולת שנתית בחודשים
+        double AllocatedMonths, // חודשים מוקצים
+        double RemainingMonths, // יתרת חודשים, חודשים פנויים 
         string AvailabilityStatus, // סטטוס זמינות
         int AssignedSystemsCount // כמות מערכות
     );

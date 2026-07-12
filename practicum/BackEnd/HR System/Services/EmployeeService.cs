@@ -342,7 +342,7 @@ namespace HR_System.Services
             return res.ModifiedCount > 0;
         }
 
-        private static int GetAllocatedMonths(Employee employee) =>
+        private static double GetAllocatedMonths(Employee employee) =>
             (employee.Allocations ?? new List<EmployeeAllocation>()).Sum(a => a.ActualMonths);
 
         private static string GetAvailabilityStatus(Employee employee)

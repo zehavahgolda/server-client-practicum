@@ -111,8 +111,8 @@ namespace HR_System.Services
             var usedBudget = (decimal)allocatedMonths * costPerManMonth;
             var budgetGap = allocatedBudget - usedBudget;
 
-            int totalPlanned = allocations.Sum(a => a.PlannedMonths);
-            int totalActual = allocatedMonths;
+            double totalPlanned = allocations.Sum(a => a.PlannedMonths);
+            double totalActual = allocatedMonths;
             double variancePercent = 0;
 
             if (totalPlanned > 0)
@@ -305,7 +305,7 @@ namespace HR_System.Services
             {
                 matrixSheet.Cell(matrixRow, 1).Value = employee.FullName;
 
-                int employeeTotal = 0;
+                double employeeTotal = 0;
 
                 for (int i = 0; i < orderedSystems.Count; i++)
                 {
@@ -416,7 +416,7 @@ namespace HR_System.Services
         }
 
         // סכימת חודשי עבודה בפועל עבור מערכת ספציפית
-        private static int GetAllocatedMonthsBySystemId(IEnumerable<Employee> employees, string systemId) =>
+        private static double GetAllocatedMonthsBySystemId(IEnumerable<Employee> employees, string systemId) =>
             employees.SelectMany(e => e.Allocations ?? []).Where(a => string.Equals(a.SystemId, systemId, StringComparison.OrdinalIgnoreCase)).Sum(a => a.ActualMonths);
 
         // ספירת כמות העובדים המוקצים למערכת
@@ -424,7 +424,7 @@ namespace HR_System.Services
             employees.Where(e => (e.Allocations ?? []).Any(a => string.Equals(a.SystemId, systemId, StringComparison.OrdinalIgnoreCase))).Count();
 
         // קביעת סטטוס קיבולת המערכת
-        private static string GetCapacityStatus(int gap) => gap > 0 ? "Shortage" : (gap == 0 ? "Balanced" : "Excess");
+        private static string GetCapacityStatus(double gap) => gap > 0 ? "Shortage" : (gap == 0 ? "Balanced" : "Excess");
 
         // קביעת סטטוס זמינות של עובד
         private static string GetEmployeeAvailabilityStatus(Employee employee)

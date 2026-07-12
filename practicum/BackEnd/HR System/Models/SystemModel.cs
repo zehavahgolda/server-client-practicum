@@ -20,7 +20,7 @@ namespace HR_System.Models
         public int Year { get; set; } // שנה
 
         [BsonElement("requiredCapacity")]
-        public int RequiredCapacityMonths { get; set; } // חודשי עבודה מוקצים למערכת
+        public double RequiredCapacityMonths { get; set; } // חודשי עבודה מוקצים למערכת
 
         [BsonElement("managementNote")]
         public string? ManagementNote { get; set; } // הערה ניהולית על המערכת

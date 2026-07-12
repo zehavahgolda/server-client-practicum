@@ -57,10 +57,10 @@ namespace HR_System.Services
         // =========================================================================
         // 💡 פונקציות העזר שאת אוהבת - עכשיו הן יושבות פה בצורה תקנית בתוך ה-Class!
         // =========================================================================
-        private static int GetAllocatedMonths(Employee employee) =>
+        private static double GetAllocatedMonths(Employee employee) =>
             (employee.Allocations ?? new List<EmployeeAllocation>()).Sum(a => a.ActualMonths);
 
-        private static int GetRemainingMonths(Employee employee) =>
+        private static double GetRemainingMonths(Employee employee) =>
             employee.YearlyCapacityMonths - GetAllocatedMonths(employee);
 
         private static string GetAvailabilityStatus(Employee employee)

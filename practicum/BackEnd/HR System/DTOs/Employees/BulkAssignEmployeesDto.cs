@@ -8,8 +8,8 @@
     public record EmployeeAssignmentItemDto(
         string EmployeeId,
         string RoleInSystem,
-        int PlannedMonths,
-        int ActualMonths
+        double PlannedMonths,
+        double ActualMonths
     );
 
     public record BulkAssignEmployeesResultDto(
