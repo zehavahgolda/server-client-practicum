@@ -1,20 +1,26 @@
 using HR_System.Services;
 using MongoDB.Driver;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ����� ������ ������ �-MongoDB ���� ���� �-appsettings.json
+// =======================
+// Configure Serilog
+// =======================
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 var connectionString = builder.Configuration["MongoDB:ConnectionString"];
 var databaseName = builder.Configuration["MongoDB:DatabaseName"];
 
-// ����� �-MongoClient ��������� (���� ���� ��� ���� ��� ������)
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
 
-// ����� �-IMongoDatabase �-Scoped (���� ��� ��� ����)
 builder.Services.AddScoped<IMongoDatabase>(sp =>
     sp.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
 
-// ����� ����� ������ ���������� �-JSON ���� ������ �-Frontend
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
     {
@@ -25,18 +31,18 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ����� ������ ��������� ����� ����� ������ (Dependency Injection)
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ISystemService, SystemService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IChangeService, ChangeService>();
 
-// ����� ������� CORS ���� ���� ������ ������
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalUI", policy =>
     {
-        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -44,7 +50,6 @@ builder.Services.AddAutoMapper(typeof(AutoMappering));
 
 var app = builder.Build();
 
-// ������ ����� �����
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -53,11 +58,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ����� CORS ����� ������
 app.UseCors("AllowLocalUI");
 
-// ����� ����� �������
 app.UseAuthorization();
+
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("HR System API started successfully.");
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "HR System API terminated unexpectedly.");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

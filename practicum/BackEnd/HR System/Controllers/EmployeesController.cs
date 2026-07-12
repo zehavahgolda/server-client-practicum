@@ -1,140 +1,7 @@
-﻿//using HR_System.DTOs.Employees;
-//using HR_System.Services;
-//using Microsoft.AspNetCore.Mvc;
-
-//namespace HR_System.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class EmployeesController : ControllerBase
-//    {
-//        private readonly IEmployeeService _employeeService;
-
-//        public EmployeesController(IEmployeeService employeeService)
-//        {
-//            _employeeService = employeeService;
-//        }
-
-//        /// <summary>
-//        /// שליפת רשימת עובדים לפי פרמטרים.
-//        /// </summary>
-//        [HttpGet]
-//        public async Task<ActionResult<List<EmployeeListItemDto>>> GetEmployees(
-//            [FromQuery] int? year,
-//            [FromQuery] string? managerName,
-//            [FromQuery] string? professionalCategory,
-//            [FromQuery] string? systemId,
-//            [FromQuery] string? search)
-//        {
-//            try
-//            {
-//                var employees = await _employeeService.GetEmployeesAsync(
-//                    year,
-//                    managerName,
-//                    professionalCategory,
-//                    systemId,
-//                    search);
-//                return Ok(employees);
-//            }
-//            catch (Exception ex)
-//            {
-//                return StatusCode(500, $"Error: {ex.Message}");
-//            }
-//        }
-
-//        /// <summary>
-//        /// שליפת פרטי עובד ספציפי לפי מזהה.
-//        /// </summary>
-//        [HttpGet("{id}")]
-//        public async Task<ActionResult<EmployeeDetailsDto>> GetEmployeeById(string id)
-//        {
-//            try
-//            {
-//                var employee = await _employeeService.GetEmployeeByIdAsync(id);
-//                if (employee is null)
-//                {
-//                    return NotFound();
-//                }
-
-//                return Ok(employee);
-//            }
-//            catch (Exception ex)
-//            {
-//                return StatusCode(500, $"Error: {ex.Message}");
-//            }
-//        }
-
-//        /// <summary>
-//        /// עדכון חודשי עבודה בפועל עבור הקצאת עובד למערכת.
-//        /// </summary>
-//        [HttpPut("{id}/allocation-months")]
-//        public async Task<IActionResult> UpdateAllocationMonths(
-//            string id,
-//            [FromQuery] string? systemId,
-//            [FromQuery] string? roleInSystem,
-//            [FromQuery] int? actualMonths)
-//        {
-//            if (string.IsNullOrWhiteSpace(systemId) || string.IsNullOrWhiteSpace(roleInSystem) || !actualMonths.HasValue)
-//            {
-//                return BadRequest("Required parameters: systemId, roleInSystem, and actualMonths must be provided.");
-//            }
-
-//            var success = await _employeeService.UpdateAllocationActualMonthsAsync(id, systemId, roleInSystem, actualMonths.Value);
-
-//            if (!success)
-//                return NotFound("Employee allocation was not found for the specified system and role.");
-
-//            return Ok(new { message = $"Actual months updated to {actualMonths}." });
-//        }
-
-//        /// <summary>
-//        /// יצירת עובד חדש.
-//        /// </summary>
-//        [HttpPost]
-//        public async Task<ActionResult<string>> CreateEmployee([FromBody] EmployeeCreateDto dto)
-//        {
-//            var id = await _employeeService.CreateEmployeeAsync(dto);
-//            return CreatedAtAction(nameof(GetEmployeeById), new { id }, id);
-//        }
-
-//        /// <summary>
-//        /// עדכון עובד קיים.
-//        /// </summary>
-//        [HttpPut("{id}")]
-//        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeEditDto dto)
-//        {
-//            var success = await _employeeService.UpdateEmployeeAsync(id, dto);
-//            if (!success) return NotFound("Employee not found or no changes were made.");
-//            return NoContent();
-//        }
-
-//        /// <summary>
-//        /// הוספת הקצאה לעובד קיים.
-//        /// </summary>
-//        [HttpPost("{id}/allocations")]
-//        public async Task<IActionResult> AddAllocation(string id, [FromBody] AllocationCreateDto dto)
-//        {
-//            var success = await _employeeService.AddAllocationAsync(id, dto);
-//            if (!success) return NotFound("Employee not found or could not add allocation.");
-//            return Ok();
-//        }
-
-//        /// <summary>
-//        /// מחיקה רכה של עובד (שינוי סטטוס ללא פעיל).
-//        /// </summary>
-//        [HttpDelete("{id}")]
-//        public async Task<IActionResult> DeleteEmployee(string id)
-//        {
-//            var success = await _employeeService.DeleteEmployeeAsync(id);
-//            if (!success) return NotFound("Employee not found.");
-//            return NoContent();
-//        }
-//    }
-//}
-
-using HR_System.DTOs.Employees;
+﻿using HR_System.DTOs.Employees;
 using HR_System.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace HR_System.Controllers
 {
@@ -143,10 +10,14 @@ namespace HR_System.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+        private readonly ILogger<EmployeesController> _logger;
 
-        public EmployeesController(IEmployeeService employeeService)
+        public EmployeesController(
+            IEmployeeService employeeService,
+            ILogger<EmployeesController> logger)
         {
             _employeeService = employeeService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -160,6 +31,14 @@ namespace HR_System.Controllers
             [FromQuery] string? systemId,
             [FromQuery] string? search)
         {
+            _logger.LogInformation(
+                "GetEmployees request received. Year: {Year}, Manager: {Manager}, Category: {Category}, System: {SystemId}, Search: {Search}",
+                year,
+                managerName,
+                professionalCategory,
+                systemId,
+                search);
+
             try
             {
                 var employees = await _employeeService.GetEmployeesAsync(
@@ -173,7 +52,11 @@ namespace HR_System.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing GetEmployees request.");
+
+                return StatusCode(500, "An unexpected error occurred.");
             }
         }
 
@@ -187,18 +70,36 @@ namespace HR_System.Controllers
             [FromQuery] int? year,
             [FromQuery] string? search)
         {
+            _logger.LogInformation(
+                "GetAssignmentCandidates request received. SystemId: {SystemId}, Year: {Year}, Search: {Search}",
+                systemId,
+                year,
+                search);
+
             try
             {
                 if (string.IsNullOrWhiteSpace(systemId))
-                    return BadRequest("systemId is required.");
+                {
+                    _logger.LogWarning(
+                        "GetAssignmentCandidates request rejected because SystemId was not provided.");
 
-                var employees = await _employeeService.GetAssignmentCandidatesAsync(systemId, year, search);
+                    return BadRequest("systemId is required.");
+                }
+
+                var employees = await _employeeService.GetAssignmentCandidatesAsync(
+                    systemId,
+                    year,
+                    search);
 
                 return Ok(employees);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing GetAssignmentCandidates request.");
+
+                return StatusCode(500, "An unexpected error occurred.");
             }
         }
 
@@ -208,18 +109,33 @@ namespace HR_System.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDetailsDto>> GetEmployeeById(string id)
         {
+            _logger.LogInformation(
+                "GetEmployeeById request received. EmployeeId: {EmployeeId}",
+                id);
+
             try
             {
                 var employee = await _employeeService.GetEmployeeByIdAsync(id);
 
                 if (employee is null)
+                {
+                    _logger.LogWarning(
+                        "Employee not found. EmployeeId: {EmployeeId}",
+                        id);
+
                     return NotFound();
+                }
 
                 return Ok(employee);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing GetEmployeeById request. EmployeeId: {EmployeeId}",
+                    id);
+
+                return StatusCode(500, "An unexpected error occurred.");
             }
         }
 
@@ -233,87 +149,234 @@ namespace HR_System.Controllers
             [FromQuery] string? roleInSystem,
             [FromQuery] int? actualMonths)
         {
-            if (string.IsNullOrWhiteSpace(systemId) ||
-                string.IsNullOrWhiteSpace(roleInSystem) ||
-                !actualMonths.HasValue)
-            {
-                return BadRequest("Required parameters: systemId, roleInSystem, and actualMonths must be provided.");
-            }
-
-            var success = await _employeeService.UpdateAllocationActualMonthsAsync(
+            _logger.LogInformation(
+                "UpdateAllocationMonths request received. EmployeeId: {EmployeeId}, SystemId: {SystemId}, Role: {RoleInSystem}, ActualMonths: {ActualMonths}",
                 id,
                 systemId,
                 roleInSystem,
-                actualMonths.Value);
+                actualMonths);
 
-            if (!success)
-                return NotFound("Employee allocation was not found for the specified system and role.");
+            try
+            {
+                if (string.IsNullOrWhiteSpace(systemId) ||
+                    string.IsNullOrWhiteSpace(roleInSystem) ||
+                    !actualMonths.HasValue)
+                {
+                    _logger.LogWarning(
+                        "UpdateAllocationMonths request rejected due to missing required parameters. EmployeeId: {EmployeeId}",
+                        id);
 
-            return Ok(new { message = $"Actual months updated to {actualMonths}." });
+                    return BadRequest(
+                        "Required parameters: systemId, roleInSystem, and actualMonths must be provided.");
+                }
+
+                var success = await _employeeService.UpdateAllocationActualMonthsAsync(
+                    id,
+                    systemId,
+                    roleInSystem,
+                    actualMonths.Value);
+
+                if (!success)
+                {
+                    _logger.LogWarning(
+                        "Employee allocation was not found. EmployeeId: {EmployeeId}, SystemId: {SystemId}, Role: {RoleInSystem}",
+                        id,
+                        systemId,
+                        roleInSystem);
+
+                    return NotFound(
+                        "Employee allocation was not found for the specified system and role.");
+                }
+
+                return Ok(new { message = $"Actual months updated to {actualMonths}." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing UpdateAllocationMonths request. EmployeeId: {EmployeeId}",
+                    id);
+
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
         /// <summary>
         /// יצירת עובד חדש.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult<string>> CreateEmployee([FromBody] EmployeeCreateDto dto)
+        public async Task<ActionResult<string>> CreateEmployee(
+            [FromBody] EmployeeCreateDto dto)
         {
-            var id = await _employeeService.CreateEmployeeAsync(dto);
-            return CreatedAtAction(nameof(GetEmployeeById), new { id }, id);
+            _logger.LogInformation(
+                "CreateEmployee request received.");
+
+            try
+            {
+                var id = await _employeeService.CreateEmployeeAsync(dto);
+
+                return CreatedAtAction(
+                    nameof(GetEmployeeById),
+                    new { id },
+                    id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing CreateEmployee request.");
+
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
         /// <summary>
         /// עדכון עובד קיים.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployee(string id, [FromBody] EmployeeEditDto dto)
+        public async Task<IActionResult> UpdateEmployee(
+            string id,
+            [FromBody] EmployeeEditDto dto)
         {
-            var success = await _employeeService.UpdateEmployeeAsync(id, dto);
+            _logger.LogInformation(
+                "UpdateEmployee request received. EmployeeId: {EmployeeId}",
+                id);
 
-            if (!success)
-                return NotFound("Employee not found or no changes were made.");
+            try
+            {
+                var success = await _employeeService.UpdateEmployeeAsync(id, dto);
 
-            return NoContent();
+                if (!success)
+                {
+                    _logger.LogWarning(
+                        "Employee update could not be completed. EmployeeId: {EmployeeId}",
+                        id);
+
+                    return NotFound(
+                        "Employee not found or no changes were made.");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing UpdateEmployee request. EmployeeId: {EmployeeId}",
+                    id);
+
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
         /// <summary>
         /// הוספת הקצאה לעובד קיים.
         /// </summary>
         [HttpPost("{id}/allocations")]
-        public async Task<IActionResult> AddAllocation(string id, [FromBody] AllocationCreateDto dto)
+        public async Task<IActionResult> AddAllocation(
+            string id,
+            [FromBody] AllocationCreateDto dto)
         {
-            var success = await _employeeService.AddAllocationAsync(id, dto);
+            _logger.LogInformation(
+                "AddAllocation request received. EmployeeId: {EmployeeId}",
+                id);
 
-            if (!success)
-                return BadRequest("Employee not found, already assigned, inactive, or does not have enough remaining months.");
+            try
+            {
+                var success = await _employeeService.AddAllocationAsync(id, dto);
 
-            return Ok();
+                if (!success)
+                {
+                    _logger.LogWarning(
+                        "Employee allocation request could not be completed. EmployeeId: {EmployeeId}",
+                        id);
+
+                    return BadRequest(
+                        "Employee not found, already assigned, inactive, or does not have enough remaining months.");
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing AddAllocation request. EmployeeId: {EmployeeId}",
+                    id);
+
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
         /// <summary>
         /// שיבוץ כמה עובדים למערכת בפעולה אחת.
         /// </summary>
         [HttpPost("bulk-assign")]
-        public async Task<IActionResult> BulkAssignEmployees([FromBody] BulkAssignEmployeesDto dto)
+        public async Task<IActionResult> BulkAssignEmployees(
+            [FromBody] BulkAssignEmployeesDto dto)
         {
-            var result = await _employeeService.BulkAssignEmployeesToSystemAsync(dto);
+            _logger.LogInformation(
+                "BulkAssignEmployees request received.");
 
-            if (!result.IsSuccess)
-                return BadRequest(result);
+            try
+            {
+                var result =
+                    await _employeeService.BulkAssignEmployeesToSystemAsync(dto);
 
-            return Ok(result);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning(
+                        "Bulk employee assignment request could not be completed.");
+
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing BulkAssignEmployees request.");
+
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
+        /// <summary>
         /// מחיקה רכה של עובד.
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(string id)
         {
-            var success = await _employeeService.DeleteEmployeeAsync(id);
+            _logger.LogInformation(
+                "DeleteEmployee request received. EmployeeId: {EmployeeId}",
+                id);
 
-            if (!success)
-                return NotFound("Employee not found.");
+            try
+            {
+                var success = await _employeeService.DeleteEmployeeAsync(id);
 
-            return NoContent();
+                if (!success)
+                {
+                    _logger.LogWarning(
+                        "Employee deactivation could not be completed. EmployeeId: {EmployeeId}",
+                        id);
+
+                    return NotFound("Employee not found.");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error while processing DeleteEmployee request. EmployeeId: {EmployeeId}",
+                    id);
+
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
     }
 }
