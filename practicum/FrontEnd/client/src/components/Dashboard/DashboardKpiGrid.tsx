@@ -1,20 +1,22 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useEffect, useMemo, useState } from "react";
 import { systemService } from "../../services/systemService";
 import type { System, SystemDetails } from "../../types";
 import AssignEmployeesDrawer from "../Systems/AssignEmployeesDrawer";
 import EditSystemModal from "../Systems/EditSystemModal";
-import SystemCard from "../Systems/SystemCard";
 import SystemProfile from "../Systems/SystemProfile";
 import DashboardKpiCard from "./DashboardKpiCard";
+import DashboardKpiDetailsModal, {
+  type DashboardKpiModalMode
+} from "./DashboardKpiDetailsModal";
 import "./DashboardKpiGrid.css";
 
-// ממיר ערך מספרי לאחוז מעוגל לתצוגה בכרטיסי KPI.
+// ממיר ערך מספרי לאחוז מעוגל.
 function toPercent(value: number) {
   return `${Math.round(value)}%`;
 }
 
-// מעצב ערך מספרי רגיל להצגה אחידה, כולל תמיכה בחצאי חודשים.
+// מעצב ערך מספרי, כולל תמיכה בחצאי חודשים.
 function formatMetricValue(value: number) {
   return new Intl.NumberFormat("he-IL", {
     minimumFractionDigits: Number.isInteger(value) ? 0 : 1,
@@ -22,7 +24,7 @@ function formatMetricValue(value: number) {
   }).format(value || 0);
 }
 
-// מעצב ערך כספי לפי פורמט מטבע ישראלי להצגה אחידה.
+// מעצב סכום כספי בשקלים.
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
@@ -31,49 +33,175 @@ function formatCurrency(value: number) {
   }).format(value || 0);
 }
 
-// גריד KPI מרכזי בדשבורד שמחשב ומציג מדדים מתוך נתוני המערכות.
+// גריד KPI מרכזי בדשבורד.
+// אחראי על טעינת הנתונים, חישוב המדדים, פתיחת הפופאפ
+// וחיבור פעולות העריכה/השיבוץ/הפרופיל.
 export default function DashboardKpiGrid() {
-  const navigate = useNavigate();
   const [systems, setSystems] = useState<System[]>([]);
   const [loading, setLoading] = useState(true);
-  const [shortageModalOpen, setShortageModalOpen] = useState(false);
-  const [selectedSystem, setSelectedSystem] = useState<SystemDetails | null>(null);
+  const [activeModal, setActiveModal] =
+    useState<DashboardKpiModalMode | null>(null);
+
+  const [selectedSystem, setSelectedSystem] =
+    useState<SystemDetails | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [assignDrawerOpen, setAssignDrawerOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
+  // טעינת נתוני המערכות הראשונית.
   useEffect(() => {
-    let isMounted = true;
+    let cancelled = false;
 
-    // טוען את רשימת המערכות ליצירת מדדי KPI ומונע עדכון סטייט אחרי unmount.
-    async function loadSystems() {
+    async function loadInitialSystems() {
+      setLoading(true);
+
       try {
         const data = await systemService.getSystems();
 
-        if (isMounted) {
+        if (!cancelled) {
           setSystems(data);
         }
       } catch (error) {
         console.error("Failed to load dashboard KPI systems", error);
 
-        if (isMounted) {
+        if (!cancelled) {
           setSystems([]);
         }
       } finally {
-        if (isMounted) {
+        if (!cancelled) {
           setLoading(false);
         }
       }
     }
 
-    void loadSystems();
+    void loadInitialSystems();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
   }, []);
 
-  // תצוגת ביניים בזמן טעינת נתוני הדשבורד.
+  // חישובי KPI מרכזיים.
+  const metrics = useMemo(() => {
+    const totalAllocatedBudget = systems.reduce(
+      (sum, system) => sum + (system.allocatedBudget || 0),
+      0
+    );
+
+    const totalUsedBudget = systems.reduce(
+      (sum, system) => sum + (system.usedBudget || 0),
+      0
+    );
+
+    const totalRequiredCapacity = systems.reduce(
+      (sum, system) => sum + (system.requiredCapacityMonths || 0),
+      0
+    );
+
+    const totalAllocatedCapacity = systems.reduce(
+      (sum, system) => sum + (system.allocatedMonths || 0),
+      0
+    );
+
+    const shortageSystems = systems.filter((system) => system.gap > 0);
+
+    const totalCapacityGap = shortageSystems.reduce(
+      (sum, system) => sum + (system.gap || 0),
+      0
+    );
+
+    const budgetUsagePercent =
+      totalAllocatedBudget > 0
+        ? (totalUsedBudget / totalAllocatedBudget) * 100
+        : 0;
+
+    const budgetOverrunCount = systems.filter(
+      (system) => system.budgetGap < 0
+    ).length;
+
+    return {
+      totalAllocatedBudget,
+      totalUsedBudget,
+      totalRequiredCapacity,
+      totalAllocatedCapacity,
+      totalCapacityGap,
+      shortageSystems,
+      shortageCount: shortageSystems.length,
+      budgetUsagePercent,
+      budgetOverrunCount
+    };
+  }, [systems]);
+
+  // טוען פרטים מלאים של מערכת עבור פעולה שדורשת SystemDetails.
+  async function loadSystemDetails(systemId: string) {
+    setLoadingDetails(true);
+
+    try {
+      const details = await systemService.getSystemById(systemId);
+      setSelectedSystem(details);
+      return details;
+    } catch (error) {
+      console.error("Failed to load system details from dashboard", error);
+      return null;
+    } finally {
+      setLoadingDetails(false);
+    }
+  }
+
+  // פתיחת מגירת שיבוץ עובדים מתוך הפופאפ.
+  async function openAssignment(system: System) {
+    const details = await loadSystemDetails(system.id);
+
+    if (details) {
+      setAssignDrawerOpen(true);
+    }
+  }
+
+  // פתיחת מודל עריכת מערכת מתוך הפופאפ.
+  async function openEdit(system: System) {
+    const details = await loadSystemDetails(system.id);
+
+    if (details) {
+      setEditModalOpen(true);
+    }
+  }
+
+  // פתיחת פרופיל מערכת מלא.
+  async function openProfile(system: System) {
+    const details = await loadSystemDetails(system.id);
+
+    if (details) {
+      setActiveModal(null);
+      setProfileOpen(true);
+    }
+  }
+
+  // רענון הרשימה והמערכת הפעילה לאחר עריכה או שיבוץ.
+  async function refreshAfterChange() {
+    const systemsData = await systemService.getSystems();
+    setSystems(systemsData);
+
+    if (selectedSystem) {
+      const refreshedDetails = await systemService.getSystemById(
+        selectedSystem.id
+      );
+      setSelectedSystem(refreshedDetails);
+    }
+  }
+
+  function closeProfile() {
+    setProfileOpen(false);
+    setAssignDrawerOpen(false);
+    setEditModalOpen(false);
+    setSelectedSystem(null);
+  }
+
+  const modalSystems =
+    activeModal === "budget"
+      ? systems
+      : metrics.shortageSystems;
+
   if (loading) {
     return (
       <section className="dashboard-kpi-grid">
@@ -81,82 +209,9 @@ export default function DashboardKpiGrid() {
           title="טוען..."
           value="..."
           description="מחשב נתוני דשבורד"
-          onClick={() => navigate("/systems")}
         />
       </section>
     );
-  }
-
-  // חישוב מדדי תקציב כוללים עבור כלל המערכות.
-  const totalAllocatedBudget = systems.reduce(
-    (sum, system) => sum + (system.allocatedBudget || 0),
-    0
-  );
-
-  const totalUsedBudget = systems.reduce(
-    (sum, system) => sum + (system.usedBudget || 0),
-    0
-  );
-
-  const budgetUsagePercent =
-    totalAllocatedBudget > 0 ? (totalUsedBudget / totalAllocatedBudget) * 100 : 0;
-
-  // חישוב מדדי קיבולת לצורך כרטיסי KPI תפעוליים.
-  const totalRequiredCapacity = systems.reduce(
-    (sum, system) => sum + (system.requiredCapacityMonths || 0),
-    0
-  );
-
-  const totalAllocatedCapacity = systems.reduce(
-    (sum, system) => sum + (system.allocatedMonths || 0),
-    0
-  );
-
-  const capacityUsagePercent =
-    totalRequiredCapacity > 0 ? (totalAllocatedCapacity / totalRequiredCapacity) * 100 : 0;
-
-  // מדדי מצב מערכתיים: חוסר/איזון/חריגות תקציב.
-  const totalCapacityGap = systems.reduce(
-    (sum, system) => sum + Math.max(system.gap || 0, 0),
-    0
-  );
-
-  const shortageCount = systems.filter((system) => system.gap > 0).length;
-  const balancedOrExcessCount = systems.filter((system) => system.gap <= 0).length;
-  const budgetOverrunCount = systems.filter((system) => system.budgetGap < 0).length;
-  const shortageSystems = systems.filter((system) => system.gap > 0);
-
-  async function refreshSystems() {
-    const data = await systemService.getSystems();
-    setSystems(data);
-  }
-
-  async function openSystemProfile(systemId: string) {
-    setLoadingDetails(true);
-
-    try {
-      const data = await systemService.getSystemById(systemId);
-      setSelectedSystem(data);
-    } catch (error) {
-      console.error("Failed to load system profile from dashboard", error);
-    } finally {
-      setLoadingDetails(false);
-    }
-  }
-
-  async function refreshSelectedSystem() {
-    if (!selectedSystem) {
-      await refreshSystems();
-      return;
-    }
-
-    const [systemsData, detailsData] = await Promise.all([
-      systemService.getSystems(),
-      systemService.getSystemById(selectedSystem.id)
-    ]);
-
-    setSystems(systemsData);
-    setSelectedSystem(detailsData);
   }
 
   return (
@@ -164,110 +219,89 @@ export default function DashboardKpiGrid() {
       <section className="dashboard-kpi-grid">
         <DashboardKpiCard
           title="ניצול תקציב"
-          value={toPercent(budgetUsagePercent)}
-          description={`${formatCurrency(totalUsedBudget)} מתוך ${formatCurrency(totalAllocatedBudget)}`}
-          variant={budgetOverrunCount > 0 ? "red" : "orange"}
+          value={toPercent(metrics.budgetUsagePercent)}
+          description={`${formatCurrency(
+            metrics.totalUsedBudget
+          )} מתוך ${formatCurrency(metrics.totalAllocatedBudget)}`}
+          variant={metrics.budgetOverrunCount > 0 ? "red" : "orange"}
+          onClick={() => setActiveModal("budget")}
         />
 
-      <DashboardKpiCard
-        title="דורש שיבוץ כוח אדם"
-        value={String(shortageCount)}
-        description={`${shortageCount} מערכות בחוסר מתוך ${systems.length}`}
-        variant={shortageCount > 0 ? "red" : "default"}
-        onClick={() => navigate("/systems?view=status")}
-      />
-
-          <DashboardKpiCard
-          title="חודשי עבודה חסרים"
-          value={formatMetricValue(totalRequiredCapacity - totalAllocatedCapacity)}
-          description={`${formatMetricValue(totalAllocatedCapacity)} בשימוש מתוך ${formatMetricValue(totalRequiredCapacity)}`}
-          onClick={() => navigate("/employees?availability=low")}
+        <DashboardKpiCard
+          title="דורש שיבוץ כוח אדם"
+          value={String(metrics.shortageCount)}
+          description={`${metrics.shortageCount} מערכות בחוסר מתוך ${systems.length}`}
+          variant={metrics.shortageCount > 0 ? "red" : "default"}
+          onClick={() => setActiveModal("shortage-count")}
         />
 
-       <DashboardKpiCard
-        title="????????????"
-        value={formatMetricValue(totalCapacityGap)}
-        description={`${formatMetricValue(totalCapacityGap)} חודשים חסרים מתוך ${formatMetricValue(totalRequiredCapacity)} נדרשים`}
-        variant={totalCapacityGap > 0 ? "red" : "default"}
-        onClick={() => setShortageModalOpen(true)}
-      />
-
-        {/* <DashboardKpiCard
-          title="מערכות בחריגת תקציב"
-          value={String(budgetOverrunCount)}
-          description={
-            budgetOverrunCount > 0
-              ? "יש מערכות שחרגו מהתקציב"
-              : `אין חריגות תקציב · ${shortageCount} מערכות בחוסר קיבולת`
+        <DashboardKpiCard
+          title="פער קיבולת כולל"
+          value={formatMetricValue(
+            metrics.totalRequiredCapacity - metrics.totalAllocatedCapacity
+          )}
+          description={`${formatMetricValue(
+            metrics.totalAllocatedCapacity
+          )} מוקצים מתוך ${formatMetricValue(
+            metrics.totalRequiredCapacity
+          )} נדרשים`}
+          variant={
+            metrics.totalRequiredCapacity - metrics.totalAllocatedCapacity > 0
+              ? "red"
+              : "default"
           }
-          variant={budgetOverrunCount > 0 ? "red" : "default"}
-        /> */}
+          onClick={() => setActiveModal("missing-months")}
+        />
+
+        <DashboardKpiCard
+          title="סה״כ חודשי מחסור"
+          value={formatMetricValue(metrics.totalCapacityGap)}
+          description={`${formatMetricValue(
+            metrics.totalCapacityGap
+          )} חודשים חסרים במערכות שבמחסור`}
+          variant={metrics.totalCapacityGap > 0 ? "red" : "default"}
+          onClick={() => setActiveModal("capacity-gap")}
+        />
       </section>
 
-      {shortageModalOpen && !selectedSystem && (
-        <div className="modal-overlay dashboard-shortage-modal-overlay" onClick={() => setShortageModalOpen(false)}>
-          <div
-            className="modal-card dashboard-shortage-modal-card"
-            dir="rtl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button type="button" className="modal-close-btn" onClick={() => setShortageModalOpen(false)}>
-              ×
-            </button>
+      <DashboardKpiDetailsModal
+        open={activeModal !== null}
+        mode={activeModal ?? "shortage-count"}
+        systems={modalSystems}
+        onClose={() => setActiveModal(null)}
+        onAssign={(system) => void openAssignment(system)}
+        onEdit={(system) => void openEdit(system)}
+        onOpenProfile={(system) => void openProfile(system)}
+      />
 
-            <div className="dashboard-shortage-modal-header">
-              <h3>מערכות בחוסר</h3>
-              <p>בחר מערכת כדי לפתוח אותה בפופאפ ולטפל בפער הקיבולת.</p>
-            </div>
-
-            {shortageSystems.length === 0 ? (
-              <div className="empty-text">אין כרגע מערכות בחוסר.</div>
-            ) : (
-              <div className="dashboard-shortage-grid">
-                {shortageSystems.map((system) => (
-                  <SystemCard
-                    key={system.id}
-                    system={system}
-                    selected={false}
-                    onClick={() => void openSystemProfile(system.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+      {profileOpen && selectedSystem && (
+        <SystemProfile
+          system={selectedSystem}
+          loading={loadingDetails}
+          onBack={closeProfile}
+          onOpenAssign={() => setAssignDrawerOpen(true)}
+          onOpenEdit={() => setEditModalOpen(true)}
+        />
       )}
 
-      {selectedSystem && (
-        <>
-          <SystemProfile
-            system={selectedSystem}
-            loading={loadingDetails}
-            onBack={() => {
-              setEditModalOpen(false);
-              setAssignDrawerOpen(false);
-              setSelectedSystem(null);
-            }}
-            onOpenAssign={() => setAssignDrawerOpen(true)}
-            onOpenEdit={() => setEditModalOpen(true)}
-          />
+      <AssignEmployeesDrawer
+        open={assignDrawerOpen}
+        system={selectedSystem}
+        year={
+          selectedSystem?.year && selectedSystem.year > 0
+            ? selectedSystem.year
+            : new Date().getFullYear()
+        }
+        onClose={() => setAssignDrawerOpen(false)}
+        onAssigned={refreshAfterChange}
+      />
 
-          <AssignEmployeesDrawer
-            open={assignDrawerOpen}
-            system={selectedSystem}
-            year={new Date().getFullYear()}
-            onClose={() => setAssignDrawerOpen(false)}
-            onAssigned={refreshSelectedSystem}
-          />
-
-          <EditSystemModal
-            open={editModalOpen}
-            system={selectedSystem}
-            onClose={() => setEditModalOpen(false)}
-            onUpdated={refreshSelectedSystem}
-          />
-        </>
-      )}
+      <EditSystemModal
+        open={editModalOpen}
+        system={selectedSystem}
+        onClose={() => setEditModalOpen(false)}
+        onUpdated={refreshAfterChange}
+      />
     </>
   );
 }

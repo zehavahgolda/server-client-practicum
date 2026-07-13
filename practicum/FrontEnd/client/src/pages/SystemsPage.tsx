@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSystems } from "../hooks/useSystems";
@@ -15,9 +16,24 @@ import "./SystemsPage.css";
 type ViewMode = "all" | "status" | "gap";
 type UiStatus = "all" | "shortage" | "balanced" | "excess";
 
-// מחזיר את השנה הפעילה כברירת מחדל לפילטרים.
+interface YearOption {
+  value: number | "";
+  label: string;
+}
+
+// מחזיר את השנה הפעילה כברירת מחדל לפעולות שמחייבות שנה מוגדרת.
 function getActiveYear() {
   return new Date().getFullYear();
+}
+
+// בונה את אפשרויות סינון השנה, כולל הצגת כל השנים.
+function buildYearOptions(activeYear: number): YearOption[] {
+  return [
+    { value: "", label: "כל השנים" },
+    { value: activeYear - 1, label: String(activeYear - 1) },
+    { value: activeYear, label: String(activeYear) },
+    { value: activeYear + 1, label: String(activeYear + 1) }
+  ];
 }
 
 // ממפה מערכת לגוון סטטוס חזותי לפי פער הקיבולת.
@@ -77,7 +93,10 @@ function getGapGroups(systems: System[]) {
 // עמוד מערכות: מצבי תצוגה, פילטרים, פרופיל מערכת וניהול פעולות.
 export default function SystemsPage() {
   const activeYear = getActiveYear();
-  const yearOptions = [activeYear - 1, activeYear, activeYear + 1];
+  const yearOptions = useMemo(
+    () => buildYearOptions(activeYear),
+    [activeYear]
+  );
 
   const [searchParams] = useSearchParams();
   const riskFilter = searchParams.get("risk");
@@ -191,6 +210,7 @@ export default function SystemsPage() {
   }, [selectedSystem?.id]);
 
   // מאפס את כלל הפילטרים והחיפוש המקומי.
+  // ניקוי השנה מחזיר לתצוגת "כל השנים".
   function clearFilters() {
     setFilters({});
     setUiStatus("all");
@@ -225,19 +245,27 @@ export default function SystemsPage() {
         filters={
           <>
             <label>
-              סינון
+              שנה
               <select
-                value={filters.year ?? activeYear}
-                onChange={(event) =>
+                value={filters.year ?? ""}
+                onChange={(event) => {
+                  const selectedValue = event.target.value;
+
                   setFilters((prev) => ({
                     ...prev,
-                    year: Number(event.target.value)
-                  }))
-                }
+                    year:
+                      selectedValue === ""
+                        ? undefined
+                        : Number(selectedValue)
+                  }));
+                }}
               >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
+                {yearOptions.map((option) => (
+                  <option
+                    key={option.label}
+                    value={option.value}
+                  >
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -412,7 +440,6 @@ export default function SystemsPage() {
               subtitle="מערכות עם יותר קיבולת מוקצית מהנדרש."
               tone="excess"
               systems={statusGroups.excess}
-              // defaultOpen
               onSystemClick={loadSystemDetails}
               selectedSystemId={selectedSystem?.id ?? null}
             />
@@ -422,7 +449,6 @@ export default function SystemsPage() {
               subtitle="מערכות שמוקצות בדיוק לפי הדרישה."
               tone="balanced"
               systems={statusGroups.balanced}
-              // defaultOpen
               onSystemClick={loadSystemDetails}
               selectedSystemId={selectedSystem?.id ?? null}
             />
@@ -432,7 +458,6 @@ export default function SystemsPage() {
               subtitle="מערכות שחסרה להן קיבולת ויש לטפל בהן."
               tone="shortage"
               systems={statusGroups.shortage}
-              // defaultOpen
               onSystemClick={loadSystemDetails}
               selectedSystemId={selectedSystem?.id ?? null}
             />
@@ -446,7 +471,6 @@ export default function SystemsPage() {
               subtitle="מערכות שאינן דורשות תגבור כרגע."
               tone="excess"
               systems={gapGroups.healthy}
-              // defaultOpen
               onSystemClick={loadSystemDetails}
               selectedSystemId={selectedSystem?.id ?? null}
             />
@@ -456,7 +480,6 @@ export default function SystemsPage() {
               subtitle="פער קיבולת קטן יחסית, עד 4 חודשי עבודה."
               tone="balanced"
               systems={gapGroups.regularShortage}
-              // defaultOpen
               onSystemClick={loadSystemDetails}
               selectedSystemId={selectedSystem?.id ?? null}
             />
@@ -466,7 +489,6 @@ export default function SystemsPage() {
               subtitle="מערכות עם מחסור משמעותי שדורש תשומת לב ניהולית."
               tone="shortage"
               systems={gapGroups.criticalShortage}
-              // defaultOpen
               onSystemClick={loadSystemDetails}
               selectedSystemId={selectedSystem?.id ?? null}
             />

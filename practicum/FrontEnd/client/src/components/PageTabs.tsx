@@ -16,9 +16,9 @@ export default function PageTabs() {
         עובדים
       </NavLink>
 
-      {/* <NavLink to="/categories" className={({ isActive }) => isActive ? "page-tab-link active" : "page-tab-link"}>
+      <NavLink to="/categories" className={({ isActive }) => isActive ? "page-tab-link active" : "page-tab-link"}>
         קטגוריות
-      </NavLink> */}
+      </NavLink> 
 
       {/* <NavLink to="/changes" className={({ isActive }) => isActive ? "page-tab-link active" : "page-tab-link"}>
         שינויים

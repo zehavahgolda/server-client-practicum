@@ -1,0 +1,111 @@
+.dashboard-system-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--surface-bg);
+  box-shadow: var(--shadow-soft);
+}
+
+.dashboard-system-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-system-row-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.dashboard-system-row-title h4 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text-primary);
+}
+
+.dashboard-system-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dashboard-system-status.shortage {
+  color: var(--status-danger);
+  background: var(--status-danger-soft);
+}
+
+.dashboard-system-status.balanced {
+  color: var(--status-success);
+  background: var(--status-success-soft);
+}
+
+.dashboard-system-row-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard-system-row-metrics > div {
+  min-width: 90px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--page-bg);
+}
+
+.dashboard-system-row-metrics span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.dashboard-system-row-metrics strong {
+  display: block;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.dashboard-system-row-metrics strong.danger {
+  color: var(--status-danger);
+}
+
+.dashboard-system-row-metrics strong.ok {
+  color: var(--status-success);
+}
+
+.dashboard-system-row-actions {
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dashboard-system-action {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-system-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-system-row-actions {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-system-action {
+    flex: 1 1 140px;
+  }
+}
