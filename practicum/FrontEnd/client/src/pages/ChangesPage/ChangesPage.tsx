@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { useChanges } from "../hooks/useChanges";
+import { useChanges } from "../../hooks/useChanges";
 import "./ChangesPage.css";
-import PageTabs from "../components/shared/navigation/PageTabs";
+import PageTabs from "../../components/shared/navigation/PageTabs";
 
 // מחזיר את השנה הפעילה כברירת מחדל לפילטרים.
 function getActiveYear() {

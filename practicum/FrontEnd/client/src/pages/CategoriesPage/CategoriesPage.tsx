@@ -1,5 +1,5 @@
-import PageTabs from "../components/shared/navigation/PageTabs";
-import { useCategories } from "../hooks/useCategories";
+import PageTabs from "../../components/shared/navigation/PageTabs";
+import { useCategories } from "../../hooks/useCategories";
 import "./CategoriesPage.css";
 
 // מחזיר את השנה הפעילה כברירת מחדל לפילטרים.

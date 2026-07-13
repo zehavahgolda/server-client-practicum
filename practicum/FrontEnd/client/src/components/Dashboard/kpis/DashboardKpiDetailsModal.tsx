@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import type { System } from "../../types";
-import DashboardSystemRow from "./DashboardSystemRow";
+import type { System } from "../../../types";
+import DashboardSystemRow from "../systems/DashboardSystemRow";
 import "./DashboardKpiDetailsModal.css";
 
 export type DashboardKpiModalMode =

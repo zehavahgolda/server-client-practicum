@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useEmployeesPage } from "../hooks/useEmployeesPage";
-import EmployeeFilters from "../components/Employees/filters/EmployeeFilters";
-import EmployeeBoard from "../components/Employees/EmployeeBoard";
-import EmployeeProfileSection from "../components/Employees/EmployeeProfileSection";
-import EmployeeGroup from "../components/Employees/groups/EmployeeGroup";
-import EmployeeFormModal from "../components/Employees/EmployeeFormModal";
-import AllocationModal from "../components/Employees/AllocationModal";
-import AllocationUpdateModal from "../components/Employees/AllocationUpdateModal";
+
+import { useEmployeesPage } from "../../hooks/useEmployeesPage";
+
+import EmployeeFilters from "../../components/Employees/filters/EmployeeFilters";
+import EmployeeBoard from "../../components/Employees/EmployeeBoard";
+import EmployeeProfileSection from "../../components/Employees/profile/EmployeeProfileSection";
+import EmployeeGroup from "../../components/Employees/groups/EmployeeGroup";
+import EmployeeFormModal from "../../components/Employees/modals/EmployeeFormModal";
+import AllocationModal from "../../components/Employees/allocations/AllocationModal";
+import AllocationUpdateModal from "../../components/Employees/allocations/AllocationUpdateModal";
+
 import "./EmployeesPage.css";
 
 type EmployeeViewMode = "all" | "status" | "category";

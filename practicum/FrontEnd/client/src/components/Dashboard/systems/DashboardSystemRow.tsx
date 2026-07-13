@@ -1,4 +1,4 @@
-import type { System } from "../../types";
+import type { System } from "../../../types";
 import "./DashboardSystemRow.css";
 
 interface DashboardSystemRowProps {

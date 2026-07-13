@@ -1,6 +1,5 @@
 import type { EmployeeListItem } from "../../../types";
 import "./EmployeeCard.css";
-import "./EmployeeFilters.css";
 
 // מאפייני כרטיס עובד בודד.
 interface EmployeeCardProps {
@@ -24,7 +23,12 @@ function isBudgetGreen(employee: EmployeeListItem): boolean {
 
   if (typeof withBudget.budgetStatus === "string") {
     const normalized = withBudget.budgetStatus.trim().toLowerCase();
-    return normalized === "balanced" || normalized === "within budget" || normalized === "green";
+
+    return (
+      normalized === "balanced" ||
+      normalized === "within budget" ||
+      normalized === "green"
+    );
   }
 
   return false;
@@ -37,14 +41,8 @@ function getTone(employee: EmployeeListItem) {
 
   if (monthsGreen && budgetGreen) return "available";
   if (employee.remainingMonths < 0) return "overloaded";
-  return "balanced";
-}
 
-// מחזיר תווית סטטוס קריאה למשתמש.
-function getStatusLabel(employee: EmployeeListItem) {
-  // if (employee.remainingMonths < 0) return "עומס יתר";
-  // if (employee.remainingMonths === 0) return "מלא";
-  // return "זמין";
+  return "balanced";
 }
 
 // מציג כרטיס עובד עם נתוני קיבולת, סטטוס ופרטים תפעוליים.
@@ -62,9 +60,7 @@ export default function EmployeeCard({
       onClick={onClick}
     >
       <div className="employee-card-top">
-
         <div className="employee-card-title">
-
           <strong>{employee.fullName}</strong>
 
           <span>
@@ -73,21 +69,14 @@ export default function EmployeeCard({
           </span>
 
           <small>מנהל: {employee.managerName}</small>
-
         </div>
-
-        <span className={`employee-status-pill ${tone}`}>
-         {/* {getStatusLabel(employee)} */}
-        </span>
-
       </div>
 
       <div className="employee-card-divider" />
 
       <div className="employee-card-metrics">
-
         <div>
-          <span>מכסה  שנתית</span>
+          <span>מכסה שנתית</span>
           <strong>{employee.yearlyCapacityMonths}</strong>
         </div>
 
@@ -107,9 +96,7 @@ export default function EmployeeCard({
           <span>מערכות</span>
           <strong>{employee.assignedSystemsCount}</strong>
         </div>
-
       </div>
-
     </button>
   );
 }

@@ -1,16 +1,21 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useSystems } from "../hooks/useSystems";
-import type { System } from "../types";
-import SystemCard from "../components/Systems/cards/SystemCard";
-import { getSystemCardTone } from "../components/Systems/cards/SystemCard";
-import SystemProfile from "../components/Systems/profile/SystemProfile";
-import SystemGroup from "../components/Systems/groups/SystemGroup";
-import AssignEmployeesDrawer from "../components/Systems/drawers/AssignEmployeesDrawer";
-import CreateSystemModal from "../components/Systems/modals/CreateSystemModal";
-import EditSystemModal from "../components/Systems/modals/EditSystemModal";
-import UnifiedToolbar from "../components/shared/navigation/UnifiedToolbar";
+
+import { useSystems } from "../../hooks/useSystems";
+import type { System } from "../../types";
+
+import SystemCard, {
+  getSystemCardTone,
+} from "../../components/Systems/cards/SystemCard";
+
+import SystemProfile from "../../components/Systems/profile/SystemProfile";
+import SystemGroup from "../../components/Systems/groups/SystemGroup";
+import AssignEmployeesDrawer from "../../components/Systems/drawers/AssignEmployeesDrawer";
+import CreateSystemModal from "../../components/Systems/modals/CreateSystemModal";
+import EditSystemModal from "../../components/Systems/modals/EditSystemModal";
+
+import UnifiedToolbar from "../../components/shared/navigation/UnifiedToolbar";
+
 import "./SystemsPage.css";
 
 type ViewMode = "all" | "status" | "gap";

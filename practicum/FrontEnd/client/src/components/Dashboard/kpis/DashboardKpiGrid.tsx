@@ -1,14 +1,17 @@
-
 import { useEffect, useMemo, useState } from "react";
+
 import { systemService } from "../../../services/systemService";
 import type { System, SystemDetails } from "../../../types";
+
 import AssignEmployeesDrawer from "../../Systems/drawers/AssignEmployeesDrawer";
 import EditSystemModal from "../../Systems/modals/EditSystemModal";
 import SystemProfile from "../../Systems/profile/SystemProfile";
+
 import DashboardKpiCard from "./DashboardKpiCard";
 import DashboardKpiDetailsModal, {
   type DashboardKpiModalMode
-} from "../DashboardKpiDetailsModal";
+} from "./DashboardKpiDetailsModal";
+
 import "./DashboardKpiGrid.css";
 
 // ממיר ערך מספרי לאחוז מעוגל.

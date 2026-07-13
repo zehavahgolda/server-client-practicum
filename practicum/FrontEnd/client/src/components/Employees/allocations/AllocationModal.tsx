@@ -1,8 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import type { System } from "../../types";
-import { isValidHalfMonthValue, MAX_MONTHS, normalizeMonthValue } from "../../utils/months";
-
+import type { System } from "../../../types";
+import { isValidHalfMonthValue, MAX_MONTHS, normalizeMonthValue } from "../../../utils/months";
 // מגביל קלט חודשי עבודה לטווח תקין 0-12.
 function clampMonthsInput(value: string): string {
   if (value === "") return "";

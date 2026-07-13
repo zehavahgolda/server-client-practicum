@@ -1,5 +1,5 @@
 
-import type { EmployeeDetails } from "../../types";
+import type { EmployeeDetails } from "../../../types";
 import EmployeeProfile from "./EmployeeProfile";
 
 // מאפייני מעטפת פרופיל עובד עם פעולות ניהול.

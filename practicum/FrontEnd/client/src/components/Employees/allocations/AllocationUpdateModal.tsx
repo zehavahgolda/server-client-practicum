@@ -1,8 +1,7 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { isValidHalfMonthValue, MAX_MONTHS, normalizeMonthValue } from "../../utils/months";
-
+import { isValidHalfMonthValue, MAX_MONTHS, normalizeMonthValue } from "../../../utils/months";
 function clampMonthsInput(value: string): string {
   if (value === "") return "";
 
