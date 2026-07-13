@@ -2,7 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { useSystems } from "../../hooks/useSystems";
-import type { System } from "../../types";
+import {
+  getGapGroups,
+  getStatusGroups,
+  matchesSearch,
+  matchesStatus,
+  type UiStatus
+} from "../../utils/systemViewUtils";
+import {
+  buildYearOptions,
+  getActiveYear
+} from "../../utils/yearOptions";
 
 import SystemCard, {
   getSystemCardTone,
@@ -19,81 +29,6 @@ import UnifiedToolbar from "../../components/shared/navigation/UnifiedToolbar";
 import "./SystemsPage.css";
 
 type ViewMode = "all" | "status" | "gap";
-type UiStatus = "all" | "shortage" | "balanced" | "excess";
-
-interface YearOption {
-  value: number | "";
-  label: string;
-}
-
-// מחזיר את השנה הפעילה כברירת מחדל לפעולות שמחייבות שנה מוגדרת.
-function getActiveYear() {
-  return new Date().getFullYear();
-}
-
-// בונה את אפשרויות סינון השנה, כולל הצגת כל השנים.
-function buildYearOptions(activeYear: number): YearOption[] {
-  return [
-    { value: "", label: "כל השנים" },
-    { value: activeYear - 1, label: String(activeYear - 1) },
-    { value: activeYear, label: String(activeYear) },
-    { value: activeYear + 1, label: String(activeYear + 1) }
-  ];
-}
-
-// ממפה מערכת לגוון סטטוס חזותי לפי פער הקיבולת.
-function getSystemTone(system: System): "shortage" | "balanced" | "excess" {
-  if (system.gap > 0) return "shortage";
-  if (system.gap < 0) return "excess";
-  return "balanced";
-}
-
-// מסנן מערכת לפי סטטוס UI נבחר.
-function matchesStatus(system: System, status: UiStatus) {
-  if (status === "all") return true;
-  return getSystemTone(system) === status;
-}
-
-// מבצע חיפוש טקסטואלי חופשי על שדות רלוונטיים במערכת.
-function matchesSearch(system: System, search: string) {
-  const value = search.trim().toLowerCase();
-  if (!value) return true;
-
-  const searchableText = [
-    system.name,
-    system.capacityStatus,
-    system.managementNote,
-    system.requiredCapacityMonths,
-    system.allocatedMonths,
-    system.gap,
-    system.assignedEmployeesCount
-  ]
-    .filter((item) => item !== undefined && item !== null)
-    .join(" ")
-    .toLowerCase();
-
-  return searchableText.includes(value);
-}
-
-// מקבץ מערכות לפי מצב עסקי (עודף/מאוזן/מחסור).
-function getStatusGroups(systems: System[]) {
-  return {
-    excess: systems.filter((system) => system.gap < 0),
-    balanced: systems.filter((system) => system.gap === 0),
-    shortage: systems.filter((system) => system.gap > 0)
-  };
-}
-
-// מקבץ מערכות לפי חומרת פער הקיבולת.
-function getGapGroups(systems: System[]) {
-  return {
-    healthy: systems.filter((system) => system.gap <= 0),
-    regularShortage: systems.filter(
-      (system) => system.gap > 0 && system.gap <= 4
-    ),
-    criticalShortage: systems.filter((system) => system.gap > 4)
-  };
-}
 
 // עמוד מערכות: מצבי תצוגה, פילטרים, פרופיל מערכת וניהול פעולות.
 export default function SystemsPage() {
