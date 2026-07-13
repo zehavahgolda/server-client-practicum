@@ -1,4 +1,4 @@
-import type { SystemDetails } from "../../types";
+import type { SystemDetails } from "../../../types";
 import "./SystemProfile.css";
 import { useNavigate } from "react-router-dom";
 

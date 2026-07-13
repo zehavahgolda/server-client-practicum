@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { assignmentService } from "../../services/assignmentService";
+import { assignmentService } from "../../../services/assignmentService";
 import type {
   BulkAssignEmployeesDto,
   EmployeeAssignmentCandidate,
   EmployeeAssignmentItem,
   SystemDetails
-} from "../../types";
+} from "../../../types";
 import "./AssignEmployeesDrawer.css";
-import { normalizeMonthValue } from "../../utils/months";
+import { normalizeMonthValue } from "../../../utils/months";
 
 // מאפייני המגירה לשיבוץ עובדים למערכת.
 interface AssignEmployeesDrawerProps {

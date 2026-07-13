@@ -1,4 +1,4 @@
-import { systemService } from "../../services/systemService";
+import { systemService } from "../../../services/systemService";
 import "./DashboardActions.css";
 
 // קומפוננטת פעולות בדשבורד (למשל ייצוא דוח).

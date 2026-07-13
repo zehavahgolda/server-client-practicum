@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
-import PageTabs from "../PageTabs";
-import DashboardActions from "../Dashboard/DashboardActions";
-import DashboardKpiGrid from "../Dashboard/DashboardKpiGrid";
+import PageTabs from "../navigation/PageTabs";
+import DashboardActions from "../../Dashboard/actions/DashboardActions";
+import DashboardKpiGrid from "../../Dashboard/kpis/DashboardKpiGrid";
 import "./AppLayout.css";
 
 export default function AppLayout() {

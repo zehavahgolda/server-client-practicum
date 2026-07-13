@@ -1,5 +1,5 @@
 import type { EmployeeDetails, EmployeeListItem } from "../../types";
-import EmployeeCard from "./EmployeeCard";
+import EmployeeCard from "./cards/EmployeeCard";
 
 // מאפייני לוח העובדים (רשימה, בחירה וטעינה).
 interface EmployeeBoardProps {

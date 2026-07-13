@@ -1,4 +1,4 @@
-import type { System } from "../../types";
+import type { System } from "../../../types";
 import "./SystemCard.css";
 
 // מאפייני כרטיס מערכת בודדת.

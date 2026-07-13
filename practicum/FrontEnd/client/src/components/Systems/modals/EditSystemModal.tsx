@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { systemService } from "../../services/systemService";
-import type { SystemDetails, SystemUpdateDto } from "../../types";
+import { systemService } from "../../../services/systemService";
+import type { SystemDetails, SystemUpdateDto } from "../../../types";
 import "./EditSystemModal.css";
 
 // מאפייני מודל עריכת מערכת.

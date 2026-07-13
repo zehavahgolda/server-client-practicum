@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { EmployeeFilters as EmployeeFiltersType } from "../../types";
-import UnifiedToolbar from "../shared/UnifiedToolbar";
+import type { EmployeeFilters as EmployeeFiltersType } from "../../../types";
+import UnifiedToolbar from "../../shared/navigation/UnifiedToolbar";
 import "./EmployeeFilters.css";
 
 // שנה נוכחית ואפשרויות סינון סביב השנה הפעילה.

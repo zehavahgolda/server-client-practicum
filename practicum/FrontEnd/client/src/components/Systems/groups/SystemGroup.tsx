@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { System } from "../../types";
-import SystemCard from "./SystemCard";
+import type { System } from "../../../types";
+import SystemCard from "../cards/SystemCard";
 import "./SystemGroup.css";
 
 // מאפייני קבוצת מערכות בתצוגה מקובצת.

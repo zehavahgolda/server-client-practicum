@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import type { EmployeeDetails } from "../../types";
+import type { EmployeeDetails } from "../../../types";
 import "./EmployeeProfile.css";
 
 // מאפייני קומפוננטת פרופיל עובד.

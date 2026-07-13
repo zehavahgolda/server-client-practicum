@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { systemService } from "../../services/systemService";
-import type { SystemCreateDto } from "../../types";
+import { systemService } from "../../../services/systemService";
+import type { SystemCreateDto } from "../../../types";
 import "./CreateSystemModal.css";
 
 // מאפייני מודל יצירת מערכת חדשה.

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import type { EmployeeDetails, EmployeeUpsertPayload } from "../../types";
-
+import type { EmployeeDetails, EmployeeUpsertPayload } from "../../../types";
 const MAX_MONTHS = 12;
 
 // מצב הטופס הפנימי ליצירה/עריכה של עובד.

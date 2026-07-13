@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEmployees } from "../../hooks/useEmployees";
-import DashboardChartCard from "./DashboardChartCard";
-import DashboardDonutChart from "./DashboardDonutChart";
-
+import { useEmployees } from "../../../hooks/useEmployees";
+import DashboardChartCard from "../charts/DashboardChartCard";
+import DashboardDonutChart from "../charts/DashboardDonutChart";
 // פלטת צבעים להצגת קטגוריות עובדים בדונאט.
 const categoryColors = ["#1f6db3", "#149584", "#7550b9", "#cb6a0b", "#d1495b", "#4f8f5b"];
 

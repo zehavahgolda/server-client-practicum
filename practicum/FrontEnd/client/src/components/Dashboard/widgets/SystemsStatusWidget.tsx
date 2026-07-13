@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSystems } from "../../hooks/useSystems";
-import DashboardChartCard from "./DashboardChartCard";
-import DashboardDonutChart from "./DashboardDonutChart";
-
+import { useSystems } from "../../../hooks/useSystems";
+import DashboardChartCard from "../charts/DashboardChartCard";
+import DashboardDonutChart from "../charts/DashboardDonutChart";
 // מיפוי קבוצות סטטוס עם כינויים אפשריים וצבע תצוגה לכל קבוצה.
 const statusGroups = [
   {

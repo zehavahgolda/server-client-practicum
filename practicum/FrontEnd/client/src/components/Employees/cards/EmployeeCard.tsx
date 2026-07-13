@@ -1,4 +1,4 @@
-import type { EmployeeListItem } from "../../types";
+import type { EmployeeListItem } from "../../../types";
 import "./EmployeeCard.css";
 import "./EmployeeFilters.css";
 

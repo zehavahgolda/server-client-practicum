@@ -7,7 +7,7 @@ import SystemsPage from "./pages/SystemsPage";
 import ChangesPage from "./pages/ChangesPage";
 import CategoriesPage from "./pages/CategoriesPage";
 
-import AppLayout from "./components/shared/AppLayout";
+import AppLayout from "./components/shared/layout/AppLayout";
 
 function App() {
   return (

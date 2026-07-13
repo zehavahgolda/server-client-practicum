@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import type { EmployeeListItem } from "../../types";
-import EmployeeCard from "./EmployeeCard";
+import type { EmployeeListItem } from "../../../types";
+import EmployeeCard from "../cards/EmployeeCard";
 import "./EmployeeGroup.css";
 
 // מאפייני קבוצת עובדים (כותרת, רשימה ובחירה).

@@ -1,4 +1,4 @@
-import DashboardChartsGrid from "../components/Dashboard/DashboardChartsGrid";
+import DashboardChartsGrid from "../components/Dashboard/charts/DashboardChartsGrid";
 
 import EmployeesByCategoryWidget from "../components/Dashboard/EmployeesByCategoryWidget";
 import WorkforceBySystemWidget from "../components/Dashboard/WorkforceBySystemWidget";

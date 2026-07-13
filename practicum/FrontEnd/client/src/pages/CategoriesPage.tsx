@@ -1,4 +1,4 @@
-import PageTabs from "../components/PageTabs";
+import PageTabs from "../components/shared/navigation/PageTabs";
 import { useCategories } from "../hooks/useCategories";
 import "./CategoriesPage.css";
 

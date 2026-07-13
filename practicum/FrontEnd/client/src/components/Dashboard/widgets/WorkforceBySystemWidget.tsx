@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardChartCard from "./DashboardChartCard";
-import DashboardHorizontalBars from "./DashboardHorizontalBars";
-import { systemService } from "../../services/systemService";
-
+import DashboardChartCard from "../charts/DashboardChartCard";
+import DashboardHorizontalBars from "../charts/DashboardHorizontalBars";
+import { systemService } from "../../../services/systemService";
 // פלטת צבעים קבועה לגרף ביקוש כוח עבודה לפי מערכות.
 const chartColors = ["#1f6db3", "#149584", "#7550b9", "#6c7d13", "#cb6a0b", "#b43135", "#4f8f5b"];
 

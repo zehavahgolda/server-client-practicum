@@ -1,5 +1,4 @@
-import type { EmployeeAllocation } from "../../types";
-
+import type { EmployeeAllocation } from "../../../types";
 // ממפה סטטוס קיבולת למחלקת CSS בטוחה ומוכרת מראש.
 function getStatusClass(status: string): string {
   const normalized = status.trim().toLowerCase();
