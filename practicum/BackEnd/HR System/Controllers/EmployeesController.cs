@@ -22,31 +22,41 @@ namespace HR_System.Controllers
 
         /// <summary>
         /// שליפת רשימת עובדים לפי פרמטרים.
+        ///
+        /// isActive:
+        /// true  - עובדים פעילים בלבד.
+        /// false - עובדים לא פעילים בלבד.
+        /// null  - כל העובדים.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<List<EmployeeListItemDto>>> GetEmployees(
-            [FromQuery] int? year,
-            [FromQuery] string? managerName,
-            [FromQuery] string? professionalCategory,
-            [FromQuery] string? systemId,
-            [FromQuery] string? search)
+        public async Task<ActionResult<List<EmployeeListItemDto>>>
+            GetEmployees(
+                [FromQuery] int? year,
+                [FromQuery] string? managerName,
+                [FromQuery] string? professionalCategory,
+                [FromQuery] string? systemId,
+                [FromQuery] string? search,
+                [FromQuery] bool? isActive)
         {
             _logger.LogInformation(
-                "GetEmployees request received. Year: {Year}, Manager: {Manager}, Category: {Category}, System: {SystemId}, Search: {Search}",
+                "GetEmployees request received. Year: {Year}, Manager: {Manager}, Category: {Category}, System: {SystemId}, Search: {Search}, IsActive: {IsActive}",
                 year,
                 managerName,
                 professionalCategory,
                 systemId,
-                search);
+                search,
+                isActive);
 
             try
             {
-                var employees = await _employeeService.GetEmployeesAsync(
-                    year,
-                    managerName,
-                    professionalCategory,
-                    systemId,
-                    search);
+                var employees =
+                    await _employeeService.GetEmployeesAsync(
+                        year,
+                        managerName,
+                        professionalCategory,
+                        systemId,
+                        search,
+                        isActive);
 
                 return Ok(employees);
             }
@@ -54,9 +64,12 @@ namespace HR_System.Controllers
             {
                 _logger.LogError(
                     ex,
-                    "Unexpected error while processing GetEmployees request.");
+                    "Unexpected error while processing GetEmployees request. IsActive: {IsActive}",
+                    isActive);
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -65,10 +78,12 @@ namespace HR_System.Controllers
         /// מיועד ל-Drawer של שיבוץ עובדים מתוך פרופיל מערכת.
         /// </summary>
         [HttpGet("assignment-candidates")]
-        public async Task<ActionResult<List<EmployeeAssignmentCandidateDto>>> GetAssignmentCandidates(
-            [FromQuery] string systemId,
-            [FromQuery] int? year,
-            [FromQuery] string? search)
+        public async Task<ActionResult<
+            List<EmployeeAssignmentCandidateDto>>>
+            GetAssignmentCandidates(
+                [FromQuery] string systemId,
+                [FromQuery] int? year,
+                [FromQuery] string? search)
         {
             _logger.LogInformation(
                 "GetAssignmentCandidates request received. SystemId: {SystemId}, Year: {Year}, Search: {Search}",
@@ -83,13 +98,16 @@ namespace HR_System.Controllers
                     _logger.LogWarning(
                         "GetAssignmentCandidates request rejected because SystemId was not provided.");
 
-                    return BadRequest("systemId is required.");
+                    return BadRequest(
+                        "systemId is required.");
                 }
 
-                var employees = await _employeeService.GetAssignmentCandidatesAsync(
-                    systemId,
-                    year,
-                    search);
+                var employees =
+                    await _employeeService
+                        .GetAssignmentCandidatesAsync(
+                            systemId,
+                            year,
+                            search);
 
                 return Ok(employees);
             }
@@ -99,7 +117,9 @@ namespace HR_System.Controllers
                     ex,
                     "Unexpected error while processing GetAssignmentCandidates request.");
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -107,7 +127,8 @@ namespace HR_System.Controllers
         /// שליפת פרטי עובד ספציפי לפי מזהה.
         /// </summary>
         [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeDetailsDto>> GetEmployeeById(string id)
+        public async Task<ActionResult<EmployeeDetailsDto>>
+            GetEmployeeById(string id)
         {
             _logger.LogInformation(
                 "GetEmployeeById request received. EmployeeId: {EmployeeId}",
@@ -115,7 +136,9 @@ namespace HR_System.Controllers
 
             try
             {
-                var employee = await _employeeService.GetEmployeeByIdAsync(id);
+                var employee =
+                    await _employeeService
+                        .GetEmployeeByIdAsync(id);
 
                 if (employee is null)
                 {
@@ -135,7 +158,9 @@ namespace HR_System.Controllers
                     "Unexpected error while processing GetEmployeeById request. EmployeeId: {EmployeeId}",
                     id);
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -143,11 +168,12 @@ namespace HR_System.Controllers
         /// עדכון חודשי עבודה בפועל עבור הקצאת עובד למערכת.
         /// </summary>
         [HttpPut("{id}/allocation-months")]
-        public async Task<IActionResult> UpdateAllocationMonths(
-            string id,
-            [FromQuery] string? systemId,
-            [FromQuery] string? roleInSystem,
-            [FromQuery] int? actualMonths)
+        public async Task<IActionResult>
+            UpdateAllocationMonths(
+                string id,
+                [FromQuery] string? systemId,
+                [FromQuery] string? roleInSystem,
+                [FromQuery] int? actualMonths)
         {
             _logger.LogInformation(
                 "UpdateAllocationMonths request received. EmployeeId: {EmployeeId}, SystemId: {SystemId}, Role: {RoleInSystem}, ActualMonths: {ActualMonths}",
@@ -170,11 +196,13 @@ namespace HR_System.Controllers
                         "Required parameters: systemId, roleInSystem, and actualMonths must be provided.");
                 }
 
-                var success = await _employeeService.UpdateAllocationActualMonthsAsync(
-                    id,
-                    systemId,
-                    roleInSystem,
-                    actualMonths.Value);
+                var success =
+                    await _employeeService
+                        .UpdateAllocationActualMonthsAsync(
+                            id,
+                            systemId,
+                            roleInSystem,
+                            actualMonths.Value);
 
                 if (!success)
                 {
@@ -188,7 +216,11 @@ namespace HR_System.Controllers
                         "Employee allocation was not found for the specified system and role.");
                 }
 
-                return Ok(new { message = $"Actual months updated to {actualMonths}." });
+                return Ok(new
+                {
+                    message =
+                        $"Actual months updated to {actualMonths}."
+                });
             }
             catch (Exception ex)
             {
@@ -197,7 +229,9 @@ namespace HR_System.Controllers
                     "Unexpected error while processing UpdateAllocationMonths request. EmployeeId: {EmployeeId}",
                     id);
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -205,15 +239,18 @@ namespace HR_System.Controllers
         /// יצירת עובד חדש.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult<string>> CreateEmployee(
-            [FromBody] EmployeeCreateDto dto)
+        public async Task<ActionResult<string>>
+            CreateEmployee(
+                [FromBody] EmployeeCreateDto dto)
         {
             _logger.LogInformation(
                 "CreateEmployee request received.");
 
             try
             {
-                var id = await _employeeService.CreateEmployeeAsync(dto);
+                var id =
+                    await _employeeService
+                        .CreateEmployeeAsync(dto);
 
                 return CreatedAtAction(
                     nameof(GetEmployeeById),
@@ -226,7 +263,9 @@ namespace HR_System.Controllers
                     ex,
                     "Unexpected error while processing CreateEmployee request.");
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -234,9 +273,10 @@ namespace HR_System.Controllers
         /// עדכון עובד קיים.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployee(
-            string id,
-            [FromBody] EmployeeEditDto dto)
+        public async Task<IActionResult>
+            UpdateEmployee(
+                string id,
+                [FromBody] EmployeeEditDto dto)
         {
             _logger.LogInformation(
                 "UpdateEmployee request received. EmployeeId: {EmployeeId}",
@@ -244,7 +284,9 @@ namespace HR_System.Controllers
 
             try
             {
-                var success = await _employeeService.UpdateEmployeeAsync(id, dto);
+                var success =
+                    await _employeeService
+                        .UpdateEmployeeAsync(id, dto);
 
                 if (!success)
                 {
@@ -265,7 +307,9 @@ namespace HR_System.Controllers
                     "Unexpected error while processing UpdateEmployee request. EmployeeId: {EmployeeId}",
                     id);
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -273,9 +317,10 @@ namespace HR_System.Controllers
         /// הוספת הקצאה לעובד קיים.
         /// </summary>
         [HttpPost("{id}/allocations")]
-        public async Task<IActionResult> AddAllocation(
-            string id,
-            [FromBody] AllocationCreateDto dto)
+        public async Task<IActionResult>
+            AddAllocation(
+                string id,
+                [FromBody] AllocationCreateDto dto)
         {
             _logger.LogInformation(
                 "AddAllocation request received. EmployeeId: {EmployeeId}",
@@ -283,7 +328,9 @@ namespace HR_System.Controllers
 
             try
             {
-                var success = await _employeeService.AddAllocationAsync(id, dto);
+                var success =
+                    await _employeeService
+                        .AddAllocationAsync(id, dto);
 
                 if (!success)
                 {
@@ -304,7 +351,9 @@ namespace HR_System.Controllers
                     "Unexpected error while processing AddAllocation request. EmployeeId: {EmployeeId}",
                     id);
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -312,8 +361,9 @@ namespace HR_System.Controllers
         /// שיבוץ כמה עובדים למערכת בפעולה אחת.
         /// </summary>
         [HttpPost("bulk-assign")]
-        public async Task<IActionResult> BulkAssignEmployees(
-            [FromBody] BulkAssignEmployeesDto dto)
+        public async Task<IActionResult>
+            BulkAssignEmployees(
+                [FromBody] BulkAssignEmployeesDto dto)
         {
             _logger.LogInformation(
                 "BulkAssignEmployees request received.");
@@ -321,7 +371,8 @@ namespace HR_System.Controllers
             try
             {
                 var result =
-                    await _employeeService.BulkAssignEmployeesToSystemAsync(dto);
+                    await _employeeService
+                        .BulkAssignEmployeesToSystemAsync(dto);
 
                 if (!result.IsSuccess)
                 {
@@ -339,7 +390,9 @@ namespace HR_System.Controllers
                     ex,
                     "Unexpected error while processing BulkAssignEmployees request.");
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
 
@@ -347,7 +400,8 @@ namespace HR_System.Controllers
         /// מחיקה רכה של עובד.
         /// </summary>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployee(string id)
+        public async Task<IActionResult>
+            DeleteEmployee(string id)
         {
             _logger.LogInformation(
                 "DeleteEmployee request received. EmployeeId: {EmployeeId}",
@@ -355,7 +409,9 @@ namespace HR_System.Controllers
 
             try
             {
-                var success = await _employeeService.DeleteEmployeeAsync(id);
+                var success =
+                    await _employeeService
+                        .DeleteEmployeeAsync(id);
 
                 if (!success)
                 {
@@ -363,7 +419,8 @@ namespace HR_System.Controllers
                         "Employee deactivation could not be completed. EmployeeId: {EmployeeId}",
                         id);
 
-                    return NotFound("Employee not found.");
+                    return NotFound(
+                        "Employee not found.");
                 }
 
                 return NoContent();
@@ -375,7 +432,9 @@ namespace HR_System.Controllers
                     "Unexpected error while processing DeleteEmployee request. EmployeeId: {EmployeeId}",
                     id);
 
-                return StatusCode(500, "An unexpected error occurred.");
+                return StatusCode(
+                    500,
+                    "An unexpected error occurred.");
             }
         }
     }

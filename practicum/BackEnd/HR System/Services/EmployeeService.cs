@@ -29,60 +29,118 @@ namespace HR_System.Services
         }
 
         public async Task<List<EmployeeListItemDto>> GetEmployeesAsync(
-            int? year = null,
-            string? managerName = null,
-            string? professionalCategory = null,
-            string? systemId = null,
-            string? search = null)
+     int? year = null,
+     string? managerName = null,
+     string? professionalCategory = null,
+     string? systemId = null,
+     string? search = null,
+     bool? isActive = null)
         {
             _logger.LogInformation(
-                "Searching employees. Year: {Year}, Manager: {ManagerName}, Category: {ProfessionalCategory}, SystemId: {SystemId}, Search: {Search}",
+                "Searching employees. Year: {Year}, Manager: {ManagerName}, Category: {ProfessionalCategory}, SystemId: {SystemId}, Search: {Search}, IsActive: {IsActive}",
                 year,
                 managerName,
                 professionalCategory,
                 systemId,
-                search);
+                search,
+                isActive);
 
             try
             {
-                var employees = await _employeesCollection.Find(_ => true).ToListAsync();
+                var employees = await _employeesCollection
+                    .Find(_ => true)
+                    .ToListAsync();
+
                 var filtered = employees.AsEnumerable();
 
+                // true  - רק פעילים.
+                // false - רק לא פעילים.
+                // null  - כל העובדים.
+                if (isActive.HasValue)
+                {
+                    filtered = filtered.Where(employee =>
+                        employee.IsActive == isActive.Value);
+                }
+
                 if (year.HasValue)
-                    filtered = filtered.Where(e => e.Year == year.Value);
+                {
+                    filtered = filtered.Where(employee =>
+                        employee.Year == year.Value);
+                }
 
                 if (!string.IsNullOrWhiteSpace(managerName))
-                    filtered = filtered.Where(e =>
-                        string.Equals(e.ManagerName, managerName, StringComparison.OrdinalIgnoreCase));
+                {
+                    var normalizedManagerName = managerName.Trim();
+
+                    filtered = filtered.Where(employee =>
+                        string.Equals(
+                            employee.ManagerName,
+                            normalizedManagerName,
+                            StringComparison.OrdinalIgnoreCase));
+                }
 
                 if (!string.IsNullOrWhiteSpace(professionalCategory))
-                    filtered = filtered.Where(e =>
-                        string.Equals(e.ProfessionalCategory, professionalCategory, StringComparison.OrdinalIgnoreCase));
+                {
+                    var normalizedCategory =
+                        professionalCategory.Trim();
+
+                    filtered = filtered.Where(employee =>
+                        string.Equals(
+                            employee.ProfessionalCategory,
+                            normalizedCategory,
+                            StringComparison.OrdinalIgnoreCase));
+                }
 
                 if (!string.IsNullOrWhiteSpace(systemId))
-                    filtered = filtered.Where(e =>
-                        (e.Allocations ?? new List<EmployeeAllocation>())
-                        .Any(a => string.Equals(a.SystemId, systemId, StringComparison.OrdinalIgnoreCase)));
+                {
+                    var normalizedSystemId = systemId.Trim();
+
+                    filtered = filtered.Where(employee =>
+                        (employee.Allocations ??
+                         new List<EmployeeAllocation>())
+                        .Any(allocation =>
+                            string.Equals(
+                                allocation.SystemId,
+                                normalizedSystemId,
+                                StringComparison.OrdinalIgnoreCase)));
+                }
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
-                    var s = search.Trim();
-                    filtered = filtered.Where(e =>
-                        (!string.IsNullOrWhiteSpace(e.FullName) &&
-                         e.FullName.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(e.ManagerName) &&
-                         e.ManagerName.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(e.ProfessionalCategory) &&
-                         e.ProfessionalCategory.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(e.ProfessionalSubCategory) &&
-                         e.ProfessionalSubCategory.Contains(s, StringComparison.OrdinalIgnoreCase)));
+                    var normalizedSearch = search.Trim();
+
+                    filtered = filtered.Where(employee =>
+                        (!string.IsNullOrWhiteSpace(employee.FullName) &&
+                         employee.FullName.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)) ||
+
+                        (!string.IsNullOrWhiteSpace(employee.ManagerName) &&
+                         employee.ManagerName.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)) ||
+
+                        (!string.IsNullOrWhiteSpace(
+                            employee.ProfessionalCategory) &&
+                         employee.ProfessionalCategory.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)) ||
+
+                        (!string.IsNullOrWhiteSpace(
+                            employee.ProfessionalSubCategory) &&
+                         employee.ProfessionalSubCategory.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)));
                 }
 
                 var result = _mapper.Map<List<EmployeeListItemDto>>(
-                    filtered.OrderBy(e => e.FullName).ToList());
+                    filtered
+                        .OrderBy(employee => employee.FullName)
+                        .ToList());
 
                 _logger.LogInformation(
-                    "Employee search completed. Returned {EmployeeCount} employees.",
+                    "Employee search completed. IsActive: {IsActive}, Returned {EmployeeCount} employees.",
+                    isActive,
                     result.Count);
 
                 return result;
@@ -91,20 +149,20 @@ namespace HR_System.Services
             {
                 _logger.LogError(
                     ex,
-                    "Employee search failed. Year: {Year}, Manager: {ManagerName}, Category: {ProfessionalCategory}, SystemId: {SystemId}",
+                    "Employee search failed. Year: {Year}, Manager: {ManagerName}, Category: {ProfessionalCategory}, SystemId: {SystemId}, IsActive: {IsActive}",
                     year,
                     managerName,
                     professionalCategory,
-                    systemId);
+                    systemId,
+                    isActive);
 
                 throw;
             }
         }
-
         public async Task<List<EmployeeAssignmentCandidateDto>> GetAssignmentCandidatesAsync(
-            string systemId,
-            int? year = null,
-            string? search = null)
+    string systemId,
+    int? year = null,
+    string? search = null)
         {
             _logger.LogInformation(
                 "Searching assignment candidates. SystemId: {SystemId}, Year: {Year}, Search: {Search}",
@@ -114,49 +172,98 @@ namespace HR_System.Services
 
             try
             {
-                var employees = await _employeesCollection.Find(e => e.IsActive).ToListAsync();
+                var employees = await _employeesCollection
+                    .Find(employee => employee.IsActive)
+                    .ToListAsync();
+
                 var filtered = employees.AsEnumerable();
 
                 if (year.HasValue)
-                    filtered = filtered.Where(e => e.Year == year.Value);
+                {
+                    filtered = filtered.Where(employee =>
+                        employee.Year == year.Value);
+                }
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
-                    var s = search.Trim();
-                    filtered = filtered.Where(e =>
-                        (!string.IsNullOrWhiteSpace(e.FullName) &&
-                         e.FullName.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(e.ManagerName) &&
-                         e.ManagerName.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(e.ProfessionalCategory) &&
-                         e.ProfessionalCategory.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(e.ProfessionalSubCategory) &&
-                         e.ProfessionalSubCategory.Contains(s, StringComparison.OrdinalIgnoreCase)));
+                    var normalizedSearch = search.Trim();
+
+                    filtered = filtered.Where(employee =>
+                        (!string.IsNullOrWhiteSpace(employee.FullName) &&
+                         employee.FullName.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)) ||
+
+                        (!string.IsNullOrWhiteSpace(employee.ManagerName) &&
+                         employee.ManagerName.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)) ||
+
+                        (!string.IsNullOrWhiteSpace(employee.ProfessionalCategory) &&
+                         employee.ProfessionalCategory.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)) ||
+
+                        (!string.IsNullOrWhiteSpace(employee.ProfessionalSubCategory) &&
+                         employee.ProfessionalSubCategory.Contains(
+                             normalizedSearch,
+                             StringComparison.OrdinalIgnoreCase)));
                 }
 
                 var result = filtered
-                    .OrderBy(e => e.FullName)
-                    .Select(e =>
+                    .OrderBy(employee => employee.FullName)
+                    .Select(employee =>
                     {
-                        var allocated = GetAllocatedMonths(e);
-                        var remaining = e.YearlyCapacityMonths - allocated;
+                        var allocations =
+                            employee.Allocations ??
+                            new List<EmployeeAllocation>();
 
-                        var alreadyAssigned = (e.Allocations ?? new List<EmployeeAllocation>())
-                            .Any(a => string.Equals(a.SystemId, systemId, StringComparison.OrdinalIgnoreCase));
+                        var allocatedMonths = allocations.Sum(
+                            allocation => allocation.ActualMonths);
+
+                        var remainingMonths =
+                            employee.YearlyCapacityMonths - allocatedMonths;
+
+                        var currentSystemAllocations = allocations
+                            .Where(allocation =>
+                                string.Equals(
+                                    allocation.SystemId,
+                                    systemId,
+                                    StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
+                        var alreadyAssignedToSystem =
+                            currentSystemAllocations.Count > 0;
+
+                        var currentSystemMonths =
+                            currentSystemAllocations.Sum(
+                                allocation => allocation.ActualMonths);
+
+                        var allocatedOutsideCurrentSystem =
+                            allocatedMonths - currentSystemMonths;
+
+                        var maxAssignableMonths = Math.Max(
+                            0,
+                            employee.YearlyCapacityMonths -
+                            allocatedOutsideCurrentSystem);
+
+                        var canAssign = maxAssignableMonths >= 0.5;
 
                         return new EmployeeAssignmentCandidateDto(
-                            e.Id ?? string.Empty,
-                            e.FullName,
-                            e.ProfessionalCategory,
-                            e.ProfessionalSubCategory,
-                            e.ManagerName,
-                            e.YearlyCapacityMonths,
-                            allocated,
-                            remaining,
-                            GetAvailabilityStatus(e),
-                            GetAssignedSystemsCount(e),
-                            alreadyAssigned,
-                            !alreadyAssigned && remaining > 0
+                            employee.Id ?? string.Empty,
+                            employee.FullName,
+                            employee.ProfessionalCategory,
+                            employee.ProfessionalSubCategory,
+                            employee.ManagerName,
+                            employee.YearlyCapacityMonths,
+                            allocatedMonths,
+                            remainingMonths,
+                            currentSystemMonths,
+                            maxAssignableMonths,
+                            GetAvailabilityStatus(employee),
+                            GetAssignedSystemsCount(employee),
+                            alreadyAssignedToSystem,
+                            canAssign
                         );
                     })
                     .ToList();
@@ -179,7 +286,6 @@ namespace HR_System.Services
                 throw;
             }
         }
-
         public async Task<EmployeeDetailsDto?> GetEmployeeByIdAsync(string id)
         {
             _logger.LogInformation(
@@ -549,7 +655,7 @@ namespace HR_System.Services
         }
 
         public async Task<BulkAssignEmployeesResultDto> BulkAssignEmployeesToSystemAsync(
-            BulkAssignEmployeesDto dto)
+    BulkAssignEmployeesDto dto)
         {
             _logger.LogInformation(
                 "Assigning employees to system in bulk. SystemId: {SystemId}, RequestedEmployeeCount: {RequestedEmployeeCount}",
@@ -562,7 +668,8 @@ namespace HR_System.Services
 
                 if (dto is null)
                 {
-                    _logger.LogWarning("Bulk assignment rejected because request data was missing.");
+                    _logger.LogWarning(
+                        "Bulk assignment rejected because request data was missing.");
 
                     return new BulkAssignEmployeesResultDto(
                         false,
@@ -571,17 +678,23 @@ namespace HR_System.Services
                 }
 
                 if (string.IsNullOrWhiteSpace(dto.SystemId))
+                {
                     errors.Add("SystemId is required.");
+                }
 
                 if (dto.Employees is null || dto.Employees.Count == 0)
+                {
                     errors.Add("At least one employee must be selected.");
+                }
 
                 var systemExists = await _systemsCollection
-                    .Find(s => s.Id == dto.SystemId)
+                    .Find(system => system.Id == dto.SystemId)
                     .AnyAsync();
 
                 if (!systemExists)
+                {
                     errors.Add("System was not found.");
+                }
 
                 if (errors.Any())
                 {
@@ -590,80 +703,161 @@ namespace HR_System.Services
                         dto.SystemId,
                         errors.Count);
 
-                    return new BulkAssignEmployeesResultDto(false, 0, errors);
+                    return new BulkAssignEmployeesResultDto(
+                        false,
+                        0,
+                        errors);
+                }
+
+                var duplicateEmployeeIds = dto.Employees
+                    .GroupBy(item => item.EmployeeId)
+                    .Where(group => group.Count() > 1)
+                    .Select(group => group.Key)
+                    .ToList();
+
+                if (duplicateEmployeeIds.Any())
+                {
+                    errors.Add(
+                        "Each employee may appear only once in the assignment request.");
+
+                    _logger.LogWarning(
+                        "Bulk assignment request contained duplicate employee IDs. SystemId: {SystemId}, DuplicateCount: {DuplicateCount}",
+                        dto.SystemId,
+                        duplicateEmployeeIds.Count);
+
+                    return new BulkAssignEmployeesResultDto(
+                        false,
+                        0,
+                        errors);
                 }
 
                 var employeeIds = dto.Employees
-                    .Select(e => e.EmployeeId)
+                    .Select(item => item.EmployeeId)
                     .Distinct()
                     .ToList();
 
                 var employees = await _employeesCollection
-                    .Find(e => employeeIds.Contains(e.Id!))
+                    .Find(employee => employeeIds.Contains(employee.Id!))
                     .ToListAsync();
 
                 var updates = new List<WriteModel<Employee>>();
 
                 foreach (var item in dto.Employees)
                 {
-                    var employee = employees.FirstOrDefault(e => e.Id == item.EmployeeId);
+                    var employee = employees.FirstOrDefault(
+                        currentEmployee =>
+                            currentEmployee.Id == item.EmployeeId);
 
                     if (employee is null)
                     {
-                        errors.Add($"Employee {item.EmployeeId} was not found.");
+                        errors.Add(
+                            $"Employee {item.EmployeeId} was not found.");
+
                         continue;
                     }
 
                     if (!employee.IsActive)
                     {
-                        errors.Add($"{employee.FullName} is not active.");
+                        errors.Add(
+                            $"{employee.FullName} is not active.");
+
                         continue;
                     }
 
                     if (string.IsNullOrWhiteSpace(item.RoleInSystem))
                     {
-                        errors.Add($"Role is required for {employee.FullName}.");
+                        errors.Add(
+                            $"Role is required for {employee.FullName}.");
+
                         continue;
                     }
 
                     if (item.PlannedMonths <= 0 || item.ActualMonths <= 0)
                     {
-                        errors.Add($"Months must be greater than 0 for {employee.FullName}.");
+                        errors.Add(
+                            $"Months must be greater than 0 for {employee.FullName}.");
+
                         continue;
                     }
 
-                    var allocations = employee.Allocations ?? new List<EmployeeAllocation>();
+                    var allocations =
+                        employee.Allocations ??
+                        new List<EmployeeAllocation>();
 
-                    var alreadyAssigned = allocations.Any(a =>
-                        string.Equals(a.SystemId, dto.SystemId, StringComparison.OrdinalIgnoreCase));
+                    var currentAllocation = allocations.FirstOrDefault(
+                        allocation =>
+                            string.Equals(
+                                allocation.SystemId,
+                                dto.SystemId,
+                                StringComparison.OrdinalIgnoreCase));
 
-                    if (alreadyAssigned)
+                    var allocatedOutsideCurrentSystem = allocations
+                        .Where(allocation =>
+                            !string.Equals(
+                                allocation.SystemId,
+                                dto.SystemId,
+                                StringComparison.OrdinalIgnoreCase))
+                        .Sum(allocation => allocation.ActualMonths);
+
+                    var maxAssignableMonths =
+                        employee.YearlyCapacityMonths -
+                        allocatedOutsideCurrentSystem;
+
+                    if (item.ActualMonths > maxAssignableMonths)
                     {
-                        errors.Add($"{employee.FullName} is already assigned to this system.");
+                        errors.Add(
+                            $"{employee.FullName} can be assigned up to {maxAssignableMonths} months in this system.");
+
                         continue;
                     }
 
-                    var remaining = employee.YearlyCapacityMonths -
-                                    allocations.Sum(a => a.ActualMonths);
-
-                    if (item.ActualMonths > remaining)
+                    if (currentAllocation is not null)
                     {
-                        errors.Add($"{employee.FullName} has only {remaining} remaining months.");
+                        currentAllocation.RoleInSystem =
+                            item.RoleInSystem.Trim();
+
+                        currentAllocation.PlannedMonths =
+                            item.PlannedMonths;
+
+                        currentAllocation.ActualMonths =
+                            item.ActualMonths;
+
+                        updates.Add(
+                            new UpdateOneModel<Employee>(
+                                Builders<Employee>.Filter.Eq(
+                                    currentEmployee =>
+                                        currentEmployee.Id,
+                                    employee.Id),
+                                Builders<Employee>.Update.Set(
+                                    currentEmployee =>
+                                        currentEmployee.Allocations,
+                                    allocations)
+                            )
+                        );
+
                         continue;
                     }
 
-                    var allocation = new EmployeeAllocation
+                    var newAllocation = new EmployeeAllocation
                     {
                         SystemId = dto.SystemId,
-                        RoleInSystem = item.RoleInSystem,
+                        RoleInSystem = item.RoleInSystem.Trim(),
                         PlannedMonths = item.PlannedMonths,
                         ActualMonths = item.ActualMonths
                     };
 
-                    updates.Add(new UpdateOneModel<Employee>(
-                        Builders<Employee>.Filter.Eq(e => e.Id, employee.Id),
-                        Builders<Employee>.Update.Push(e => e.Allocations, allocation)
-                    ));
+                    updates.Add(
+                        new UpdateOneModel<Employee>(
+                            Builders<Employee>.Filter.Eq(
+                                currentEmployee =>
+                                    currentEmployee.Id,
+                                employee.Id),
+                            Builders<Employee>.Update.Push(
+                                currentEmployee =>
+                                    currentEmployee.Allocations,
+                                newAllocation)
+                        )
+                    );
                 }
 
                 if (errors.Any())
@@ -673,7 +867,10 @@ namespace HR_System.Services
                         dto.SystemId,
                         errors.Count);
 
-                    return new BulkAssignEmployeesResultDto(false, 0, errors);
+                    return new BulkAssignEmployeesResultDto(
+                        false,
+                        0,
+                        errors);
                 }
 
                 if (!updates.Any())
@@ -685,21 +882,24 @@ namespace HR_System.Services
                     return new BulkAssignEmployeesResultDto(
                         false,
                         0,
-                        new List<string> { "No valid employees to assign." });
+                        new List<string>
+                        {
+                    "No valid employees to assign or update."
+                        });
                 }
 
-                var result = await _employeesCollection.BulkWriteAsync(updates);
+                var result = await _employeesCollection
+                    .BulkWriteAsync(updates);
 
                 _logger.LogInformation(
-                    "Bulk employee assignment completed successfully. SystemId: {SystemId}, AssignedEmployeeCount: {AssignedEmployeeCount}",
+                    "Bulk employee assignment completed successfully. SystemId: {SystemId}, ModifiedEmployeeCount: {ModifiedEmployeeCount}",
                     dto.SystemId,
                     result.ModifiedCount);
 
                 return new BulkAssignEmployeesResultDto(
                     true,
                     (int)result.ModifiedCount,
-                    new List<string>()
-                );
+                    new List<string>());
             }
             catch (Exception ex)
             {

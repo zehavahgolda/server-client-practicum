@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 
-    namespace HR_System.DTOs.Employees
-    {
-        public record EmployeeDetailsDto(
-            string Id,
-            string FullName,
-            string ManagerName,
-            string ProfessionalCategory,
-            string? ProfessionalSubCategory,
-            int Year,
-            double YearlyCapacityMonths, // קיבולת שנתית לעובד
-            string? UpcomingEvent, // אירוע עתידי
-            double AllocatedMonths, // חודשים מוקצים
-            double RemainingMonths, // יתרת חודשים, חודשים פנויים
-            string AvailabilityStatus, // סטטוס זמינות 
-            int AssignedSystemsCount, // מספר המערכות המשויכות אליו   
-            string? Notes,
-            string? ManagerReviewNote,
-            List<EmployeeRelevantChangeDto> RelevantChanges,
-            List<EmployeeAllocationDto> Allocations // רשימת המערכות של העובד
-        );
-    }
+namespace HR_System.DTOs.Employees
+{
+    public record EmployeeDetailsDto(
+        string Id,
+        string FullName,
+        string ManagerName,
+        string ProfessionalCategory,
+        string? ProfessionalSubCategory,
+        int Year,
+        double YearlyCapacityMonths,
+        string? UpcomingEvent,
+        double AllocatedMonths,
+        double RemainingMonths,
+        string AvailabilityStatus,
+        int AssignedSystemsCount,
+        bool IsActive,
+        string? Notes,
+        string? ManagerReviewNote,
+        List<EmployeeRelevantChangeDto> RelevantChanges,
+        List<EmployeeAllocationDto> Allocations
+    );
+}

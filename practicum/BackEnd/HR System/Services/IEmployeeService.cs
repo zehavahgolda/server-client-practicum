@@ -1,94 +1,80 @@
-//using HR_System.DTOs.Employees;
-
-//namespace HR_System.Services
-//{
-//    /// חוזה השירות עבור פעולות על עובדים המשמש את ה-API Controllers.
-//    /// כולל פעולות קריאה וכתיבה הנדרשות על ידי ממשק המשתמש (יצירה/עדכון/הקצאה/מחיקה).
-//    public interface IEmployeeService
-//    {
-//        /// שליפת רשימת עובדים עם פילטרים אופציונליים לשימוש בממשק המשתמש.
-//        Task<List<EmployeeListItemDto>> GetEmployeesAsync(
-//            int? year = null,
-//            string? managerName = null,
-//            string? professionalCategory = null,
-//            string? systemId = null,
-//            string? search = null);
-
-//        /// שליפת פרטים מלאים של עובד לפי מזהה.
-//        Task<EmployeeDetailsDto?> GetEmployeeByIdAsync(string id);
-
-//        /// עדכון שדה החודשים בפועל (ActualMonths) עבור הקצאה ספציפית של עובד.
-//        Task<bool> UpdateAllocationActualMonthsAsync(
-//            string employeeId,
-//            string systemId,
-//            string roleInSystem,
-//            int actualMonths);
-
-//        /// יצירת עובד חדש על בסיס ה-DTO שסופק והחזרת המזהה שלו.
-//        Task<string> CreateEmployeeAsync(EmployeeCreateDto dto);
-
-//        /// עדכון עובד קיים. תומך בעדכון חלקי. מחזיר אמת אם בוצע עדכון.
-//        Task<bool> UpdateEmployeeAsync(string id, EmployeeEditDto dto);
-
-//        /// הוספת הקצאה לעובד קיים (שיוך למערכת ותפקיד).
-//        /// מחזיר אמת אם ההקצאה נוספה בהצלחה.
-//        Task<bool> AddAllocationAsync(string employeeId, AllocationCreateDto dto);
-
-//        /// מחיקה רכה (Soft-delete) של עובד לפי מזהה (קביעת IsActive = false).
-//        /// מחזיר אמת אם העובד עודכן.
-//        Task<bool> DeleteEmployeeAsync(string id);
-
-//        Task<List<EmployeeAssignmentCandidateDto>> GetAssignmentCandidatesAsync(string systemId,int? year = null,string? search = null);
-
-//        Task<BulkAssignEmployeesResultDto> BulkAssignEmployeesToSystemAsync(BulkAssignEmployeesDto dto);
-
-//    }
-//}
 using HR_System.DTOs.Employees;
 
 namespace HR_System.Services
 {
+    /// <summary>
     /// חוזה השירות עבור פעולות על עובדים המשמש את ה-API Controllers.
-    /// כולל פעולות קריאה וכתיבה הנדרשות על ידי ממשק המשתמש (יצירה/עדכון/הקצאה/מחיקה).
+    /// כולל פעולות קריאה וכתיבה הנדרשות על ידי ממשק המשתמש.
+    /// </summary>
     public interface IEmployeeService
     {
-        /// שליפת רשימת עובדים עם פילטרים אופציונליים לשימוש בממשק המשתמש.
+        /// <summary>
+        /// שליפת רשימת עובדים עם פילטרים אופציונליים.
+        ///
+        /// isActive:
+        /// true  - עובדים פעילים בלבד.
+        /// false - עובדים לא פעילים בלבד.
+        /// null  - כל העובדים.
+        /// </summary>
         Task<List<EmployeeListItemDto>> GetEmployeesAsync(
             int? year = null,
             string? managerName = null,
             string? professionalCategory = null,
             string? systemId = null,
-            string? search = null);
+            string? search = null,
+            bool? isActive = null);
 
+        /// <summary>
         /// שליפת מועמדים לשיבוץ למערכת מסוימת.
+        /// </summary>
         Task<List<EmployeeAssignmentCandidateDto>> GetAssignmentCandidatesAsync(
             string systemId,
             int? year = null,
             string? search = null);
 
+        /// <summary>
         /// שליפת פרטים מלאים של עובד לפי מזהה.
+        /// </summary>
         Task<EmployeeDetailsDto?> GetEmployeeByIdAsync(string id);
 
+        /// <summary>
         /// עדכון שדה החודשים בפועל עבור הקצאה ספציפית של עובד.
+        /// </summary>
         Task<bool> UpdateAllocationActualMonthsAsync(
             string employeeId,
             string systemId,
             string roleInSystem,
             int actualMonths);
 
-        /// יצירת עובד חדש על בסיס ה-DTO שסופק והחזרת המזהה שלו.
+        /// <summary>
+        /// יצירת עובד חדש והחזרת המזהה שלו.
+        /// </summary>
         Task<string> CreateEmployeeAsync(EmployeeCreateDto dto);
 
-        /// עדכון עובד קיים. תומך בעדכון חלקי. מחזיר אמת אם בוצע עדכון.
-        Task<bool> UpdateEmployeeAsync(string id, EmployeeEditDto dto);
+        /// <summary>
+        /// עדכון עובד קיים.
+        /// </summary>
+        Task<bool> UpdateEmployeeAsync(
+            string id,
+            EmployeeEditDto dto);
 
+        /// <summary>
         /// הוספת הקצאה לעובד קיים.
-        Task<bool> AddAllocationAsync(string employeeId, AllocationCreateDto dto);
+        /// </summary>
+        Task<bool> AddAllocationAsync(
+            string employeeId,
+            AllocationCreateDto dto);
 
+        /// <summary>
         /// שיבוץ כמה עובדים למערכת בפעולה אחת.
-        Task<BulkAssignEmployeesResultDto> BulkAssignEmployeesToSystemAsync(BulkAssignEmployeesDto dto);
+        /// </summary>
+        Task<BulkAssignEmployeesResultDto>
+            BulkAssignEmployeesToSystemAsync(
+                BulkAssignEmployeesDto dto);
 
+        /// <summary>
         /// מחיקה רכה של עובד.
+        /// </summary>
         Task<bool> DeleteEmployeeAsync(string id);
     }
 }

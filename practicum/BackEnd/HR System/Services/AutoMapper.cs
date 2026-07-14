@@ -25,13 +25,15 @@ namespace HR_System.Services
             // 2. מיפוי עבור פרטי עובד מלאים (EmployeeDetailsDto)
             // =========================================================================
             CreateMap<Employee, EmployeeDetailsDto>()
-                .ForCtorParam("AllocatedMonths", opt => opt.MapFrom(src => GetAllocatedMonths(src)))
-                .ForCtorParam("RemainingMonths", opt => opt.MapFrom(src => GetRemainingMonths(src)))
-                .ForCtorParam("AvailabilityStatus", opt => opt.MapFrom(src => GetAvailabilityStatus(src)))
-                .ForCtorParam("AssignedSystemsCount", opt => opt.MapFrom(src => GetAssignedSystemsCount(src)))
-                .ForCtorParam("ManagerReviewNote", opt => opt.MapFrom(src => (string?)null))
-                .ForCtorParam("RelevantChanges", opt => opt.MapFrom(src => new List<EmployeeRelevantChangeDto>()))
-                .ForCtorParam("Allocations", opt => opt.MapFrom(src => new List<EmployeeAllocationDto>()));
+                 .ForCtorParam("AllocatedMonths", opt => opt.MapFrom(src => GetAllocatedMonths(src)))
+                 .ForCtorParam("RemainingMonths", opt => opt.MapFrom(src => GetRemainingMonths(src)))
+                 .ForCtorParam("AvailabilityStatus", opt => opt.MapFrom(src => GetAvailabilityStatus(src)))
+                 .ForCtorParam("AssignedSystemsCount", opt => opt.MapFrom(src => GetAssignedSystemsCount(src)))
+                 .ForCtorParam("IsActive", opt => opt.MapFrom(src => src.IsActive))
+                 .ForCtorParam("ManagerReviewNote", opt => opt.MapFrom(src => (string?)null))
+                 .ForCtorParam("RelevantChanges", opt => opt.MapFrom(src => new List<EmployeeRelevantChangeDto>()))
+                 .ForCtorParam("Allocations", opt => opt.MapFrom(src => new List<EmployeeAllocationDto>())
+                );
 
             // =========================================================================
             // 3. שאר המיפויים הרגילים בפרויקט
