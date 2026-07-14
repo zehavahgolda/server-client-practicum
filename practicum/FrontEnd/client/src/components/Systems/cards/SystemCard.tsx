@@ -1,4 +1,6 @@
 import type { System } from "../../../types";
+import { formatCurrency } from "../../../utils/numberFormatters";
+
 import "./SystemCard.css";
 
 // מאפייני כרטיס מערכת בודדת.
@@ -60,15 +62,6 @@ function getBudgetTone(system: System) {
   }
 
   return "balanced";
-}
-
-// מעצב סכום כספי לפי פורמט מטבע ישראלי.
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("he-IL", {
-    style: "currency",
-    currency: "ILS",
-    maximumFractionDigits: 0
-  }).format(value || 0);
 }
 
 // מציג כרטיס מערכת עם נתוני קיבולת ותקציב תמציתיים.

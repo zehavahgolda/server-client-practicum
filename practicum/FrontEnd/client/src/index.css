@@ -1,5 +1,15 @@
 :root {
   --app-font: "Assistant", "Heebo", Arial, sans-serif;
+
+  /* סטטוסי זמינות עובדים */
+  --employee-available: var(--status-success);
+  --employee-available-soft: var(--status-success-soft);
+
+  --employee-balanced: #2563eb;
+  --employee-balanced-soft: #eff6ff;
+
+  --employee-overloaded: var(--status-danger);
+  --employee-overloaded-soft: var(--status-danger-soft);
 }
 
 * {

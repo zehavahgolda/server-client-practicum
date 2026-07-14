@@ -1,4 +1,9 @@
 import type { System } from "../../../types";
+import {
+  formatCurrency,
+  formatMetricValue
+} from "../../../utils/numberFormatters";
+
 import "./DashboardSystemRow.css";
 
 interface DashboardSystemRowProps {
@@ -7,21 +12,6 @@ interface DashboardSystemRowProps {
   onAssign: (system: System) => void;
   onEdit: (system: System) => void;
   onOpenProfile: (system: System) => void;
-}
-
-function formatMetric(value: number) {
-  return new Intl.NumberFormat("he-IL", {
-    minimumFractionDigits: Number.isInteger(value) ? 0 : 1,
-    maximumFractionDigits: 1
-  }).format(value || 0);
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("he-IL", {
-    style: "currency",
-    currency: "ILS",
-    maximumFractionDigits: 0
-  }).format(value || 0);
 }
 
 function getBudgetUsagePercent(system: System) {
@@ -65,18 +55,20 @@ export default function DashboardSystemRow({
         <div className="dashboard-system-row-metrics">
           <div>
             <span>נדרש</span>
-            <strong>{formatMetric(system.requiredCapacityMonths)}</strong>
+            <strong>
+              {formatMetricValue(system.requiredCapacityMonths)}
+            </strong>
           </div>
 
           <div>
             <span>מוקצה</span>
-            <strong>{formatMetric(system.allocatedMonths)}</strong>
+            <strong>{formatMetricValue(system.allocatedMonths)}</strong>
           </div>
 
           <div>
             <span>פער</span>
             <strong className={hasShortage ? "danger" : "ok"}>
-              {formatMetric(Math.abs(system.gap))}
+              {formatMetricValue(Math.abs(system.gap))}
             </strong>
           </div>
 
@@ -89,7 +81,9 @@ export default function DashboardSystemRow({
             <>
               <div>
                 <span>תקציב מוקצה</span>
-                <strong>{formatCurrency(system.allocatedBudget)}</strong>
+                <strong>
+                  {formatCurrency(system.allocatedBudget)}
+                </strong>
               </div>
 
               <div>

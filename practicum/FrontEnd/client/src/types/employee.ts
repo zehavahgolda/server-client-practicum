@@ -3,7 +3,7 @@
 export interface EmployeeAllocation {
   systemId: string;
   systemName: string;
-  systemCapacityStatus: string; // "Shortage", "Balanced", "Excess"
+  systemCapacityStatus: string;
   roleInSystem: string;
   plannedMonths: number;
   actualMonths: number;
@@ -17,7 +17,7 @@ export interface EmployeeRelevantChange {
   year?: number;
 }
 
-// זה ה-Interface המרכזי לכרטיסיית הפרטים
+// פרטי עובד מלאים.
 export interface EmployeeDetails {
   id: string;
   fullName: string;
@@ -31,13 +31,14 @@ export interface EmployeeDetails {
   remainingMonths: number;
   availabilityStatus: string;
   assignedSystemsCount: number;
+  isActive: boolean;
   notes?: string;
   managerReviewNote?: string;
   relevantChanges: EmployeeRelevantChange[];
-  allocations: EmployeeAllocation[]
+  allocations: EmployeeAllocation[];
 }
 
-// לשימוש ברשימת העובדים (List View)
+// עובד ברשימה.
 export interface EmployeeListItem {
   id: string;
   fullName: string;
@@ -49,9 +50,11 @@ export interface EmployeeListItem {
   remainingMonths: number;
   availabilityStatus: string;
   assignedSystemsCount: number;
+  isActive: boolean;
   year?: number;
 }
 
+// נתונים ליצירה או עדכון עובד.
 export interface EmployeeUpsertPayload {
   fullName: string;
   professionalCategory: string;
@@ -62,4 +65,5 @@ export interface EmployeeUpsertPayload {
   upcomingEvent?: string;
   notes?: string;
   managerReviewNote?: string;
+  isActive?: boolean;
 }

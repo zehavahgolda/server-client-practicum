@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
+
 import DashboardChartCard from "../charts/DashboardChartCard";
 import DashboardHorizontalBars from "../charts/DashboardHorizontalBars";
+
+import { logger } from "../../../services/logging/logger";
 import { systemService } from "../../../services/systemService";
+
 // פלטת צבעים קבועה להצגת עמודות באופן מובחן ועקבי.
-const chartColors = ["#1f6db3", "#149584", "#7550b9", "#6c7d13", "#cb6a0b", "#b43135", "#4f8f5b"];
+const chartColors = [
+  "#1f6db3",
+  "#149584",
+  "#7550b9",
+  "#6c7d13",
+  "#cb6a0b",
+  "#b43135",
+  "#4f8f5b"
+];
 
 // מודל נתון לגרף: תווית מערכת, ערך תקציב וצבע תצוגה.
 interface BudgetBarItem {
@@ -41,10 +53,22 @@ export default function BudgetBySystemWidget() {
           setBudgetBySystem(items);
         }
       } catch (error) {
-        console.error("Failed to load budget by system", error);
-        if (isMounted) setBudgetBySystem([]);
+        logger.error(
+          "Failed to load budget by system",
+          error,
+          {
+            feature: "dashboard",
+            action: "loadBudgetBySystem"
+          }
+        );
+
+        if (isMounted) {
+          setBudgetBySystem([]);
+        }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 

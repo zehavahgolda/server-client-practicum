@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
-import { employeeService } from "../services/employeeService";
-import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
 
-function getActiveYear() {
-  return new Date().getFullYear();
-}
+import { employeeService } from "../services/employeeService";
+
+import type {
+  EmployeeListItem,
+  EmployeeUpsertPayload
+} from "../types";
+
+import { getActiveYear } from "../utils/yearOptions";
 
 // Hook תזמור ברמת עמוד העובדים: חיבור נתונים, פילטרים, מודלים ופעולות משתמש.
 export function useEmployeesPage() {
@@ -17,7 +21,12 @@ export function useEmployeesPage() {
   const availabilityFilter = searchParams.get("availability");
   const employeeIdFromUrl = searchParams.get("employeeId");
 
-  const employeesHook = useEmployees({ year: activeYear });
+  // המסך מציג כרגע רק עובדים פעילים.
+  const employeesHook = useEmployees({
+    year: activeYear,
+    isActive: true
+  });
+
   const { systems } = useSystems();
 
   const {
@@ -39,30 +48,50 @@ export function useEmployeesPage() {
 
   // אם הגיע מזהה עובד ב-URL, טוען אוטומטית את פרטי העובד לפתיחת פרופיל ישירה.
   useEffect(() => {
-    if (!employeeIdFromUrl) return;
+    if (!employeeIdFromUrl) {
+      return;
+    }
 
     void loadEmployeeDetails(employeeIdFromUrl);
   }, [employeeIdFromUrl, loadEmployeeDetails]);
 
-  const [employeesForFilterOptions, setEmployeesForFilterOptions] = useState<EmployeeListItem[]>([]);
+  const [employeesForFilterOptions, setEmployeesForFilterOptions] =
+    useState<EmployeeListItem[]>([]);
 
-  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
-  const [employeeModalMode, setEmployeeModalMode] = useState<"create" | "edit">("create");
-  const [allocationModalOpen, setAllocationModalOpen] = useState(false);
-  const [allocationUpdateModalOpen, setAllocationUpdateModalOpen] = useState(false);
+  const [employeeModalOpen, setEmployeeModalOpen] =
+    useState(false);
 
-  const [savingEmployee, setSavingEmployee] = useState(false);
-  const [savingAllocation, setSavingAllocation] = useState(false);
-  const [savingAllocationUpdate, setSavingAllocationUpdate] = useState(false);
+  const [employeeModalMode, setEmployeeModalMode] =
+    useState<"create" | "edit">("create");
 
-  // טוען רשימת עובדים בסיסית לבניית אפשרויות פילטור (קטגוריות/מנהלים) לפי שנה נבחרת.
+  const [allocationModalOpen, setAllocationModalOpen] =
+    useState(false);
+
+  const [
+    allocationUpdateModalOpen,
+    setAllocationUpdateModalOpen
+  ] = useState(false);
+
+  const [savingEmployee, setSavingEmployee] =
+    useState(false);
+
+  const [savingAllocation, setSavingAllocation] =
+    useState(false);
+
+  const [
+    savingAllocationUpdate,
+    setSavingAllocationUpdate
+  ] = useState(false);
+
+  // טוען רשימת עובדים פעילים לבניית אפשרויות פילטור.
   useEffect(() => {
     let cancelled = false;
 
     async function loadFilterOptions() {
       try {
         const data = await employeeService.getEmployees({
-          year: filters.year ?? activeYear
+          year: filters.year ?? activeYear,
+          isActive: true
         });
 
         if (!cancelled) {
@@ -75,7 +104,7 @@ export function useEmployeesPage() {
       }
     }
 
-    loadFilterOptions();
+    void loadFilterOptions();
 
     return () => {
       cancelled = true;
@@ -85,11 +114,15 @@ export function useEmployeesPage() {
   // מחיל סינון זמינות שמגיע מה-URL על רשימת העובדים הנוכחית.
   const filteredEmployees = useMemo(() => {
     if (availabilityFilter === "overloaded") {
-      return employees.filter((employee) => employee.remainingMonths < 0);
+      return employees.filter(
+        (employee) => employee.remainingMonths < 0
+      );
     }
 
     if (availabilityFilter === "low") {
-      return employees.filter((employee) => employee.remainingMonths <= 1);
+      return employees.filter(
+        (employee) => employee.remainingMonths <= 1
+      );
     }
 
     return employees;
@@ -99,8 +132,12 @@ export function useEmployeesPage() {
   const viewMeta = useMemo(
     () => ({
       total: filteredEmployees.length,
-      lowCapacity: filteredEmployees.filter((employee) => employee.remainingMonths <= 1).length,
-      overloaded: filteredEmployees.filter((employee) => employee.remainingMonths < 0).length
+      lowCapacity: filteredEmployees.filter(
+        (employee) => employee.remainingMonths <= 1
+      ).length,
+      overloaded: filteredEmployees.filter(
+        (employee) => employee.remainingMonths < 0
+      ).length
     }),
     [filteredEmployees]
   );
@@ -111,7 +148,9 @@ export function useEmployeesPage() {
       [
         ...new Set(
           employeesForFilterOptions
-            .map((employee) => employee.professionalCategory?.trim())
+            .map((employee) =>
+              employee.professionalCategory?.trim()
+            )
             .filter(Boolean)
         )
       ].sort((a, b) => a.localeCompare(b, "he")),
@@ -124,28 +163,37 @@ export function useEmployeesPage() {
       [
         ...new Set(
           employeesForFilterOptions
-            .map((employee) => employee.managerName?.trim())
+            .map((employee) =>
+              employee.managerName?.trim()
+            )
             .filter(Boolean)
         )
       ].sort((a, b) => a.localeCompare(b, "he")),
     [employeesForFilterOptions]
   );
 
-  // יוצר אפשרויות לבחירת הקצאה קיימת של העובד הנבחר לצורך עדכון מהיר.
+  // יוצר אפשרויות לבחירת הקצאה קיימת של העובד הנבחר.
   const allocationOptions = useMemo(() => {
-    if (!selectedEmployee) return [];
+    if (!selectedEmployee) {
+      return [];
+    }
 
-    return selectedEmployee.allocations.map((allocation) => ({
-      key: `${allocation.systemId}__${allocation.roleInSystem}`,
-      systemId: allocation.systemId,
-      roleInSystem: allocation.roleInSystem,
-      label: `${allocation.systemName} · ${allocation.roleInSystem}`
-    }));
+    return selectedEmployee.allocations.map(
+      (allocation) => ({
+        key: `${allocation.systemId}__${allocation.roleInSystem}`,
+        systemId: allocation.systemId,
+        roleInSystem: allocation.roleInSystem,
+        label: `${allocation.systemName} · ${allocation.roleInSystem}`
+      })
+    );
   }, [selectedEmployee]);
 
   // מאפס את הפילטרים לברירת המחדל של המסך.
   function clearFilters() {
-    setFilters({ year: activeYear });
+    setFilters({
+      year: activeYear,
+      isActive: true
+    });
   }
 
   // פותח מודל יצירת עובד חדש.
@@ -156,18 +204,29 @@ export function useEmployeesPage() {
 
   // פותח מודל עריכת עובד עבור העובד הנבחר.
   function openEditEmployeeModal() {
-    if (!selectedEmployee) return;
+    if (!selectedEmployee) {
+      return;
+    }
+
     setEmployeeModalMode("edit");
     setEmployeeModalOpen(true);
   }
 
-  // שומר עובד: יוצר חדש או מעדכן קיים לפי מצב המודל, עם ניהול דגל שמירה.
-  async function handleEmployeeSubmit(payload: EmployeeUpsertPayload) {
+  // שומר עובד: יוצר חדש או מעדכן קיים לפי מצב המודל.
+  async function handleEmployeeSubmit(
+    payload: EmployeeUpsertPayload
+  ) {
     setSavingEmployee(true);
 
     try {
-      if (employeeModalMode === "edit" && selectedEmployee?.id) {
-        await updateEmployee(selectedEmployee.id, payload);
+      if (
+        employeeModalMode === "edit" &&
+        selectedEmployee?.id
+      ) {
+        await updateEmployee(
+          selectedEmployee.id,
+          payload
+        );
       } else {
         await createEmployee(payload);
       }
@@ -178,7 +237,7 @@ export function useEmployeesPage() {
     }
   }
 
-  // מוסיף הקצאה לעובד הנבחר וסוגר את המודל לאחר הצלחה.
+  // מוסיף הקצאה לעובד הנבחר.
   async function handleAddAllocation(payload: {
     systemId: string;
     roleInSystem: string;
@@ -195,12 +254,21 @@ export function useEmployeesPage() {
     }
   }
 
-  // מעדכן חודשי ביצוע של הקצאה קיימת וסוגר את מודל העדכון לאחר הצלחה.
-  async function handleUpdateAllocation(systemId: string, roleInSystem: string, actualMonths: number) {
+  // מעדכן חודשי ביצוע של הקצאה קיימת.
+  async function handleUpdateAllocation(
+    systemId: string,
+    roleInSystem: string,
+    actualMonths: number
+  ) {
     setSavingAllocationUpdate(true);
 
     try {
-      await updateActualMonths(systemId, roleInSystem, actualMonths);
+      await updateActualMonths(
+        systemId,
+        roleInSystem,
+        actualMonths
+      );
+
       setAllocationUpdateModalOpen(false);
     } finally {
       setSavingAllocationUpdate(false);

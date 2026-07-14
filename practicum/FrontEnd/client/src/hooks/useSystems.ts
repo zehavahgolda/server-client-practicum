@@ -1,6 +1,8 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { logger } from "../services/logging/logger";
 import { systemService } from "../services/systemService";
+
 import type { System, SystemDetails, SystemFilters } from "../types";
 
 // Hook לניהול נתוני מערכות: רשימה, פריט נבחר, טעינה, שגיאות ופילטרים.
@@ -11,9 +13,12 @@ export function useSystems(initialFilters: SystemFilters = {}) {
   });
 
   const [systems, setSystems] = useState<System[]>([]);
-  const [selectedSystem, setSelectedSystem] = useState<SystemDetails | null>(null);
+  const [selectedSystem, setSelectedSystem] =
+    useState<SystemDetails | null>(null);
+
   const [loadingList, setLoadingList] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
 
   // טוען את רשימת המערכות לפי הפילטרים הנוכחיים ומעדכן סטייט תואם.
@@ -27,6 +32,12 @@ export function useSystems(initialFilters: SystemFilters = {}) {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "שגיאה בטעינת מערכות";
+
+      logger.error("Failed to load systems", err, {
+        feature: "systems",
+        action: "loadSystems",
+        filters
+      });
 
       setError(message);
     } finally {
@@ -45,6 +56,12 @@ export function useSystems(initialFilters: SystemFilters = {}) {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "שגיאה בטעינת פרטי מערכת";
+
+      logger.error("Failed to load system details", err, {
+        feature: "systems",
+        action: "loadSystemDetails",
+        entityId: id
+      });
 
       setError(message);
     } finally {

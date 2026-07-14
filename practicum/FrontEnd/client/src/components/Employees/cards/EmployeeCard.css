@@ -1,5 +1,4 @@
-
- .employee-card {
+.employee-card {
   position: relative;
   width: 100%;
   min-height: 132px;
@@ -9,9 +8,9 @@
   padding: 12px;
   text-align: right;
   cursor: pointer;
-  transition: all .18s ease;
+  transition: all 0.18s ease;
   overflow: hidden;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
 .employee-card::after {
@@ -23,18 +22,28 @@
   height: 100%;
 }
 
-.employee-card.available::after { background: var(--status-success); }
-.employee-card.balanced::after { background: blue; }
-.employee-card.overloaded::after { background: var(--status-danger); }
+.employee-card.available::after {
+  background: var(--employee-available);
+}
+
+.employee-card.balanced::after {
+  background: var(--employee-balanced);
+}
+
+.employee-card.overloaded::after {
+  background: var(--employee-overloaded);
+}
 
 .employee-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, .11);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.11);
 }
 
 .employee-card.selected {
   border-color: var(--status-surplus);
-  box-shadow: 0 0 0 2px var(--status-surplus-soft), var(--shadow-soft);
+  box-shadow:
+    0 0 0 2px var(--status-surplus-soft),
+    var(--shadow-soft);
 }
 
 .employee-card-top {
@@ -65,20 +74,19 @@
   font-size: 11px;
 }
 
-
-
 .employee-status-pill.available {
-  background: var(--status-success-soft);
-  color: var(--status-success);
+  background: var(--employee-available-soft);
+  color: var(--employee-available);
 }
+
 .employee-status-pill.balanced {
-  background: var(--status-surplus-soft);
-  color: var(--status-surplus);
+  background: var(--employee-balanced-soft);
+  color: var(--employee-balanced);
 }
 
 .employee-status-pill.overloaded {
-  background: var(--status-danger-soft);
-  color: var(--status-danger);
+  background: var(--employee-overloaded-soft);
+  color: var(--employee-overloaded);
 }
 
 .employee-card-divider {
@@ -113,9 +121,17 @@
   color: var(--text-primary);
 }
 
-.employee-card-metrics strong.available { color: var(--status-success); }
-.employee-card-metrics strong.balanced { color: #180c9b; }
-.employee-card-metrics strong.overloaded { color: var(--status-danger); }
+.employee-card-metrics strong.available {
+  color: var(--employee-available);
+}
+
+.employee-card-metrics strong.balanced {
+  color: var(--employee-balanced);
+}
+
+.employee-card-metrics strong.overloaded {
+  color: var(--employee-overloaded);
+}
 
 .employees-board {
   background: var(--surface-bg);
@@ -145,8 +161,8 @@
 }
 
 .employees-capacity-counter {
-  background: var(--status-success-soft);
-  color: var(--status-success);
+  background: var(--employee-overloaded-soft);
+  color: var(--employee-overloaded);
   border-radius: 999px;
   padding: 6px 10px;
   font-weight: 900;
@@ -186,22 +202,6 @@
 
 .employees-back-btn {
   flex: 0 0 auto;
-}
-
-.empty-text {
-  width: 100%;
-  min-height: 96px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: var(--text-secondary);
-  background: var(--surface-alt);
-  border: 1px dashed var(--border-color);
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 18px;
-  box-sizing: border-box;
 }
 
 @media (max-width: 1280px) {

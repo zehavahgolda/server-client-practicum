@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
+
+import { logger } from "../../../services/logging/logger";
 import { systemService } from "../../../services/systemService";
+
 import type { SystemCreateDto } from "../../../types";
+
+import { getActiveYear } from "../../../utils/yearOptions";
+
 import "./CreateSystemModal.css";
 
 // מאפייני מודל יצירת מערכת חדשה.
@@ -10,16 +16,11 @@ interface Props {
   onCreated: () => Promise<void> | void;
 }
 
-// מחזיר את שנת העבודה הנוכחית כברירת מחדל.
-function getDefaultYear() {
-  return new Date().getFullYear();
-}
-
 // בונה את ערכי ברירת המחדל לטופס יצירת מערכת.
 function buildInitialForm(): SystemCreateDto {
   return {
     name: "",
-    year: getDefaultYear(),
+    year: getActiveYear(),
     requiredCapacityMonths: 12,
     allocatedBudget: 0,
     managementNote: ""
@@ -27,8 +28,14 @@ function buildInitialForm(): SystemCreateDto {
 }
 
 // מודל יצירת מערכת כולל ולידציה בסיסית ושמירה לשרת.
-export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
-  const [form, setForm] = useState<SystemCreateDto>(() => buildInitialForm());
+export default function CreateSystemModal({
+  open,
+  onClose,
+  onCreated
+}: Props) {
+  const [form, setForm] = useState<SystemCreateDto>(
+    buildInitialForm
+  );
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -42,11 +49,15 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
     }
   }, [open]);
 
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   // מאמת שדות ושומר מערכת חדשה בשרת.
   async function save() {
-    if (!form.name.trim()) {
+    const name = form.name.trim();
+
+    if (!name) {
       setError("חובה להזין שם מערכת.");
       return;
     }
@@ -67,15 +78,34 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
     try {
       await systemService.createSystem({
         ...form,
-        name: form.name.trim(),
-        allocatedBudget: Number(form.allocatedBudget) || 0,
-        managementNote: form.managementNote?.trim() || undefined
+        name,
+        allocatedBudget:
+          Number(form.allocatedBudget) || 0,
+        managementNote:
+          form.managementNote?.trim() || undefined
+      });
+
+      logger.info("System created", {
+        feature: "systems",
+        action: "createSystem",
+        year: form.year
       });
 
       await onCreated();
       onClose();
-    } catch {
-      setError("שגיאה בהוספת מערכת.");
+    } catch (err) {
+      logger.error("Failed to create system", err, {
+        feature: "systems",
+        action: "createSystem",
+        year: form.year
+      });
+
+      const message =
+        err instanceof Error
+          ? err.message
+          : "שגיאה בהוספת מערכת.";
+
+      setError(message);
     } finally {
       setSaving(false);
     }
@@ -84,12 +114,20 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
   return (
     <div className="create-system-backdrop">
       <div className="create-system-modal" dir="rtl">
-        <button type="button" className="create-system-close" onClick={onClose}>
+        <button
+          type="button"
+          className="create-system-close"
+          onClick={onClose}
+          disabled={saving}
+        >
           ×
         </button>
 
         <h2>הוספת מערכת</h2>
-        <p>מסך זריז לניהול דרישות הקיבולת והתקציב של מערכת.</p>
+        <p>
+          מסך זריז לניהול דרישות הקיבולת והתקציב של
+          מערכת.
+        </p>
 
         {error && <div className="error-box">{error}</div>}
 
@@ -98,7 +136,13 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
             שם מערכת *
             <input
               value={form.name}
-              onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+              onChange={(event) =>
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  name: event.target.value
+                }))
+              }
+              disabled={saving}
             />
           </label>
 
@@ -107,7 +151,13 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
             <input
               type="number"
               value={form.year}
-              onChange={(e) => setForm((p) => ({ ...p, year: Number(e.target.value) }))}
+              onChange={(event) =>
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  year: Number(event.target.value)
+                }))
+              }
+              disabled={saving}
             />
           </label>
 
@@ -117,12 +167,15 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
               type="number"
               min={1}
               value={form.requiredCapacityMonths}
-              onChange={(e) =>
-                setForm((p) => ({
-                  ...p,
-                  requiredCapacityMonths: Number(e.target.value)
+              onChange={(event) =>
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  requiredCapacityMonths: Number(
+                    event.target.value
+                  )
                 }))
               }
+              disabled={saving}
             />
           </label>
 
@@ -132,12 +185,15 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
               type="number"
               min={0}
               value={form.allocatedBudget}
-              onChange={(e) =>
-                setForm((p) => ({
-                  ...p,
-                  allocatedBudget: Number(e.target.value)
+              onChange={(event) =>
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  allocatedBudget: Number(
+                    event.target.value
+                  )
                 }))
               }
+              disabled={saving}
             />
           </label>
         </div>
@@ -145,19 +201,33 @@ export default function CreateSystemModal({ open, onClose, onCreated }: Props) {
         <label className="create-system-note-label">
           הערת ניהול
           <textarea
-            value={form.managementNote}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, managementNote: e.target.value }))
+            value={form.managementNote ?? ""}
+            onChange={(event) =>
+              setForm((previousForm) => ({
+                ...previousForm,
+                managementNote: event.target.value
+              }))
             }
+            disabled={saving}
           />
         </label>
 
         <div className="create-system-actions">
-          <button type="button" className="secondary-btn" onClick={onClose}>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={onClose}
+            disabled={saving}
+          >
             ביטול
           </button>
 
-          <button type="button" className="primary-btn" onClick={save} disabled={saving}>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() => void save()}
+            disabled={saving}
+          >
             {saving ? "שומר..." : "שמירה"}
           </button>
         </div>

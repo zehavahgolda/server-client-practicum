@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
+
+import { logger } from "../../../services/logging/logger";
 import { systemService } from "../../../services/systemService";
+
 import type { SystemDetails, SystemUpdateDto } from "../../../types";
+
 import "./EditSystemModal.css";
 
 // מאפייני מודל עריכת מערכת.
@@ -12,17 +16,28 @@ interface Props {
 }
 
 // בונה מצב טופס התחלתי לפי המערכת שנבחרה לעריכה.
-function buildInitialForm(system: SystemDetails | null): SystemUpdateDto {
+function buildInitialForm(
+  system: SystemDetails | null
+): SystemUpdateDto {
   return {
     name: system?.name ?? "",
-    requiredCapacityMonths: system?.requiredCapacityMonths ?? 1,
+    requiredCapacityMonths:
+      system?.requiredCapacityMonths ?? 1,
     allocatedBudget: system?.allocatedBudget ?? 0
   };
 }
 
 // מודל עריכת מערכת עם ולידציה ושמירת שינויים.
-export default function EditSystemModal({ open, system, onClose, onUpdated }: Props) {
-  const [form, setForm] = useState<SystemUpdateDto>(() => buildInitialForm(system));
+export default function EditSystemModal({
+  open,
+  system,
+  onClose,
+  onUpdated
+}: Props) {
+  const [form, setForm] = useState<SystemUpdateDto>(() =>
+    buildInitialForm(system)
+  );
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -37,7 +52,9 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
 
   const currentSystem = open ? system : null;
 
-  if (!currentSystem) return null;
+  if (!currentSystem) {
+    return null;
+  }
 
   const systemId = currentSystem.id;
 
@@ -66,14 +83,33 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
     try {
       await systemService.updateSystem(systemId, {
         name,
-        requiredCapacityMonths: form.requiredCapacityMonths,
-        allocatedBudget: Number(form.allocatedBudget) || 0
+        requiredCapacityMonths:
+          form.requiredCapacityMonths,
+        allocatedBudget:
+          Number(form.allocatedBudget) || 0
+      });
+
+      logger.info("System updated", {
+        feature: "systems",
+        action: "updateSystem",
+        entityId: systemId
       });
 
       await onUpdated();
       onClose();
-    } catch {
-      setError("שגיאה בעדכון מערכת.");
+    } catch (err) {
+      logger.error("Failed to update system", err, {
+        feature: "systems",
+        action: "updateSystem",
+        entityId: systemId
+      });
+
+      const message =
+        err instanceof Error
+          ? err.message
+          : "שגיאה בעדכון מערכת.";
+
+      setError(message);
     } finally {
       setSaving(false);
     }
@@ -82,12 +118,20 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
   return (
     <div className="edit-system-backdrop">
       <div className="edit-system-modal" dir="rtl">
-        <button type="button" className="edit-system-close" onClick={onClose}>
+        <button
+          type="button"
+          className="edit-system-close"
+          onClick={onClose}
+          disabled={saving}
+        >
           ×
         </button>
 
         <h2>עריכת מערכת</h2>
-        <p>מסך נוח לניהול דרישות הקיבולת והתקציב של מערכת.</p>
+        <p>
+          מסך נוח לניהול דרישות הקיבולת והתקציב של
+          מערכת.
+        </p>
 
         {error && <div className="error-box">{error}</div>}
 
@@ -96,7 +140,13 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
             שם מערכת *
             <input
               value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              onChange={(event) =>
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  name: event.target.value
+                }))
+              }
+              disabled={saving}
             />
           </label>
 
@@ -107,11 +157,14 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
               min={1}
               value={form.requiredCapacityMonths}
               onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  requiredCapacityMonths: Number(event.target.value)
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  requiredCapacityMonths: Number(
+                    event.target.value
+                  )
                 }))
               }
+              disabled={saving}
             />
           </label>
 
@@ -122,21 +175,34 @@ export default function EditSystemModal({ open, system, onClose, onUpdated }: Pr
               min={0}
               value={form.allocatedBudget}
               onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  allocatedBudget: Number(event.target.value)
+                setForm((previousForm) => ({
+                  ...previousForm,
+                  allocatedBudget: Number(
+                    event.target.value
+                  )
                 }))
               }
+              disabled={saving}
             />
           </label>
         </div>
 
         <div className="edit-system-actions">
-          <button type="button" className="secondary-btn" onClick={onClose}>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={onClose}
+            disabled={saving}
+          >
             ביטול
           </button>
 
-          <button type="button" className="primary-btn" onClick={save} disabled={saving}>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() => void save()}
+            disabled={saving}
+          >
             {saving ? "שומר..." : "שמירת שינויים"}
           </button>
         </div>

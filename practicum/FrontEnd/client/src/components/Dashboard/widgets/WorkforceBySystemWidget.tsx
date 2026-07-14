@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import DashboardChartCard from "../charts/DashboardChartCard";
 import DashboardHorizontalBars from "../charts/DashboardHorizontalBars";
+
+import { logger } from "../../../services/logging/logger";
 import { systemService } from "../../../services/systemService";
+
 // פלטת צבעים קבועה לגרף ביקוש כוח עבודה לפי מערכות.
-const chartColors = ["#1f6db3", "#149584", "#7550b9", "#6c7d13", "#cb6a0b", "#b43135", "#4f8f5b"];
+const chartColors = [
+  "#1f6db3",
+  "#149584",
+  "#7550b9",
+  "#6c7d13",
+  "#cb6a0b",
+  "#b43135",
+  "#4f8f5b"
+];
 
 // מודל נתון עבור שורת גרף ביקוש: מערכת, ערך וצבע.
 interface WorkforceBarItem {
@@ -16,7 +28,11 @@ interface WorkforceBarItem {
 // ווידג'ט המציג ביקוש כוח עבודה לפי מערכת בגרף עמודות אופקי.
 export default function WorkforceBySystemWidget() {
   const navigate = useNavigate();
-  const [workforceBySystem, setWorkforceBySystem] = useState<WorkforceBarItem[]>([]);
+
+  const [workforceBySystem, setWorkforceBySystem] = useState<
+    WorkforceBarItem[]
+  >([]);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,10 +59,22 @@ export default function WorkforceBySystemWidget() {
           setWorkforceBySystem(items);
         }
       } catch (error) {
-        console.error("Failed to load workforce demand by system", error);
-        if (isMounted) setWorkforceBySystem([]);
+        logger.error(
+          "Failed to load workforce demand by system",
+          error,
+          {
+            feature: "dashboard",
+            action: "loadWorkforceBySystem"
+          }
+        );
+
+        if (isMounted) {
+          setWorkforceBySystem([]);
+        }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
@@ -70,7 +98,9 @@ export default function WorkforceBySystemWidget() {
         <DashboardHorizontalBars
           items={workforceBySystem}
           onItemClick={(item) =>
-            navigate(`/systems?view=gap&search=${encodeURIComponent(item.label)}`)
+            navigate(
+              `/systems?view=gap&search=${encodeURIComponent(item.label)}`
+            )
           }
         />
       )}

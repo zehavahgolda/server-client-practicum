@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
+
 import type { EmployeeListItem } from "../../../types";
+
 import EmployeeCard from "../cards/EmployeeCard";
+
 import "./EmployeeGroup.css";
 
 // מאפייני קבוצת עובדים (כותרת, רשימה ובחירה).
@@ -26,11 +29,19 @@ export default function EmployeeGroup({
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
 
-  // מחשב סיכום זמינות עבור כותרת הקבוצה.
+  // מחשב סיכום זמינות עבור גוף הקבוצה.
   const summary = useMemo(() => {
-    const available = employees.filter((e) => e.remainingMonths > 0).length;
-    const balanced = employees.filter((e) => e.remainingMonths === 0).length;
-    const overloaded = employees.filter((e) => e.remainingMonths < 0).length;
+    const available = employees.filter(
+      (employee) => employee.remainingMonths > 0
+    ).length;
+
+    const balanced = employees.filter(
+      (employee) => employee.remainingMonths === 0
+    ).length;
+
+    const overloaded = employees.filter(
+      (employee) => employee.remainingMonths < 0
+    ).length;
 
     return {
       available,
@@ -39,29 +50,30 @@ export default function EmployeeGroup({
     };
   }, [employees]);
 
-  if (employees.length === 0) return null;
+  if (employees.length === 0) {
+    return null;
+  }
 
   return (
     <section className={`employee-group ${tone}`}>
       <button
         type="button"
         className="employee-group-header"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen((previousOpen) => !previousOpen)}
       >
         <div className="employee-group-title-wrap">
           <span className="employee-group-color-line" />
+
           <div>
             <h2>{title}</h2>
+
             {subtitle && <p>{subtitle}</p>}
+
             <span>{employees.length} עובדים</span>
           </div>
         </div>
 
         <div className="employee-group-left">
-          <span className={`employee-group-gap ${tone}`}>
-            עומס {summary.overloaded}
-          </span>
-
           <span className="employee-group-toggle">
             {open ? "▲" : "▼"}
           </span>
@@ -71,9 +83,17 @@ export default function EmployeeGroup({
       {open && (
         <div className="employee-group-body">
           <div className="employee-group-summary">
-            <span className="available">{summary.available} זמינים</span>
-            <span className="balanced">{summary.balanced} מלאים</span>
-            <span className="overloaded">{summary.overloaded} עומס יתר</span>
+            <span className="available">
+              {summary.available} זמינים
+            </span>
+
+            <span className="balanced">
+              {summary.balanced} מלאים
+            </span>
+
+            <span className="overloaded">
+              {summary.overloaded} עומס יתר
+            </span>
           </div>
 
           <div className="employees-cards-grid employee-group-grid">

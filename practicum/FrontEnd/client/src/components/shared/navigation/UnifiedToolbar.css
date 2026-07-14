@@ -72,23 +72,19 @@
 }
 
 .unified-stat-pill.green {
-  background: var(--status-success-soft);
-  color: var(--status-success);
+  background: var(--employee-available-soft);
+  color: var(--employee-available);
 }
 
-.unified-stat-pill.neutral {
-  background: var(--status-surplus-soft);
-  color: var(--status-surplus);
-}
-
+.unified-stat-pill.neutral,
 .unified-stat-pill.warning {
-  background: var(--status-warning-soft);
-  color: blue; /* var(--status-warning); */ 
+  background: var(--employee-balanced-soft);
+  color: var(--employee-balanced);
 }
 
 .unified-stat-pill.danger {
-  background: var(--status-danger-soft);
-  color: var(--status-danger);
+  background: var(--employee-overloaded-soft);
+  color: var(--employee-overloaded);
 }
 
 .unified-view-pill {

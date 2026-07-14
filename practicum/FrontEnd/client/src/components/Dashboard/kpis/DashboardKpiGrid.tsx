@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { logger } from "../../../services/logging/logger";
 import { systemService } from "../../../services/systemService";
 import type { System, SystemDetails } from "../../../types";
 
@@ -13,28 +14,12 @@ import DashboardKpiDetailsModal, {
 } from "./DashboardKpiDetailsModal";
 
 import "./DashboardKpiGrid.css";
+import {
+  formatCurrency,
+  formatMetricValue,
+  formatPercent
+} from "../../../utils/numberFormatters";
 
-// ממיר ערך מספרי לאחוז מעוגל.
-function toPercent(value: number) {
-  return `${Math.round(value)}%`;
-}
-
-// מעצב ערך מספרי, כולל תמיכה בחצאי חודשים.
-function formatMetricValue(value: number) {
-  return new Intl.NumberFormat("he-IL", {
-    minimumFractionDigits: Number.isInteger(value) ? 0 : 1,
-    maximumFractionDigits: 1
-  }).format(value || 0);
-}
-
-// מעצב סכום כספי בשקלים.
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("he-IL", {
-    style: "currency",
-    currency: "ILS",
-    maximumFractionDigits: 0
-  }).format(value || 0);
-}
 
 // גריד KPI מרכזי בדשבורד.
 // אחראי על טעינת הנתונים, חישוב המדדים, פתיחת הפופאפ
@@ -66,7 +51,10 @@ export default function DashboardKpiGrid() {
           setSystems(data);
         }
       } catch (error) {
-        console.error("Failed to load dashboard KPI systems", error);
+        logger.error("Failed to load dashboard KPI systems", error, {
+          feature: "dashboard",
+          action: "loadInitialSystems"
+        });
 
         if (!cancelled) {
           setSystems([]);
@@ -145,7 +133,16 @@ export default function DashboardKpiGrid() {
       setSelectedSystem(details);
       return details;
     } catch (error) {
-      console.error("Failed to load system details from dashboard", error);
+      logger.error(
+        "Failed to load system details from dashboard",
+        error,
+        {
+          feature: "dashboard",
+          action: "loadSystemDetails",
+          entityId: systemId
+        }
+      );
+
       return null;
     } finally {
       setLoadingDetails(false);
@@ -222,7 +219,7 @@ export default function DashboardKpiGrid() {
       <section className="dashboard-kpi-grid">
         <DashboardKpiCard
           title="ניצול תקציב"
-          value={toPercent(metrics.budgetUsagePercent)}
+          value={formatPercent(metrics.budgetUsagePercent)}
           description={`${formatCurrency(
             metrics.totalUsedBudget
           )} מתוך ${formatCurrency(metrics.totalAllocatedBudget)}`}

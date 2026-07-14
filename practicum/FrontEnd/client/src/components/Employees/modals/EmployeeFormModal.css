@@ -1,0 +1,28 @@
+.employee-status-management {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.employee-status-management p {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 13px;
+}
+
+.employee-status-active {
+  display: block;
+  margin-top: 4px;
+  color: #18864b;
+}
+
+.employee-status-inactive {
+  display: block;
+  margin-top: 4px;
+  color: #c0392b;
+}
