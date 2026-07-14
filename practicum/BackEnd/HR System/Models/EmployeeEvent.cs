@@ -17,6 +17,9 @@ namespace HR_System.Models
         [BsonElement("eventType")]
         public string EventType { get; set; } = null!;
 
+        [BsonElement("customEventType")]
+        public string? CustomEventType { get; set; }
+
         [BsonElement("description")]
         public string? Description { get; set; }
 

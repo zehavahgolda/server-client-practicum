@@ -4,6 +4,7 @@ namespace HR_System.DTOs.Employees
         string Id,
         string EmployeeId,
         string EventType,
+        string? CustomEventType,
         string? Description,
         DateOnly StartDate,
         DateOnly? EndDate,

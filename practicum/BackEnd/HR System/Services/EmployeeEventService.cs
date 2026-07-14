@@ -41,13 +41,14 @@ namespace HR_System.Services
             EmployeeEventCreateDto dto)
         {
             ValidateObjectId(employeeId, nameof(employeeId));
-            ValidateEvent(dto.EventType, dto.StartDate, dto.EndDate);
+            ValidateEvent(dto.EventType, dto.CustomEventType, dto.StartDate, dto.EndDate);
             await EnsureEmployeeExistsAsync(employeeId);
 
             var employeeEvent = new EmployeeEvent
             {
                 EmployeeId = employeeId,
                 EventType = dto.EventType.Trim(),
+                CustomEventType = NormalizeCustomEventType(dto.EventType, dto.CustomEventType),
                 Description = NormalizeDescription(dto.Description),
                 StartDate = ToUtcDate(dto.StartDate),
                 EndDate = dto.EndDate.HasValue ? ToUtcDate(dto.EndDate.Value) : null,
@@ -72,7 +73,7 @@ namespace HR_System.Services
         {
             ValidateObjectId(employeeId, nameof(employeeId));
             ValidateObjectId(eventId, nameof(eventId));
-            ValidateEvent(dto.EventType, dto.StartDate, dto.EndDate);
+            ValidateEvent(dto.EventType, dto.CustomEventType, dto.StartDate, dto.EndDate);
             await EnsureEmployeeExistsAsync(employeeId);
 
             var now = DateTime.UtcNow;
@@ -82,6 +83,7 @@ namespace HR_System.Services
                 !employeeEvent.IsDeleted);
             var update = Builders<EmployeeEvent>.Update
                 .Set(employeeEvent => employeeEvent.EventType, dto.EventType.Trim())
+                .Set(employeeEvent => employeeEvent.CustomEventType, NormalizeCustomEventType(dto.EventType, dto.CustomEventType))
                 .Set(employeeEvent => employeeEvent.Description, NormalizeDescription(dto.Description))
                 .Set(employeeEvent => employeeEvent.StartDate, ToUtcDate(dto.StartDate))
                 .Set(employeeEvent => employeeEvent.EndDate, dto.EndDate.HasValue ? ToUtcDate(dto.EndDate.Value) : null)
@@ -154,11 +156,21 @@ namespace HR_System.Services
             }
         }
 
-        private static void ValidateEvent(string? eventType, DateOnly startDate, DateOnly? endDate)
+        private static void ValidateEvent(
+            string? eventType,
+            string? customEventType,
+            DateOnly startDate,
+            DateOnly? endDate)
         {
             if (string.IsNullOrWhiteSpace(eventType))
             {
                 throw new ArgumentException("EventType is required.", nameof(eventType));
+            }
+
+            if (string.Equals(eventType.Trim(), "Other", StringComparison.Ordinal) &&
+                string.IsNullOrWhiteSpace(customEventType))
+            {
+                throw new ArgumentException("CustomEventType is required when EventType is Other.", nameof(customEventType));
             }
 
             if (startDate == default)
@@ -178,6 +190,16 @@ namespace HR_System.Services
             return string.IsNullOrEmpty(normalized) ? null : normalized;
         }
 
+        private static string? NormalizeCustomEventType(string eventType, string? customEventType)
+        {
+            if (!string.Equals(eventType.Trim(), "Other", StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            return customEventType!.Trim();
+        }
+
         private static DateTime ToUtcDate(DateOnly value) =>
             DateTime.SpecifyKind(value.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
 
@@ -186,6 +208,7 @@ namespace HR_System.Services
                 employeeEvent.Id ?? string.Empty,
                 employeeEvent.EmployeeId,
                 employeeEvent.EventType,
+                employeeEvent.CustomEventType,
                 employeeEvent.Description,
                 DateOnly.FromDateTime(employeeEvent.StartDate),
                 employeeEvent.EndDate.HasValue ? DateOnly.FromDateTime(employeeEvent.EndDate.Value) : null,
