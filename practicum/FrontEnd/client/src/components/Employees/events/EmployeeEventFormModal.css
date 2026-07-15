@@ -1,0 +1,43 @@
+.employee-event-modal-card {
+  width: min(760px, 100%);
+}
+
+.employee-event-form-grid {
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+}
+
+.employee-event-textarea-label {
+  grid-column: 1 / -1;
+}
+
+.employee-event-textarea-label textarea {
+  min-height: 82px;
+}
+
+.employee-event-dates-grid {
+  align-items: start;
+}
+
+.employee-event-open-ended-toggle {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.employee-event-field-error {
+  margin-top: 2px;
+  display: inline-block;
+  color: var(--status-danger);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .employee-event-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

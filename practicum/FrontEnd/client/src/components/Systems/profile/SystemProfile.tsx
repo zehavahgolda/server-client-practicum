@@ -1,9 +1,11 @@
+import { useEffect, useMemo, useState } from "react";
+import { employeeEventTypeOptions } from "../../../constants/employeeEventTypes";
+import { employeeEventService } from "../../../services/employeeEventService";
+import type { EmployeeEvent, SystemDetails } from "../../../types";
+import "./SystemProfile.css";
 import { useNavigate } from "react-router-dom";
 
-import type { SystemDetails } from "../../../types";
 import { formatCurrency } from "../../../utils/numberFormatters";
-
-import "./SystemProfile.css";
 
 // מאפייני מסך פרופיל מערכת.
 interface SystemProfileProps {
@@ -49,6 +51,107 @@ export default function SystemProfile({
   onOpenEdit
 }: SystemProfileProps) {
   const navigate = useNavigate();
+  const [employeesAvailabilityOpen, setEmployeesAvailabilityOpen] = useState(false);
+  const managementNote = system.managementNote?.trim() || "";
+  const todayKey = getTodayKey();
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventsError, setEventsError] = useState<string | null>(null);
+  const [eventsByEmployeeId, setEventsByEmployeeId] = useState<Record<string, EmployeeEvent[]>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBatchEvents() {
+      const employeeIds = Array.from(
+        new Set(
+          (system.assignedEmployees || [])
+            .map((employee) => employee.employeeId?.trim())
+            .filter((employeeId): employeeId is string => Boolean(employeeId))
+        )
+      );
+
+      if (employeeIds.length === 0) {
+        setEventsByEmployeeId({});
+        setEventsError(null);
+        setEventsLoading(false);
+        return;
+      }
+
+      setEventsLoading(true);
+      setEventsError(null);
+
+      try {
+        const items = await employeeEventService.getEmployeeEventsBatch(employeeIds);
+        if (cancelled) return;
+
+        const nextMap: Record<string, EmployeeEvent[]> = {};
+        for (const item of items) {
+          nextMap[item.employeeId] = item.events || [];
+        }
+
+        setEventsByEmployeeId(nextMap);
+      } catch {
+        if (cancelled) return;
+        setEventsError("טעינת שינויי הזמינות נכשלה.");
+        setEventsByEmployeeId({});
+      } finally {
+        if (!cancelled) {
+          setEventsLoading(false);
+        }
+      }
+    }
+
+    void loadBatchEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [system.id, system.assignedEmployees]);
+
+  const employeesWithEvents = useMemo<EmployeeWithEvents[]>(() => {
+    const result: EmployeeWithEvents[] = [];
+
+    for (const employee of system.assignedEmployees || []) {
+      const events = eventsByEmployeeId[employee.employeeId] || [];
+      if (events.length === 0) continue;
+
+      const sortedEvents = [...events].sort((a, b) => {
+        const bucketDiff = getEventBucket(a, todayKey) - getEventBucket(b, todayKey);
+        if (bucketDiff !== 0) return bucketDiff;
+
+        const aStart = toDateKey(a.startDate) || "";
+        const bStart = toDateKey(b.startDate) || "";
+        return aStart.localeCompare(bStart);
+      });
+
+      result.push({
+        employeeId: employee.employeeId,
+        fullName: employee.fullName,
+        events: sortedEvents
+      });
+    }
+
+    return result;
+  }, [eventsByEmployeeId, system.assignedEmployees, todayKey]);
+
+  const availabilityCount = useMemo(
+    () => employeesWithEvents.reduce((sum, employee) => sum + employee.events.length, 0),
+    [employeesWithEvents]
+  );
+
+  const activeEmployeeIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    for (const employee of system.assignedEmployees || []) {
+      const events = eventsByEmployeeId[employee.employeeId] || [];
+      const hasCurrentEvent = events.some((event) => getEventBucket(event, todayKey) === 0);
+      if (hasCurrentEvent) {
+        ids.add(employee.employeeId);
+      }
+    }
+
+    return ids;
+  }, [eventsByEmployeeId, system.assignedEmployees, todayKey]);
 
   const tone = getTone(system.gap);
   const firstLetter = system.name?.charAt(0) || "מ";
@@ -103,19 +206,7 @@ export default function SystemProfile({
           </header>
 
           <div className="system-profile-actions">
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={onBack}
-            >
-              חזרה לרשימה
-            </button>
-
-            <button
-              type="button"
-              className="primary-btn"
-              onClick={onOpenEdit}
-            >
+            <button type="button" className="primary-btn" onClick={onOpenEdit}>
               עריכת מערכת
             </button>
 
@@ -134,11 +225,7 @@ export default function SystemProfile({
             </div>
           )}
 
-          {system.managementNote && (
-            <div className="system-note-box">
-              {system.managementNote}
-            </div>
-          )}
+          {managementNote && <div className="system-note-box">{managementNote}</div>}
 
           <section className="system-budget-panel">
             <div className="system-budget-header">
@@ -235,8 +322,18 @@ export default function SystemProfile({
                       key={employee.employeeId}
                     >
                       <div>
-                        <strong>{employee.fullName}</strong>
-
+                        <strong className="assigned-employee-name-row">
+                          <span>{employee.fullName}</span>
+                          {activeEmployeeIds.has(employee.employeeId) && (
+                            <span
+                              className="assigned-employee-active-indicator"
+                              title="שינוי זמינות פעיל"
+                              aria-label="שינוי זמינות פעיל"
+                            >
+                              ⏱
+                            </span>
+                          )}
+                        </strong>
                         <span>
                           {employee.actualMonths} חודשי עבודה |{" "}
                           {employee.professionalCategory}
@@ -264,45 +361,74 @@ export default function SystemProfile({
             </section>
 
             <section className="system-profile-panel insight-panel">
+              {/* אזור תובנות ניהול עם אירועי זמינות עובדים */}
               <h2>תמונת ניהול</h2>
 
-              <div className="system-note-box">
-                {system.gap > 0
-                  ? "קיים מחסור שעדיין ניתן לאיזון באמצעות העברת קיבולת."
-                  : system.gap < 0
-                    ? "קיים עודף קיבולת במערכת זו."
-                    : "המערכת מאוזנת מבחינת קיבולת."}
-              </div>
+              <div className="system-management-section">
+                {eventsLoading && <p className="empty-text">טוען שינויי זמינות...</p>}
 
-              <div className="system-profile-tags centered">
-                <span className="system-soft-pill">
-                  סטטוס: {getStatusLabel(system.gap)}
-                </span>
+                {!eventsLoading && eventsError && (
+                  <p className="system-management-error">{eventsError}</p>
+                )}
 
-                <span className="system-soft-pill">
-                  פער: {Math.abs(system.gap)}
-                </span>
-              </div>
+                {!eventsLoading && !eventsError && employeesWithEvents.length === 0 && system.assignedEmployees.length > 0 && (
+                  <p className="empty-text">לא נמצאו שינויי זמינות לעובדים המשויכים.</p>
+                )}
 
-              <h3>שינויים רלוונטיים</h3>
-
-              {system.changes.length === 0 ? (
-                <p className="empty-text">
-                  אין שינויים משויכים כרגע למערכת זו.
-                </p>
-              ) : (
-                <div className="changes-list">
-                  {system.changes.map((change, index) => (
-                    <div
-                      className="change-row"
-                      key={`${change.date}-${index}`}
+                {!eventsLoading && !eventsError && employeesWithEvents.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      className="system-collapsible-header"
+                      onClick={() => setEmployeesAvailabilityOpen((prev) => !prev)}
                     >
-                      <strong>{change.title}</strong>
-                      <span>{change.impact}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+                      <span className="system-collapsible-title">
+                        עובדים עם שינויי זמינות ({availabilityCount})
+                      </span>
+                      <span className="system-collapsible-chevron">
+                        {employeesAvailabilityOpen ? "▾" : "▸"}
+                      </span>
+                    </button>
+
+                    {employeesAvailabilityOpen && (
+                      <div className="system-collapsible-body">
+                        <div className="system-events-list">
+                          {employeesWithEvents.map((employee) => (
+                            <article className="system-event-employee-card" key={employee.employeeId}>
+                              <h3>{employee.fullName}</h3>
+
+                              <div className="system-event-items">
+                                {employee.events.map((event) => {
+                                  const duration = getApproxDurationLabel(event.startDate, event.endDate);
+
+                                  return (
+                                    <div className="system-event-item" key={event.id}>
+                                      <strong>{getEventTypeLabel(event)}</strong>
+                                      <span>{formatRange(event.startDate, event.endDate)}</span>
+                                      {duration && <span>{duration}</span>}
+                                      {event.description?.trim() && <span>{event.description.trim()}</span>}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              <div className="system-event-actions">
+                                <button
+                                  type="button"
+                                  className="small-outline-btn"
+                                  onClick={() => navigate(`/employees?employeeId=${employee.employeeId}`)}
+                                >
+                                  פתיחת עובד
+                                </button>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </section>
           </div>
         </section>
@@ -310,3 +436,82 @@ export default function SystemProfile({
     </div>
   );
 }
+
+function getTodayKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function toDateKey(value?: string | null): string | null {
+  if (!value) return null;
+  const normalized = value.trim();
+  if (!normalized) return null;
+  return normalized.slice(0, 10);
+}
+
+function formatDateDisplay(value?: string | null): string {
+  const key = toDateKey(value);
+  if (!key) return "";
+  const [year, month, day] = key.split("-");
+  return `${day}.${month}.${year}`;
+}
+
+function formatRange(startDate: string, endDate?: string | null): string {
+  const start = formatDateDisplay(startDate);
+  const end = formatDateDisplay(endDate);
+  return end ? `${start}–${end}` : `${start} ואילך`;
+}
+
+function getApproxDurationLabel(startDate: string, endDate?: string | null): string | null {
+  const start = toDateKey(startDate);
+  const end = toDateKey(endDate);
+
+  if (!start || !end || end < start) {
+    return null;
+  }
+
+  const [startYear, startMonth, startDay] = start.split("-").map(Number);
+  const [endYear, endMonth, endDay] = end.split("-").map(Number);
+  const totalMonths =
+    (endYear - startYear) * 12 +
+    (endMonth - startMonth) +
+    (endDay - startDay) / 30;
+
+  if (!Number.isFinite(totalMonths) || totalMonths <= 0) {
+    return null;
+  }
+
+  return `משך משוער: כ־${totalMonths.toFixed(1)} חודשים`;
+}
+
+function getEventTypeLabel(event: EmployeeEvent): string {
+  const normalizedType = event.eventType?.trim() ?? "";
+  const option = employeeEventTypeOptions.find((item) => item.value === normalizedType);
+
+  if (normalizedType === "Other" && event.customEventType?.trim()) {
+    return event.customEventType.trim();
+  }
+
+  return option?.label || normalizedType || "אירוע";
+}
+
+function getEventBucket(event: EmployeeEvent, todayKey: string): 0 | 1 | 2 {
+  const start = toDateKey(event.startDate);
+  const end = toDateKey(event.endDate);
+
+  if (!start) {
+    return 2;
+  }
+
+  const isCurrent = start <= todayKey && (!end || end >= todayKey);
+  if (isCurrent) return 0;
+
+  if (start > todayKey) return 1;
+
+  return 2;
+}
+
+type EmployeeWithEvents = {
+  employeeId: string;
+  fullName: string;
+  events: EmployeeEvent[];
+};

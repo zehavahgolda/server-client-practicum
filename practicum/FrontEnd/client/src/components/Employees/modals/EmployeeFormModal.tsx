@@ -16,10 +16,6 @@ type EmployeeFormState = {
   managerName: string;
   year: string;
   yearlyCapacityMonths: string;
-  upcomingEvent: string;
-  notes: string;
-  managerReviewNote: string;
-  isActive: boolean;
 };
 
 // ערכי ברירת מחדל לטופס יצירת עובד.
@@ -29,11 +25,7 @@ const emptyForm: EmployeeFormState = {
   professionalSubCategory: "",
   managerName: "",
   year: "2026",
-  yearlyCapacityMonths: "12",
-  upcomingEvent: "",
-  notes: "",
-  managerReviewNote: "",
-  isActive: true
+  yearlyCapacityMonths: "12"
 };
 
 // מגביל קלט חודשי עבודה לטווח תקין 0-12.
@@ -66,6 +58,7 @@ interface EmployeeFormModalProps {
   employee: EmployeeDetails | null;
   saving: boolean;
   onClose: () => void;
+  onManageAvailability?: (employee: EmployeeDetails) => void;
   onSubmit: (payload: EmployeeUpsertPayload) => Promise<void>;
 }
 
@@ -76,6 +69,7 @@ export default function EmployeeFormModal({
   employee,
   saving,
   onClose,
+  onManageAvailability,
   onSubmit
 }: EmployeeFormModalProps) {
   const [form, setForm] = useState<EmployeeFormState>(emptyForm);
@@ -95,14 +89,7 @@ export default function EmployeeFormModal({
           employee.professionalSubCategory ?? "",
         managerName: employee.managerName ?? "",
         year: String(employee.year ?? 2026),
-        yearlyCapacityMonths: String(
-          employee.yearlyCapacityMonths ?? 12
-        ),
-        upcomingEvent: employee.upcomingEvent ?? "",
-        notes: employee.notes ?? "",
-        managerReviewNote:
-          employee.managerReviewNote ?? "",
-        isActive: employee.isActive
+        yearlyCapacityMonths: String(employee.yearlyCapacityMonths ?? 12)
       });
     } else {
       setForm(emptyForm);
@@ -171,33 +158,14 @@ export default function EmployeeFormModal({
         form.professionalSubCategory.trim() || undefined,
       managerName,
       year,
-      yearlyCapacityMonths,
-      upcomingEvent:
-        form.upcomingEvent.trim() || undefined,
-      notes: form.notes.trim() || undefined,
-      managerReviewNote:
-        form.managerReviewNote.trim() || undefined,
-      isActive: form.isActive
+      yearlyCapacityMonths
     });
   }
 
-  function toggleEmployeeStatus() {
-    const nextStatus = !form.isActive;
-
-    const confirmed = window.confirm(
-      nextStatus
-        ? "להפעיל מחדש את העובד? לאחר ההפעלה הוא יוכל להופיע ברשימות השיבוץ ולהיות משויך למערכות."
-        : "להעביר את העובד למצב לא פעיל? הוא יוסר מרשימות העובדים הפעילים ולא יהיה ניתן לשיבוץ."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setForm((previousForm) => ({
-      ...previousForm,
-      isActive: nextStatus
-    }));
+  function handleGoToAvailability() {
+    if (saving || !employee) return;
+    onClose();
+    onManageAvailability?.(employee);
   }
 
   return (
@@ -307,9 +275,29 @@ export default function EmployeeFormModal({
           </section>
 
           <section className="modal-section">
-            <h4 className="modal-section-title">
-              קיבולת וזמינות
-            </h4>
+            <div className="employee-form-capacity-header-row">
+              <h4 className="modal-section-title">קיבולת וזמינות</h4>
+
+              {mode === "edit" && employee && (
+                <button
+                  type="button"
+                  className="employee-form-availability-link"
+                  onClick={handleGoToAvailability}
+                  disabled={saving}
+                  title="ניהול זמינות בפרופיל"
+                  aria-label="ניהול זמינות בפרופיל"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="3" y="5" width="18" height="16" rx="2" ry="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="8" y1="3" x2="8" y2="7" />
+                    <line x1="16" y1="3" x2="16" y2="7" />
+                  </svg>
+                  ניהול זמינות ואירועים
+                  <span aria-hidden="true">←</span>
+                </button>
+              )}
+            </div>
 
             <div className="form-grid">
               <label>
@@ -348,21 +336,6 @@ export default function EmployeeFormModal({
                     }))
                   }
                   required
-                  disabled={saving}
-                />
-              </label>
-
-              <label>
-                אירועים עתידיים
-                <input
-                  value={form.upcomingEvent}
-                  onChange={(event) =>
-                    setForm((previousForm) => ({
-                      ...previousForm,
-                      upcomingEvent:
-                        event.target.value
-                    }))
-                  }
                   disabled={saving}
                 />
               </label>
@@ -410,24 +383,6 @@ export default function EmployeeFormModal({
               </div>
             </section>
           )}
-
-          <section className="modal-section">
-            <div className="form-grid">
-              <label>
-                הערות
-                <textarea
-                  value={form.notes}
-                  onChange={(event) =>
-                    setForm((previousForm) => ({
-                      ...previousForm,
-                      notes: event.target.value
-                    }))
-                  }
-                  disabled={saving}
-                />
-              </label>
-            </div>
-          </section>
 
           <div className="modal-actions">
             <button

@@ -10,6 +10,9 @@ import EmployeeGroup from "../../components/Employees/groups/EmployeeGroup";
 import EmployeeFormModal from "../../components/Employees/modals/EmployeeFormModal";
 import AllocationModal from "../../components/Employees/allocations/AllocationModal";
 import AllocationUpdateModal from "../../components/Employees/allocations/AllocationUpdateModal";
+import EmployeeEventFormModal from "../../components/Employees/events/EmployeeEventFormModal";
+import { useEmployeeEvents } from "../../hooks/useEmployeeEvents";
+import type { EmployeeDetails, EmployeeEventCreatePayload } from "../../types";
 
 import "./EmployeesPage.css";
 
@@ -117,9 +120,12 @@ function getCategoryGroups(
 export default function EmployeesPage() {
   const page = useEmployeesPage();
   const [searchParams] = useSearchParams();
-
-  const [viewMode, setViewMode] =
-    useState<EmployeeViewMode>("all");
+  const [viewMode, setViewMode] = useState<EmployeeViewMode>("all");
+  const {
+    createEvent,
+    updateEvent
+  } = useEmployeeEvents(page.selectedEmployee?.id ?? null);
+  const [savingEmployeeEvent, setSavingEmployeeEvent] = useState(false);
 
   useEffect(() => {
     const requestedView =
@@ -179,6 +185,32 @@ export default function EmployeesPage() {
     }),
     [page.filteredEmployees]
   );
+
+  async function handleEmployeeEventSubmit(payload: EmployeeEventCreatePayload) {
+    if (!page.selectedEmployee?.id) {
+      return;
+    }
+
+    setSavingEmployeeEvent(true);
+    try {
+      if (page.selectedEmployeeEvent?.id) {
+        await updateEvent(page.selectedEmployeeEvent.id, payload);
+      } else {
+        await createEvent(payload);
+      }
+
+      setSelectedEmployeeEvent(null);
+      setEmployeeEventModalOpen(false);
+    } finally {
+      setSavingEmployeeEvent(false);
+    }
+  }
+
+  function handleManageAvailability(employee: EmployeeDetails) {
+    page.openCreateEmployeeEventModal(employee.id);
+  }
+
+  const { setEmployeeEventModalOpen, setSelectedEmployeeEvent } = page;
 
   return (
     <main
@@ -359,15 +391,26 @@ export default function EmployeesPage() {
         open={page.employeeModalOpen}
         mode={page.employeeModalMode}
         employee={page.selectedEmployee}
-        saving={
-          page.savingEmployee ||
-          page.loadingCreate
-        }
-        onClose={() =>
-          page.setEmployeeModalOpen(false)
-        }
+        saving={page.savingEmployee || page.loadingCreate}
+        onClose={() => page.setEmployeeModalOpen(false)}
+        onManageAvailability={handleManageAvailability}
         onSubmit={page.handleEmployeeSubmit}
       />
+
+      {page.selectedEmployee && (
+        <EmployeeEventFormModal
+          open={page.employeeEventModalOpen}
+          employeeId={page.selectedEmployee.id}
+          event={page.selectedEmployeeEvent}
+          saving={savingEmployeeEvent}
+          onClose={() => {
+            if (savingEmployeeEvent) return;
+            setSelectedEmployeeEvent(null);
+            setEmployeeEventModalOpen(false);
+          }}
+          onSubmit={handleEmployeeEventSubmit}
+        />
+      )}
 
       <AllocationUpdateModal
         open={

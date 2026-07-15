@@ -65,4 +65,5 @@ export interface SystemUpdateDto {
   name: string;
   requiredCapacityMonths: number;
   allocatedBudget: number;
+  managementNote?: string;
 }

@@ -21,9 +21,9 @@ function buildInitialForm(
 ): SystemUpdateDto {
   return {
     name: system?.name ?? "",
-    requiredCapacityMonths:
-      system?.requiredCapacityMonths ?? 1,
-    allocatedBudget: system?.allocatedBudget ?? 0
+    requiredCapacityMonths: system?.requiredCapacityMonths ?? 1,
+    allocatedBudget: system?.allocatedBudget ?? 0,
+    managementNote: system?.managementNote ?? ""
   };
 }
 
@@ -83,10 +83,9 @@ export default function EditSystemModal({
     try {
       await systemService.updateSystem(systemId, {
         name,
-        requiredCapacityMonths:
-          form.requiredCapacityMonths,
-        allocatedBudget:
-          Number(form.allocatedBudget) || 0
+        requiredCapacityMonths: form.requiredCapacityMonths,
+        allocatedBudget: Number(form.allocatedBudget) || 0,
+        managementNote: form.managementNote?.trim() || undefined
       });
 
       logger.info("System updated", {
@@ -183,6 +182,20 @@ export default function EditSystemModal({
                 }))
               }
               disabled={saving}
+            />
+          </label>
+
+          <label className="edit-system-note-label">
+            הערת ניהול
+            <textarea
+              value={form.managementNote ?? ""}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  managementNote: event.target.value
+                }))
+              }
+              placeholder="הערה ניהולית על המערכת (אופציונלי)"
             />
           </label>
         </div>

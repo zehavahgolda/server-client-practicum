@@ -20,6 +20,26 @@ namespace HR_System.Controllers
             _logger = logger;
         }
 
+        [HttpPost("/api/Employees/events/batch")]
+        [HttpPost("/api/EmployeeEvents/batch")]
+        public async Task<ActionResult<EmployeeEventBatchResponseDto>> GetEmployeeEventsBatch(
+            [FromBody] EmployeeEventBatchRequestDto request)
+        {
+            try
+            {
+                return Ok(await _employeeEventService.GetEmployeeEventsBatchAsync(request));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while retrieving employee events batch.");
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult<List<EmployeeEventDto>>> GetEmployeeEvents(string employeeId)
         {

@@ -36,6 +36,45 @@ namespace HR_System.Services
             return events.Select(MapToDto).ToList();
         }
 
+        public async Task<EmployeeEventBatchResponseDto> GetEmployeeEventsBatchAsync(EmployeeEventBatchRequestDto? request)
+        {
+            var normalizedIds = ValidateAndNormalizeBatchRequest(request);
+
+            if (normalizedIds.Count == 0)
+            {
+                return new EmployeeEventBatchResponseDto(new List<EmployeeEventBatchItemDto>());
+            }
+
+            _logger.LogInformation(
+                "Retrieving employee events batch. EmployeeCount: {EmployeeCount}",
+                normalizedIds.Count);
+
+            var filter = Builders<EmployeeEvent>.Filter.And(
+                Builders<EmployeeEvent>.Filter.In(employeeEvent => employeeEvent.EmployeeId, normalizedIds),
+                Builders<EmployeeEvent>.Filter.Eq(employeeEvent => employeeEvent.IsDeleted, false));
+
+            var events = await _employeeEventsCollection
+                .Find(filter)
+                .SortByDescending(employeeEvent => employeeEvent.StartDate)
+                .ToListAsync();
+
+            var groupedEvents = events
+                .GroupBy(employeeEvent => employeeEvent.EmployeeId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(MapToDto).ToList());
+
+            var items = normalizedIds
+                .Select(employeeId => new EmployeeEventBatchItemDto(
+                    employeeId,
+                    groupedEvents.TryGetValue(employeeId, out var employeeEvents)
+                        ? employeeEvents
+                        : new List<EmployeeEventDto>()))
+                .ToList();
+
+            return new EmployeeEventBatchResponseDto(items);
+        }
+
         public async Task<EmployeeEventDto> CreateEmployeeEventAsync(
             string employeeId,
             EmployeeEventCreateDto dto)
@@ -154,6 +193,37 @@ namespace HR_System.Services
             {
                 throw new ArgumentException($"{parameterName} must be a valid ObjectId.", parameterName);
             }
+        }
+
+        private static List<string> ValidateAndNormalizeBatchRequest(EmployeeEventBatchRequestDto? request)
+        {
+            if (request is null)
+            {
+                throw new ArgumentException("Request body is required.", nameof(request));
+            }
+
+            if (request.EmployeeIds is null)
+            {
+                throw new ArgumentException("EmployeeIds is required.", nameof(request.EmployeeIds));
+            }
+
+            var normalized = request.EmployeeIds
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
+            if (normalized.Count == 0)
+            {
+                return normalized;
+            }
+
+            foreach (var employeeId in normalized)
+            {
+                ValidateObjectId(employeeId, nameof(request.EmployeeIds));
+            }
+
+            return normalized;
         }
 
         private static void ValidateEvent(

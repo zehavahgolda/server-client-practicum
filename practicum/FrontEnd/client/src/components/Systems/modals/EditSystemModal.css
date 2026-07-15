@@ -55,6 +55,24 @@
   color: var(--text-secondary);
 }
 
+.edit-system-note-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  grid-column: 1 / -1;
+}
+
+.edit-system-note-label textarea {
+  min-height: 66px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: inherit;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
 .edit-system-actions {
   display: flex;
   justify-content: flex-start;

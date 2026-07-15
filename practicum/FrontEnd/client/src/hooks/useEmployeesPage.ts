@@ -3,13 +3,10 @@ import { useSearchParams } from "react-router-dom";
 
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
+import type { EmployeeEvent } from "../types/employeeEvent";
+import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
 
 import { employeeService } from "../services/employeeService";
-
-import type {
-  EmployeeListItem,
-  EmployeeUpsertPayload
-} from "../types";
 
 import { getActiveYear } from "../utils/yearOptions";
 
@@ -58,19 +55,12 @@ export function useEmployeesPage() {
   const [employeesForFilterOptions, setEmployeesForFilterOptions] =
     useState<EmployeeListItem[]>([]);
 
-  const [employeeModalOpen, setEmployeeModalOpen] =
-    useState(false);
-
-  const [employeeModalMode, setEmployeeModalMode] =
-    useState<"create" | "edit">("create");
-
-  const [allocationModalOpen, setAllocationModalOpen] =
-    useState(false);
-
-  const [
-    allocationUpdateModalOpen,
-    setAllocationUpdateModalOpen
-  ] = useState(false);
+  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
+  const [employeeModalMode, setEmployeeModalMode] = useState<"create" | "edit">("create");
+  const [allocationModalOpen, setAllocationModalOpen] = useState(false);
+  const [allocationUpdateModalOpen, setAllocationUpdateModalOpen] = useState(false);
+  const [employeeEventModalOpen, setEmployeeEventModalOpen] = useState(false);
+  const [selectedEmployeeEvent, setSelectedEmployeeEvent] = useState<EmployeeEvent | null>(null);
 
   const [savingEmployee, setSavingEmployee] =
     useState(false);
@@ -275,6 +265,15 @@ export function useEmployeesPage() {
     }
   }
 
+  function openCreateEmployeeEventModal(employeeId: string) {
+    if (!selectedEmployee || selectedEmployee.id !== employeeId) {
+      return;
+    }
+
+    setSelectedEmployeeEvent(null);
+    setEmployeeEventModalOpen(true);
+  }
+
   return {
     systems,
     selectedEmployee,
@@ -293,6 +292,8 @@ export function useEmployeesPage() {
     employeeModalMode,
     allocationModalOpen,
     allocationUpdateModalOpen,
+    employeeEventModalOpen,
+    selectedEmployeeEvent,
     savingEmployee,
     savingAllocation,
     savingAllocationUpdate,
@@ -301,9 +302,12 @@ export function useEmployeesPage() {
     setEmployeeModalOpen,
     setAllocationModalOpen,
     setAllocationUpdateModalOpen,
+    setEmployeeEventModalOpen,
+    setSelectedEmployeeEvent,
     clearFilters,
     openCreateEmployeeModal,
     openEditEmployeeModal,
+    openCreateEmployeeEventModal,
     handleEmployeeSubmit,
     handleAddAllocation,
     handleUpdateAllocation
