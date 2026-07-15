@@ -17,6 +17,15 @@
   --status-success-soft: #f0fdf4;
   --status-warning: #d97706;
   --status-warning-soft: #fff7ed;
+  /* צבעי מצב פער גלובליים */
+--gap-positive: #f97316;
+--gap-positive-soft: #fff7ed;
+
+--gap-negative: #dc2626;
+--gap-negative-soft: #fef2f2;
+
+--gap-neutral: #16a34a;
+--gap-neutral-soft: #f0fdf4;
 }
 
 @media (prefers-color-scheme: dark) {

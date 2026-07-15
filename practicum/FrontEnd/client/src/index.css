@@ -2,14 +2,17 @@
   --app-font: "Assistant", "Heebo", Arial, sans-serif;
 
   /* סטטוסי זמינות עובדים */
-  --employee-available: var(--status-success);
-  --employee-available-soft: var(--status-success-soft);
+ /* יתרה חיובית — העובד זמין */
+  --employee-available: var(--gap-positive);
+  --employee-available-soft: var(--gap-positive-soft);
 
-  --employee-balanced: #2563eb;
-  --employee-balanced-soft: #eff6ff;
+  /* יתרה אפס — העובד מלא ומאוזן */
+  --employee-balanced: var(--gap-neutral);
+  --employee-balanced-soft: var(--gap-neutral-soft);
 
-  --employee-overloaded: var(--status-danger);
-  --employee-overloaded-soft: var(--status-danger-soft);
+  /* יתרה שלילית — עומס יתר */
+  --employee-overloaded: var(--gap-negative);
+  --employee-overloaded-soft: var(--gap-negative-soft);
 }
 
 * {
