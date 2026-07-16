@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 import { employeeEventTypeOptions } from "../../../constants/employeeEventTypes";
 import { employeeEventService } from "../../../services/employeeEventService";
-import { systemService } from "../../../services/systemService";
 import type { EmployeeEvent, SystemDetails } from "../../../types";
 import { formatCurrency } from "../../../utils/numberFormatters";
 
@@ -102,7 +101,7 @@ function getApproxDurationLabel(startDate: string, endDate?: string | null): str
     return null;
   }
 
-  return `כ־${totalMonths.toFixed(1)} חודשים`;
+  return `משך משוער: כ־${totalMonths.toFixed(1)} חודשים`;
 }
 
 function getEventTypeLabel(event: EmployeeEvent): string {
@@ -141,23 +140,11 @@ export default function SystemProfile({
 }: SystemProfileProps) {
   const navigate = useNavigate();
 
-  const [localManagementNote, setLocalManagementNote] = useState(
-    system.managementNote?.trim() || ""
-  );
+  const [employeesAvailabilityOpen, setEmployeesAvailabilityOpen] = useState(true);
+  const [orgEventsOpen, setOrgEventsOpen] = useState(false);
+  const [systemHistoryOpen, setSystemHistoryOpen] = useState(false);
 
-  const [noteDraft, setNoteDraft] = useState(localManagementNote);
-  const [noteEditing, setNoteEditing] = useState(false);
-  const [noteSaving, setNoteSaving] = useState(false);
-  const [noteError, setNoteError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const nextNote = system.managementNote?.trim() || "";
-    setLocalManagementNote(nextNote);
-    setNoteDraft(nextNote);
-    setNoteEditing(false);
-    setNoteError(null);
-  }, [system.managementNote, system.id]);
-
+  const managementNote = system.managementNote?.trim() || "";
   const todayKey = getTodayKey();
 
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -302,44 +289,10 @@ export default function SystemProfile({
   const budgetUsagePercent = getBudgetUsagePercent(system);
   const budgetTone = system.budgetGap < 0 ? "shortage" : "balanced";
 
-  const hasEventData = availabilityItems.length > 0;
-  const hasAnyManagementContent = Boolean(localManagementNote) || hasEventData;
-
-  async function handleSaveNote() {
-    const nextNote = noteDraft.trim();
-
-    if (nextNote === localManagementNote) {
-      setNoteEditing(false);
-      setNoteError(null);
-      return;
-    }
-
-    setNoteSaving(true);
-    setNoteError(null);
-
-    try {
-      await systemService.updateSystem(system.id, {
-        name: system.name,
-        requiredCapacityMonths: system.requiredCapacityMonths,
-        allocatedBudget: system.allocatedBudget,
-        managementNote: nextNote || undefined
-      });
-
-      setLocalManagementNote(nextNote);
-      setNoteEditing(false);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "שמירת הערת המערכת נכשלה.";
-      setNoteError(message);
-    } finally {
-      setNoteSaving(false);
-    }
-  }
-
-  function handleCancelNoteEdit() {
-    setNoteDraft(localManagementNote);
-    setNoteEditing(false);
-    setNoteError(null);
-  }
+  const shouldShowGroupedList =
+    splitAvailabilityItems.currentOrFuture.length > 0 &&
+    splitAvailabilityItems.historical.length > 0 &&
+    availabilityItems.length >= 5;
 
   function renderAvailabilityItems(items: AvailabilityListItem[]) {
     return items.map((item) => {
@@ -348,20 +301,16 @@ export default function SystemProfile({
       const description = event.description?.trim();
 
       return (
-        <article className="management-stream-item timeline-item" key={item.key}>
-          <span className="management-item-marker" aria-hidden="true" />
+        <article className="availability-timeline-item" key={item.key}>
+          <p className="availability-item-name">{item.fullName}</p>
 
-          <div className="management-item-content">
-            <p className="management-item-title">{item.fullName}</p>
-            <p className="management-item-label">{getEventTypeLabel(event)}</p>
+          <p className="availability-item-meta">
+            {getEventTypeLabel(event)} · {formatRange(event.startDate, event.endDate)}
+          </p>
 
-            <p className="management-item-meta">
-              {formatRange(event.startDate, event.endDate)}
-              {duration ? ` · ${duration}` : ""}
-            </p>
+          {duration && <p className="availability-item-duration">{duration}</p>}
 
-            {description && <p className="management-item-description">{description}</p>}
-          </div>
+          {description && <p className="availability-item-description">{description}</p>}
         </article>
       );
     });
@@ -389,6 +338,7 @@ export default function SystemProfile({
 
                 <div className="system-profile-title-row">
                   <h1>{system.name}</h1>
+
                   <span className={`system-status-pill ${tone}`}>{statusLabel}</span>
                 </div>
 
@@ -403,6 +353,14 @@ export default function SystemProfile({
             </div>
 
             <div className="system-profile-actions">
+              <button
+                type="button"
+                className="secondary-btn system-profile-action"
+                onClick={onBack}
+              >
+                חזרה לרשימה
+              </button>
+
               <button
                 type="button"
                 className="primary-btn system-profile-action"
@@ -423,12 +381,7 @@ export default function SystemProfile({
 
           {loading && <div className="system-note-box">טוען פרטי מערכת...</div>}
 
-          {localManagementNote && (
-            <div className="system-note-box enhanced-note-box">
-              <span className="system-note-icon" aria-hidden="true">ℹ</span>
-              <span>{localManagementNote}</span>
-            </div>
-          )}
+          {managementNote && <div className="system-note-box">{managementNote}</div>}
 
           <section className="system-profile-kpis">
             <div className="system-profile-kpi">
@@ -523,7 +476,9 @@ export default function SystemProfile({
                               className="assigned-employee-active-indicator"
                               title="שינוי זמינות פעיל"
                               aria-label="שינוי זמינות פעיל"
-                            />
+                            >
+                              ⏱
+                            </span>
                           )}
                         </strong>
 
@@ -549,113 +504,96 @@ export default function SystemProfile({
             <section className="system-profile-panel insight-panel">
               <div className="system-profile-panel-header">
                 <div>
-                  <h2>מידע ניהולי</h2>
-                  <p>הערות, אירועים ושינויים המשפיעים על המערכת</p>
+                  <h2>תמונת ניהול</h2>
+                  <p>הקשר ניהולי משלים עבור זמינות ושינויים ברמת המערכת.</p>
                 </div>
               </div>
 
-              <div className="management-stream-scroll">
-                {localManagementNote && (
-                  <section className="management-stream-group">
-                    <div className="management-note-head">
-                      <h3>הערת מערכת פעילה</h3>
-
-                      {!noteEditing && (
-                        <button
-                          type="button"
-                          className="note-edit-btn"
-                          onClick={() => setNoteEditing(true)}
-                          aria-label="עריכת הערת מערכת"
-                          title="עריכת הערת מערכת"
-                        >
-                          ✎
-                        </button>
-                      )}
-                    </div>
-
-                    {!noteEditing && (
-                      <article className="management-stream-item note-item">
-                        <span className="management-item-marker note" aria-hidden="true" />
-                        <div className="management-item-content">
-                          <p className="management-item-description">{localManagementNote}</p>
-                        </div>
-                      </article>
-                    )}
-
-                    {noteEditing && (
-                      <div className="note-editor-box">
-                        <textarea
-                          value={noteDraft}
-                          onChange={(event) => setNoteDraft(event.target.value)}
-                          className="note-editor-input"
-                          rows={4}
-                          disabled={noteSaving}
-                        />
-
-                        {noteError && <p className="system-management-error">{noteError}</p>}
-
-                        <div className="note-editor-actions">
-                          <button
-                            type="button"
-                            className="small-outline-btn"
-                            onClick={handleCancelNoteEdit}
-                            disabled={noteSaving}
-                          >
-                            ביטול
-                          </button>
-
-                          <button
-                            type="button"
-                            className="small-solid-btn"
-                            onClick={() => void handleSaveNote()}
-                            disabled={noteSaving}
-                          >
-                            {noteSaving ? "שומר..." : "שמירה"}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {!eventsLoading && !eventsError && splitAvailabilityItems.currentOrFuture.length > 0 && (
-                  <section className="management-stream-group">
-                    <h3>
-                      כעת ובקרוב
-                      <small>{availabilityEmployeesCount} עובדים מושפעים</small>
-                    </h3>
-
-                    <div className="management-stream-list">
-                      {renderAvailabilityItems(splitAvailabilityItems.currentOrFuture)}
-                    </div>
-                  </section>
-                )}
-
-                {!eventsLoading && !eventsError && splitAvailabilityItems.historical.length > 0 && (
-                  <section className="management-stream-group">
-                    <h3>אירועים קודמים</h3>
-
-                    <div className="management-stream-list">
-                      {renderAvailabilityItems(splitAvailabilityItems.historical)}
-                    </div>
-                  </section>
-                )}
-
-                {!eventsLoading && !eventsError && hasEventData && (
-                  <section className="management-stream-group">
-                    <h3>אירועים כלל־משרדיים</h3>
-                  </section>
-                )}
-
+              <div className="system-management-section">
                 {eventsLoading && <p className="empty-text">טוען שינויי זמינות...</p>}
 
                 {!eventsLoading && eventsError && (
                   <p className="system-management-error">{eventsError}</p>
                 )}
 
-                {!eventsLoading && !eventsError && !hasAnyManagementContent && (
-                  <p className="empty-text">אין כרגע אירועים או הערות המשפיעים על המערכת.</p>
+                {!eventsLoading && !eventsError && (
+                  <>
+                    {availabilityItems.length === 0 ? (
+                      <p className="empty-text">לא נמצאו שינויי זמינות לעובדים המשויכים.</p>
+                    ) : (
+                      <div className="system-collapsible-row-group">
+                        <button
+                          type="button"
+                          className="system-collapsible-header"
+                          onClick={() => setEmployeesAvailabilityOpen((prev) => !prev)}
+                          aria-expanded={employeesAvailabilityOpen}
+                        >
+                          <span className="system-collapsible-title">
+                            שינויים בזמינות עובדים
+                            <small>{availabilityEmployeesCount} עובדים מושפעים</small>
+                          </span>
+                          <span className="system-collapsible-chevron">
+                            {employeesAvailabilityOpen ? "▾" : "▸"}
+                          </span>
+                        </button>
+
+                        {employeesAvailabilityOpen && (
+                          <div className="system-collapsible-body availability-list-scroll">
+                            {shouldShowGroupedList ? (
+                              <>
+                                {splitAvailabilityItems.currentOrFuture.length > 0 && (
+                                  <section className="availability-group">
+                                    <h3 className="availability-group-title">כעת ובקרוב</h3>
+                                    <div className="availability-timeline-list">
+                                      {renderAvailabilityItems(splitAvailabilityItems.currentOrFuture)}
+                                    </div>
+                                  </section>
+                                )}
+
+                                {splitAvailabilityItems.historical.length > 0 && (
+                                  <section className="availability-group">
+                                    <h3 className="availability-group-title">אירועים קודמים</h3>
+                                    <div className="availability-timeline-list">
+                                      {renderAvailabilityItems(splitAvailabilityItems.historical)}
+                                    </div>
+                                  </section>
+                                )}
+                              </>
+                            ) : (
+                              <div className="availability-timeline-list">
+                                {renderAvailabilityItems(availabilityItems)}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
+              </div>
+
+              <div className="system-management-section">
+                <button
+                  type="button"
+                  className="system-collapsible-header secondary"
+                  onClick={() => setOrgEventsOpen((prev) => !prev)}
+                  aria-expanded={orgEventsOpen}
+                >
+                  <span className="system-collapsible-title">אירועים כלל־משרדיים</span>
+                  <span className="system-collapsible-chevron">{orgEventsOpen ? "▾" : "▸"}</span>
+                </button>
+              </div>
+
+              <div className="system-management-section">
+                <button
+                  type="button"
+                  className="system-collapsible-header secondary"
+                  onClick={() => setSystemHistoryOpen((prev) => !prev)}
+                  aria-expanded={systemHistoryOpen}
+                >
+                  <span className="system-collapsible-title">היסטוריית מערכת</span>
+                  <span className="system-collapsible-chevron">{systemHistoryOpen ? "▾" : "▸"}</span>
+                </button>
               </div>
             </section>
           </div>
