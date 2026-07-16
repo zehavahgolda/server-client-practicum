@@ -14,6 +14,7 @@ function normalizeSystem(item: System): System {
     ...item,
     name: item.name?.trim() || "ללא שם",
     capacityStatus: item.capacityStatus?.trim() || "לא מוגדר",
+    isActive: item.isActive ?? true,
     allocatedBudget: item.allocatedBudget || 0,
     usedBudget: item.usedBudget || 0,
     budgetGap: item.budgetGap || 0
@@ -25,6 +26,7 @@ function normalizeSystemDetails(item: SystemDetails): SystemDetails {
   return {
     ...normalizeSystem(item),
     assignedEmployees: item.assignedEmployees || [],
+    organizationEvents: item.organizationEvents || [],
     changes: item.changes || [],
     allocatedBudget: item.allocatedBudget || 0,
     usedBudget: item.usedBudget || 0,

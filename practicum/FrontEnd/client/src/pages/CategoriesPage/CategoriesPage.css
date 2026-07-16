@@ -323,6 +323,258 @@
   grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
 }
 
+.management-page .management-org-events-toolbar {
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 220px) minmax(180px, 220px) auto;
+}
+
+.management-page .management-org-events-filter select {
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+}
+
+.management-page .management-org-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.management-page .management-org-events-row {
+  border: 1px solid color-mix(in srgb, var(--border-color) 88%, white);
+  border-radius: 12px;
+  background: var(--surface-bg);
+  padding: 11px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.management-page .management-org-events-row--completed {
+  background: color-mix(in srgb, var(--surface-alt) 80%, white);
+}
+
+.management-page .management-org-events-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.management-page .management-org-events-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.management-page .management-org-events-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.management-page .management-org-events-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.management-page .management-org-events-status--active {
+  background: color-mix(in srgb, var(--status-surplus-soft) 80%, white);
+  color: var(--status-surplus);
+}
+
+.management-page .management-org-events-status--future {
+  background: color-mix(in srgb, #dbeafe 80%, white);
+  color: #1d4ed8;
+}
+
+.management-page .management-org-events-status--completed {
+  background: color-mix(in srgb, var(--surface-alt) 88%, white);
+  color: var(--text-secondary);
+}
+
+.management-page .management-org-events-meta,
+.management-page .management-org-events-systems,
+.system-profile-org-event-scope {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.management-page .management-org-events-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.management-page .management-org-events-description {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.management-page .management-org-events-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.management-page .management-org-events-history {
+  margin-top: 10px;
+}
+
+.management-page .management-org-event-dialog {
+  width: min(720px, 100%);
+}
+
+.management-page .management-org-event-form {
+  border-top: 0;
+  padding-top: 6px;
+}
+
+.management-page .management-org-event-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.management-page .management-org-event-form-field span,
+.management-page .management-org-event-form-scope legend {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.management-page .management-org-event-form-field input,
+.management-page .management-org-event-form-field select,
+.management-page .management-org-event-form-field textarea {
+  min-height: 42px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--input-bg);
+  box-sizing: border-box;
+}
+
+.management-page .management-org-event-form-field textarea {
+  min-height: 98px;
+  resize: vertical;
+}
+
+.management-page .management-org-event-form-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.management-page .management-org-event-form-scope {
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+}
+
+.management-page .management-org-event-form-scope-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.management-page .management-org-event-form-scope-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.management-page .management-org-event-form-systems {
+  margin-bottom: 10px;
+}
+
+.management-page .management-org-event-system-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid var(--input-border);
+  border-radius: 11px;
+  background: var(--input-bg);
+  padding-inline: 12px;
+}
+
+.management-page .management-org-event-system-search input {
+  width: 100%;
+  min-height: 38px;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: "Heebo", sans-serif;
+  font-size: 14px;
+  outline: none;
+}
+
+.management-page .management-org-event-selected-systems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.management-page .management-org-event-system-chip {
+  border: 1px solid color-mix(in srgb, var(--status-surplus) 30%, transparent);
+  border-radius: 999px;
+  background: var(--status-surplus-soft);
+  color: var(--status-surplus);
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Heebo", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.management-page .management-org-event-system-list {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.management-page .management-org-event-system-option {
+  min-height: 38px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 88%, white);
+  border-radius: 10px;
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+  font-size: 14px;
+  text-align: right;
+  cursor: pointer;
+}
+
+.management-page .management-org-event-system-option:hover {
+  border-color: color-mix(in srgb, var(--status-surplus) 36%, var(--border-color));
+  background: color-mix(in srgb, var(--surface-bg) 84%, var(--status-surplus-soft));
+}
+
 .management-page .management-subcategories-filter select {
   min-height: 38px;
   box-sizing: border-box;
@@ -535,6 +787,11 @@
   }
 
   .management-page .management-subcategories-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .management-page .management-org-events-toolbar,
+  .management-page .management-org-event-form-dates {
     grid-template-columns: 1fr;
   }
 

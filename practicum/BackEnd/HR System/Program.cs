@@ -36,6 +36,7 @@ builder.Services.AddScoped<IEmployeeEventService, EmployeeEventService>();
 builder.Services.AddScoped<ISystemService, SystemService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IChangeService, ChangeService>();
+builder.Services.AddScoped<IOrganizationEventService, OrganizationEventService>();
 
 builder.Services.AddCors(options =>
 {

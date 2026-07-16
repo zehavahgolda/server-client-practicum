@@ -1,4 +1,5 @@
 using HR_System.DTOs.Systems;
+using HR_System.DTOs.OrganizationEvents;
 using HR_System.Models;
 using MongoDB.Driver;
 using Microsoft.Extensions.Configuration;
@@ -9,13 +10,14 @@ using System.IO;
 namespace HR_System.Services
 {
     /// <summary>
-    /// щйшеъ мрйдем отшлеъ (Systems).
-    /// азшай тм щмйфъ ръерйн, зйщебй чйбемъ, рйъез сийеъ (Variance) еййцеа гезеъ мачсм.
+    /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (Systems).
+    /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (Variance) пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
     /// </summary>
     public class SystemService : ISystemService
     {
         private readonly IMongoCollection<SystemModel> _systemsCollection;
         private readonly IMongoCollection<Employee> _employeesCollection;
+        private readonly IMongoCollection<OrganizationEvent> _organizationEventsCollection;
         private readonly IConfiguration _configuration;
         private readonly ILogger<SystemService> _logger;
 
@@ -24,14 +26,15 @@ namespace HR_System.Services
             IConfiguration configuration,
             ILogger<SystemService> logger)
         {
-            // аъзем аесфй дръерйн оосг дръерйн едвгшеъ дотшлъ
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             _systemsCollection = database.GetCollection<SystemModel>("systems");
             _employeesCollection = database.GetCollection<Employee>("employees");
+            _organizationEventsCollection = database.GetCollection<OrganizationEvent>("OrganizationEvents");
             _configuration = configuration;
             _logger = logger;
         }
 
-        /// щмйфъ шщйоъ отшлеъ тн сйреп (щрд, сииес, ордм ае зйфещ зефщй).
+        /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ).
         public async Task<List<SystemListItemDto>> GetSystemsAsync(
             int? year = null,
             string? status = null,
@@ -51,7 +54,7 @@ namespace HR_System.Services
                 var employees = await _employeesCollection.Find(_ => true).ToListAsync();
                 var filtered = systems.AsEnumerable();
 
-                // сйреп мфй щрд еордм
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                 if (year.HasValue)
                     filtered = filtered.Where(s => s.Year == year.Value);
 
@@ -64,7 +67,7 @@ namespace HR_System.Services
                             StringComparison.OrdinalIgnoreCase));
                 }
 
-                // зйфещ ичси зефщй бщн дотшлъ, щн дордм ае дтшеъ дрйдем
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var searchTerm = search.Trim();
@@ -82,7 +85,7 @@ namespace HR_System.Services
                     .Select(s => MapToListItemDto(s, employees))
                     .ToList();
 
-                // сйреп сефй мфй сииес чйбемъ (Shortage/Balanced/Excess)
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (Shortage/Balanced/Excess)
                 if (!string.IsNullOrWhiteSpace(status))
                 {
                     list = list
@@ -116,7 +119,7 @@ namespace HR_System.Services
         }
 
         /// <summary>
-        /// щмйфъ лм дотшлеъ щроцаеъ бзесш лез агн (Shortage).
+        /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ (Shortage).
         /// </summary>
         public async Task<List<SystemListItemDto>> GetSystemsWithShortageAsync()
         {
@@ -149,7 +152,7 @@ namespace HR_System.Services
             }
         }
 
-        /// щмйфъ фшийн омайн тм отшлъ азъ, лемм тебгйн ощейлйн ерйъез ъчцйбй/сиййд.
+        /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅ.
         public async Task<SystemDetailsDto?> GetSystemByIdAsync(string id)
         {
             _logger.LogInformation(
@@ -214,6 +217,7 @@ namespace HR_System.Services
                 double totalPlanned = allocations.Sum(a => a.PlannedMonths);
                 double totalActual = allocatedMonths;
                 double variancePercent = 0;
+                var organizationEvents = await GetRelevantOrganizationEventsAsync(id);
 
                 if (totalPlanned > 0)
                 {
@@ -232,6 +236,7 @@ namespace HR_System.Services
                     system.ManagementNote,
                     system.UpdatedAt?.ToString("yyyy-MM-dd"),
                     assignedEmployees,
+                    organizationEvents,
                     [],
                     allocatedBudget,
                     usedBudget,
@@ -562,9 +567,9 @@ namespace HR_System.Services
             }
         }
 
-        // ферчцйеъ тжш фрйойеъ
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-        // ойфей оегм отшлъ м-DTO
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-DTO
         private SystemListItemDto MapToListItemDto(
             SystemModel system,
             IEnumerable<Employee> employees)
@@ -592,13 +597,14 @@ namespace HR_System.Services
                 GetCapacityStatus(gap),
                 GetAssignedEmployeesCount(employees, systemId),
                 system.ManagementNote,
+                system.IsActive,
                 allocatedBudget,
                 usedBudget,
                 budgetGap
             );
         }
 
-        // слйоъ зегщй тбегд бфетм тбеш отшлъ сфцйфйъ
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         private static double GetAllocatedMonthsBySystemId(
             IEnumerable<Employee> employees,
             string systemId) =>
@@ -610,7 +616,7 @@ namespace HR_System.Services
                     StringComparison.OrdinalIgnoreCase))
                 .Sum(a => a.ActualMonths);
 
-        // сфйшъ лоеъ дтебгйн доечцйн мотшлъ
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         private static int GetAssignedEmployeesCount(
             IEnumerable<Employee> employees,
             string systemId) =>
@@ -622,13 +628,13 @@ namespace HR_System.Services
                     StringComparison.OrdinalIgnoreCase)))
                 .Count();
 
-        // чбйтъ сииес чйбемъ дотшлъ
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         private static string GetCapacityStatus(double gap) =>
             gap > 0
                 ? "Shortage"
                 : (gap == 0 ? "Balanced" : "Excess");
 
-        // чбйтъ сииес жойреъ щм тебг
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
         private static string GetEmployeeAvailabilityStatus(Employee employee)
         {
             var remaining =
@@ -639,6 +645,73 @@ namespace HR_System.Services
                 ? "Available"
                 : (remaining == 0 ? "Balanced" : "Overloaded");
         }
+
+        private async Task<List<OrganizationEventDto>> GetRelevantOrganizationEventsAsync(string systemId)
+        {
+            var systems = await _systemsCollection.Find(s => s.IsActive).ToListAsync();
+            var systemsById = systems
+                .Where(system => !string.IsNullOrWhiteSpace(system.Id))
+                .GroupBy(system => system.Id!, StringComparer.Ordinal)
+                .ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+
+            var organizationEvents = await _organizationEventsCollection
+                .Find(organizationEvent => !organizationEvent.IsDeleted)
+                .SortBy(organizationEvent => organizationEvent.StartDate)
+                .ToListAsync();
+
+            return organizationEvents
+                .Where(organizationEvent =>
+                    string.Equals(organizationEvent.ScopeType, "AllOrganization", StringComparison.Ordinal) ||
+                    organizationEvent.TargetSystemIds.Contains(systemId, StringComparer.Ordinal))
+                .OrderBy(organizationEvent => GetOrganizationEventStatusSortOrder(GetOrganizationEventStatus(organizationEvent)))
+                .ThenBy(organizationEvent => organizationEvent.StartDate)
+                .Select(organizationEvent => new OrganizationEventDto(
+                    organizationEvent.Id ?? string.Empty,
+                    organizationEvent.Title,
+                    organizationEvent.Description,
+                    DateOnly.FromDateTime(organizationEvent.StartDate),
+                    organizationEvent.EndDate.HasValue ? DateOnly.FromDateTime(organizationEvent.EndDate.Value) : null,
+                    organizationEvent.ScopeType,
+                    organizationEvent.TargetSystemIds.ToList(),
+                    organizationEvent.TargetSystemIds
+                        .Where(systemsById.ContainsKey)
+                        .Select(targetSystemId => new OrganizationEventTargetSystemDto(
+                            targetSystemId,
+                            systemsById[targetSystemId].Name))
+                        .ToList(),
+                    GetOrganizationEventStatus(organizationEvent),
+                    organizationEvent.CreatedAt,
+                    organizationEvent.UpdatedAt))
+                .ToList();
+        }
+
+        private static string GetOrganizationEventStatus(OrganizationEvent organizationEvent)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var startDate = DateOnly.FromDateTime(organizationEvent.StartDate);
+            var endDate = organizationEvent.EndDate.HasValue
+                ? DateOnly.FromDateTime(organizationEvent.EndDate.Value)
+                : (DateOnly?)null;
+
+            if (endDate.HasValue && endDate.Value < today)
+            {
+                return "Completed";
+            }
+
+            if (startDate > today)
+            {
+                return "Future";
+            }
+
+            return "Active";
+        }
+
+        private static int GetOrganizationEventStatusSortOrder(string status) => status switch
+        {
+            "Active" => 0,
+            "Future" => 1,
+            _ => 2
+        };
 
         public async Task CreateSystemAsync(SystemCreateDto dto)
         {
@@ -681,7 +754,7 @@ namespace HR_System.Services
             }
         }
 
-        /// тглеп отшлъ чййоъ босг дръерйн.
+        /// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
         public async Task UpdateSystemAsync(string id, SystemCreateDto dto)
         {
             _logger.LogInformation(
@@ -736,7 +809,7 @@ namespace HR_System.Services
             }
         }
 
-        /// дсшъ шщеоъ отшлъ оосг дръерйн.
+        /// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
         public async Task DeleteSystemAsync(string id)
         {
             _logger.LogInformation(

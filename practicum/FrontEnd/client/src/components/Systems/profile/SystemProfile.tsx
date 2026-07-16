@@ -10,7 +10,7 @@ import {
 import { employeeEventTypeOptions } from "../../../constants/employeeEventTypes";
 import { employeeEventService } from "../../../services/employeeEventService";
 import { systemService } from "../../../services/systemService";
-import type { EmployeeEvent, SystemDetails } from "../../../types";
+import type { EmployeeEvent, SystemDetails, SystemOrganizationEvent } from "../../../types";
 import { formatCurrency } from "../../../utils/numberFormatters";
 
 import "./SystemProfile.css";
@@ -156,6 +156,39 @@ function getEventToneClass(event: EmployeeEvent, todayKey: string): "info" | "am
   }
 
   return "info";
+}
+
+function getOrganizationEventBucket(event: SystemOrganizationEvent, todayKey: string): 0 | 1 | 2 {
+  const start = toDateKey(event.startDate);
+  const end = toDateKey(event.endDate);
+
+  if (!start) {
+    return 2;
+  }
+
+  if (end && end < todayKey) {
+    return 2;
+  }
+
+  if (start > todayKey) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function getOrganizationEventToneClass(event: SystemOrganizationEvent, todayKey: string): "info" | "amber" | "muted" {
+  const bucket = getOrganizationEventBucket(event, todayKey);
+
+  if (bucket === 2) {
+    return "muted";
+  }
+
+  return "info";
+}
+
+function getOrganizationEventScopeLabel(event: SystemOrganizationEvent): string {
+  return event.scopeType === "AllOrganization" ? "כלל־ארגוני" : "מערכות נבחרות";
 }
 
 export default function SystemProfile({
@@ -332,7 +365,25 @@ export default function SystemProfile({
   const budgetTone = system.budgetGap < 0 ? "shortage" : "balanced";
 
   const hasEventData = availabilityItems.length > 0;
-  const hasAnyManagementContent = Boolean(localManagementNote) || hasEventData;
+  const organizationEventItems = useMemo(() => system.organizationEvents || [], [system.organizationEvents]);
+  const splitOrganizationEventItems = useMemo(() => {
+    const currentOrFuture: SystemOrganizationEvent[] = [];
+    const historical: SystemOrganizationEvent[] = [];
+
+    for (const event of organizationEventItems) {
+      const bucket = getOrganizationEventBucket(event, todayKey);
+      if (bucket === 2) {
+        historical.push(event);
+      } else {
+        currentOrFuture.push(event);
+      }
+    }
+
+    return { currentOrFuture, historical };
+  }, [organizationEventItems, todayKey]);
+  const [showOrganizationHistory, setShowOrganizationHistory] = useState(false);
+  const hasOrganizationEventData = organizationEventItems.length > 0;
+  const hasAnyManagementContent = Boolean(localManagementNote) || hasEventData || hasOrganizationEventData;
   const visibleHistoricalItems = showFullHistory
     ? splitAvailabilityItems.historical
     : splitAvailabilityItems.historical.slice(0, 4);
@@ -410,6 +461,31 @@ export default function SystemProfile({
             </p>
 
             {description && <p className="management-item-description">{description}</p>}
+          </div>
+        </article>
+      );
+    });
+  }
+
+  function renderOrganizationEventItems(items: SystemOrganizationEvent[]) {
+    return items.map((event) => {
+      const toneClass = getOrganizationEventToneClass(event, todayKey);
+      const description = event.description?.trim();
+
+      return (
+        <article className="management-stream-item timeline-item" key={event.id}>
+          <div className="management-item-content">
+            <p className="management-item-title-row">
+              <span className="management-item-title">{event.title}</span>
+              <span className={`management-item-marker ${toneClass}`} aria-hidden="true" />
+            </p>
+
+            <p className="management-item-meta">
+              {formatRange(event.startDate, event.endDate)}
+              <span className="system-profile-org-event-scope">{getOrganizationEventScopeLabel(event)}</span>
+            </p>
+
+            {description ? <p className="management-item-description">{description}</p> : null}
           </div>
         </article>
       );
@@ -757,9 +833,41 @@ export default function SystemProfile({
                   </section>
                 )}
 
-                {!eventsLoading && !eventsError && hasEventData && (
+                {!eventsLoading && !eventsError && hasOrganizationEventData && (
                   <section className="management-stream-group">
                     <h3>אירועים כלל־משרדיים</h3>
+
+                    {splitOrganizationEventItems.currentOrFuture.length > 0 ? (
+                      <div className="management-stream-list">
+                        {renderOrganizationEventItems(splitOrganizationEventItems.currentOrFuture)}
+                      </div>
+                    ) : null}
+
+                    {splitOrganizationEventItems.historical.length > 0 ? (
+                      <>
+                        <button
+                          type="button"
+                          className="management-history-toggle"
+                          onClick={() => setShowOrganizationHistory((current) => !current)}
+                        >
+                          <span>{showOrganizationHistory ? "הסתרת היסטוריית אירועים" : "הצגת היסטוריית אירועים"}</span>
+                          <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            focusable="false"
+                            className={showOrganizationHistory ? "expanded" : ""}
+                          >
+                            <polyline points="9 6 15 12 9 18" />
+                          </svg>
+                        </button>
+
+                        {showOrganizationHistory ? (
+                          <div className="management-stream-list">
+                            {renderOrganizationEventItems(splitOrganizationEventItems.historical)}
+                          </div>
+                        ) : null}
+                      </>
+                    ) : null}
                   </section>
                 )}
 

@@ -10,6 +10,7 @@ namespace HR_System.DTOs.Systems
         string CapacityStatus,
         int AssignedEmployeesCount,
         string? ManagementNote,
+        bool IsActive,
         decimal AllocatedBudget,
         decimal UsedBudget,
         decimal BudgetGap

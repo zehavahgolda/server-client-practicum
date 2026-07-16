@@ -440,50 +440,52 @@ export default function EmployeeProfile({
             </span>
           </div>
 
-          <div className="employee-profile-allocations">
-            {employee.allocations.length === 0 && (
-              <div className="employee-profile-empty">
-                אין שיבוצים פעילים לעובד זה.
-              </div>
-            )}
-
-            {employee.allocations.map(
-              (allocation) => (
-                <div
-                  key={`${allocation.systemId}-${allocation.roleInSystem}`}
-                  className="employee-profile-allocation"
-                >
-                  <div className="employee-profile-allocation-details">
-                    <strong>
-                      {allocation.systemName}
-                    </strong>
-
-                    <span>
-                      {allocation.actualMonths} חודשי
-                      עבודה מתוכננים
-                    </span>
-
-                    {allocation.roleInSystem && (
-                      <small>
-                        תפקיד במערכת: {" "}
-                        {allocation.roleInSystem}
-                      </small>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate(
-                        `/systems?systemId=${allocation.systemId}`
-                      )
-                    }
-                  >
-                    פתיחת מערכת
-                  </button>
+          <div className="employee-profile-panel-body employee-profile-panel-body--scrollable">
+            <div className="employee-profile-allocations">
+              {employee.allocations.length === 0 && (
+                <div className="employee-profile-empty employee-profile-empty--compact">
+                  אין שיבוצים פעילים לעובד זה.
                 </div>
-              )
-            )}
+              )}
+
+              {employee.allocations.map(
+                (allocation) => (
+                  <div
+                    key={`${allocation.systemId}-${allocation.roleInSystem}`}
+                    className="employee-profile-allocation"
+                  >
+                    <div className="employee-profile-allocation-details">
+                      <strong>
+                        {allocation.systemName}
+                      </strong>
+
+                      <span>
+                        {allocation.actualMonths} חודשי
+                        עבודה מתוכננים
+                      </span>
+
+                      {allocation.roleInSystem && (
+                        <small>
+                          תפקיד במערכת: {" "}
+                          {allocation.roleInSystem}
+                        </small>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/systems?systemId=${allocation.systemId}`
+                        )
+                      }
+                    >
+                      פתיחת מערכת
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </section>
 
@@ -514,99 +516,101 @@ export default function EmployeeProfile({
             </button>
           </div>
 
-          {actionError && <div className="error-box">{actionError}</div>}
-          {eventsError && <div className="error-box">{eventsError}</div>}
+          <div className="employee-profile-panel-body employee-profile-panel-body--availability">
+            {actionError && <div className="error-box">{actionError}</div>}
+            {eventsError && <div className="error-box">{eventsError}</div>}
 
-          {eventsLoading && (
-            <div className="employee-profile-empty">טוען אירועי זמינות...</div>
-          )}
+            {eventsLoading && (
+              <div className="employee-profile-empty employee-profile-empty--compact">טוען אירועי זמינות...</div>
+            )}
 
-          {!eventsLoading && currentEvent && (
-            <div className="employee-profile-change">
-              <strong>אירוע פעיל: {getEventTypeLabel(currentEvent)}</strong>
-              <span>{formatEventPeriod(currentEvent)}</span>
-              {currentEvent.description?.trim() && <span>{currentEvent.description.trim()}</span>}
-            </div>
-          )}
+            {!eventsLoading && currentEvent && (
+              <div className="employee-profile-change">
+                <strong>אירוע פעיל: {getEventTypeLabel(currentEvent)}</strong>
+                <span>{formatEventPeriod(currentEvent)}</span>
+                {currentEvent.description?.trim() && <span>{currentEvent.description.trim()}</span>}
+              </div>
+            )}
 
-          {!eventsLoading && nearestFutureEvent && nearestFutureEvent.id !== currentEvent?.id && (
-            <div className="employee-profile-change">
-              <strong>אירוע קרוב: {getEventTypeLabel(nearestFutureEvent)}</strong>
-              <span>{formatEventPeriod(nearestFutureEvent)}</span>
-              {nearestFutureEvent.description?.trim() && (
-                <span>{nearestFutureEvent.description.trim()}</span>
-              )}
-            </div>
-          )}
+            {!eventsLoading && nearestFutureEvent && nearestFutureEvent.id !== currentEvent?.id && (
+              <div className="employee-profile-change">
+                <strong>אירוע קרוב: {getEventTypeLabel(nearestFutureEvent)}</strong>
+                <span>{formatEventPeriod(nearestFutureEvent)}</span>
+                {nearestFutureEvent.description?.trim() && (
+                  <span>{nearestFutureEvent.description.trim()}</span>
+                )}
+              </div>
+            )}
 
-          {!eventsLoading && !currentEvent && !nearestFutureEvent && (
-            <div className="employee-profile-empty">אין שינויי זמינות קרובים.</div>
-          )}
+            {!eventsLoading && !currentEvent && !nearestFutureEvent && (
+              <div className="employee-profile-empty employee-profile-empty--compact">אין שינויי זמינות קרובים.</div>
+            )}
 
-          {sortedEvents.length > 0 && (
-            <>
-              <button
-                type="button"
-                className="employee-profile-history-toggle"
-                onClick={() => setHistoryOpen((prev) => !prev)}
-              >
-                {historyOpen ? "הסתרת היסטוריית זמינות" : "הצגת היסטוריית זמינות"} ({sortedEvents.length})
-              </button>
+            {sortedEvents.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  className="employee-profile-history-toggle"
+                  onClick={() => setHistoryOpen((prev) => !prev)}
+                >
+                  {historyOpen ? "הסתרת היסטוריית זמינות" : "הצגת היסטוריית זמינות"} ({sortedEvents.length})
+                </button>
 
-              {historyOpen && (
-                <div className="employee-profile-events-history" role="region" aria-label="היסטוריית זמינות">
-                  {historyEvents.length === 0 && (
-                    <div className="employee-profile-empty">אין אירועים נוספים להצגה.</div>
-                  )}
+                {historyOpen && (
+                  <div className="employee-profile-events-history" role="region" aria-label="היסטוריית זמינות">
+                    {historyEvents.length === 0 && (
+                      <div className="employee-profile-empty employee-profile-empty--compact">אין אירועים נוספים להצגה.</div>
+                    )}
 
-                  {historyEvents.map((event) => (
-                    <div key={event.id} className="employee-profile-event-item">
-                      <div className="employee-profile-event-item-main">
-                        <strong>{getEventTypeLabel(event)}</strong>
-                        <span>{formatEventPeriod(event)}</span>
-                        {event.description?.trim() && (
-                          <span>{event.description.trim()}</span>
-                        )}
+                    {historyEvents.map((event) => (
+                      <div key={event.id} className="employee-profile-event-item">
+                        <div className="employee-profile-event-item-main">
+                          <strong>{getEventTypeLabel(event)}</strong>
+                          <span>{formatEventPeriod(event)}</span>
+                          {event.description?.trim() && (
+                            <span>{event.description.trim()}</span>
+                          )}
+                        </div>
+
+                        <div className="employee-profile-event-item-actions">
+                          <button
+                            type="button"
+                            className="employee-profile-icon-btn"
+                            onClick={() => openEditEventModal(event)}
+                            disabled={savingEvent || Boolean(deletingEventId)}
+                            title="עריכת אירוע"
+                            aria-label="עריכת אירוע"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" />
+                              <path d="M14.06 4.19l3.75 3.75" />
+                            </svg>
+                          </button>
+
+                          <button
+                            type="button"
+                            className="employee-profile-icon-btn"
+                            onClick={() => void handleDeleteEvent(event.id)}
+                            disabled={savingEvent || deletingEventId === event.id}
+                            title="מחיקת אירוע"
+                            aria-label="מחיקת אירוע"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M8 6V4h8v2" />
+                              <path d="M19 6l-1 14H6L5 6" />
+                              <line x1="10" y1="10" x2="10" y2="17" />
+                              <line x1="14" y1="10" x2="14" y2="17" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-
-                      <div className="employee-profile-event-item-actions">
-                        <button
-                          type="button"
-                          className="employee-profile-icon-btn"
-                          onClick={() => openEditEventModal(event)}
-                          disabled={savingEvent || Boolean(deletingEventId)}
-                          title="עריכת אירוע"
-                          aria-label="עריכת אירוע"
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" />
-                            <path d="M14.06 4.19l3.75 3.75" />
-                          </svg>
-                        </button>
-
-                        <button
-                          type="button"
-                          className="employee-profile-icon-btn"
-                          onClick={() => void handleDeleteEvent(event.id)}
-                          disabled={savingEvent || deletingEventId === event.id}
-                          title="מחיקת אירוע"
-                          aria-label="מחיקת אירוע"
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M8 6V4h8v2" />
-                            <path d="M19 6l-1 14H6L5 6" />
-                            <line x1="10" y1="10" x2="10" y2="17" />
-                            <line x1="14" y1="10" x2="14" y2="17" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </aside>
       </section>
 

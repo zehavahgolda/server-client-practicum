@@ -7,4 +7,5 @@ export * from "./filters";
 export * from "./assignment";
 export * from "./employeeEvent";
 export * from "./subcategory";
+export * from "./organizationEvent";
 

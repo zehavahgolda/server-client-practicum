@@ -3,6 +3,10 @@
   border: 1px solid var(--border-color);
   border-radius: 14px;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* =========================
@@ -266,6 +270,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 .employee-profile-panel {
@@ -277,6 +283,25 @@
   border-radius: 10px;
 
   background: var(--surface-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.employee-profile-panel-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.employee-profile-panel-body--scrollable {
+  overflow: hidden;
+}
+
+.employee-profile-panel-body--availability {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .employee-profile-panel-header {
@@ -336,6 +361,11 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding-inline-end: 2px;
+  scrollbar-gutter: stable;
 }
 
 .employee-profile-allocation,
@@ -409,6 +439,12 @@
   font-size: 14px;
 }
 
+.employee-profile-empty--compact {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
 /* =========================
    Manager panel
    ========================= */
@@ -472,13 +508,14 @@
 }
 
 .employee-profile-events-history {
-  margin-top: 10px;
-  max-height: 280px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-inline-end: 2px;
+  scrollbar-gutter: stable;
 }
 
 .employee-profile-event-item {
@@ -641,9 +678,10 @@
 }
 
 .modal-card.employee-profile-modal-card {
-  width: min(1320px, 92vw);
+  width: min(1360px, 90vw);
   max-width: none;
 
+  height: 88vh;
   max-height: 92vh;
 
   padding: 16px;
@@ -651,8 +689,8 @@
 }
 
 .employee-profile-modal-card .employee-profile-card {
-  max-height: calc(92vh - 24px);
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden;
 }
 
 .employee-profile-modal-card
@@ -670,7 +708,8 @@
   }
 
   .modal-card.employee-profile-modal-card {
-    width: min(1160px, 96vw);
+    width: min(1360px, 95vw);
+    height: 88vh;
     max-height: 92vh;
     padding: 12px;
   }
@@ -707,6 +746,7 @@
 
   .modal-card.employee-profile-modal-card {
     width: min(100%, 96vw);
+    height: min(88vh, calc(100vh - 20px));
     max-height: 92vh;
     padding: 8px;
   }

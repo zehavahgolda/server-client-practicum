@@ -8,6 +8,7 @@ export interface System {
   capacityStatus: string;
   assignedEmployeesCount: number;
   managementNote?: string;
+  isActive?: boolean;
 
   allocatedBudget: number;
   usedBudget: number;
@@ -26,9 +27,27 @@ export interface SystemAssignedEmployee {
   availabilityStatus: string;
 }
 
+export interface SystemOrganizationEvent {
+  id: string;
+  title: string;
+  description?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  scopeType: "AllOrganization" | "SelectedSystems";
+  targetSystemIds: string[];
+  targetSystems: Array<{
+    id: string;
+    name: string;
+  }>;
+  status: "Active" | "Future" | "Completed";
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
 export interface SystemDetails extends System {
   updatedAt?: string;
   assignedEmployees: SystemAssignedEmployee[];
+  organizationEvents: SystemOrganizationEvent[];
   changes: Array<{
     date: string;
     title: string;

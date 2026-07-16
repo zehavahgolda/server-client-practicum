@@ -3,6 +3,10 @@
   border: 1px solid var(--border-color);
   border-radius: 14px;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .system-profile-header {
@@ -401,6 +405,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 
 .system-profile-panel {
@@ -460,7 +466,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 332px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-inline-end: 2px;
 }
@@ -555,7 +562,6 @@
 .management-stream-scroll {
   flex: 1;
   min-height: 0;
-  max-height: 332px;
   overflow-y: auto;
   padding-inline-end: 2px;
   scrollbar-gutter: stable;
@@ -820,7 +826,8 @@
 }
 
 .modal-card.system-profile-modal-card {
-  width: min(1320px, 92vw);
+  width: min(1360px, 90vw);
+  height: 88vh;
   max-height: 92vh;
   padding: 16px;
   overflow: hidden;
@@ -828,8 +835,7 @@
 }
 
 .system-profile-modal-card .system-profile-page {
-  max-height: calc(92vh - 24px);
-  overflow-y: auto;
+  overflow: hidden;
   scrollbar-gutter: stable;
 }
 
@@ -900,7 +906,8 @@
   }
 
   .modal-card.system-profile-modal-card {
-    width: min(1160px, 96vw);
+    width: min(1360px, 95vw);
+    height: 88vh;
     max-height: 92vh;
     padding: 12px;
   }
@@ -917,6 +924,11 @@
 }
 
 @media (max-width: 640px) {
+  .modal-card.system-profile-modal-card {
+    width: min(100%, 96vw);
+    height: min(88vh, calc(100vh - 20px));
+  }
+
   .system-profile-modal-overlay {
       padding: 10px;
   }

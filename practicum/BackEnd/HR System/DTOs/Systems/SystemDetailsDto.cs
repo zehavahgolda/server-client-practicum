@@ -1,4 +1,5 @@
 using HR_System.DTOs.Systems;
+using HR_System.DTOs.OrganizationEvents;
 
 public record SystemDetailsDto(
     string Id,
@@ -11,6 +12,7 @@ public record SystemDetailsDto(
     string? ManagementNote,
     string? UpdatedAt,
     List<SystemAssignedEmployeeDto> AssignedEmployees,
+    List<OrganizationEventDto> OrganizationEvents,
     List<object> Changes,
     decimal AllocatedBudget,
     decimal UsedBudget,
