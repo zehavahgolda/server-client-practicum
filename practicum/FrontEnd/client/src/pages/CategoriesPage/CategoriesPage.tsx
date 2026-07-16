@@ -89,7 +89,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <main className="app-shell" dir="rtl">
+    <main className="app-shell management-page" dir="rtl">
       <header className="app-header management-page-header">
         <h1>מסכי ניהול</h1>
         <p>ניהול הגדרות ארגוניות, מבנה מקצועי ואירועים רוחביים</p>

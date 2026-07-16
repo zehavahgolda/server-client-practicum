@@ -1,8 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertTriangle,
+  ClipboardList,
+  UsersRound,
+  WalletCards
+} from "lucide-react";
 
 import { employeeEventTypeOptions } from "../../../constants/employeeEventTypes";
 import { employeeEventService } from "../../../services/employeeEventService";
+import { systemService } from "../../../services/systemService";
 import type { EmployeeEvent, SystemDetails } from "../../../types";
 import { formatCurrency } from "../../../utils/numberFormatters";
 
@@ -101,7 +108,7 @@ function getApproxDurationLabel(startDate: string, endDate?: string | null): str
     return null;
   }
 
-  return `משך משוער: כ־${totalMonths.toFixed(1)} חודשים`;
+  return `כ־${totalMonths.toFixed(1)} חודשים`;
 }
 
 function getEventTypeLabel(event: EmployeeEvent): string {
@@ -131,6 +138,26 @@ function getEventBucket(event: EmployeeEvent, todayKey: string): 0 | 1 | 2 {
   return 2;
 }
 
+function getEventToneClass(event: EmployeeEvent, todayKey: string): "info" | "amber" | "muted" {
+  const bucket = getEventBucket(event, todayKey);
+  if (bucket === 2) {
+    return "muted";
+  }
+
+  const amberTypes = new Set([
+    "ReserveDuty",
+    "ParentalLeave",
+    "SpecialLeave",
+    "AvailabilityChange"
+  ]);
+
+  if (amberTypes.has(event.eventType)) {
+    return "amber";
+  }
+
+  return "info";
+}
+
 export default function SystemProfile({
   system,
   loading = false,
@@ -140,11 +167,26 @@ export default function SystemProfile({
 }: SystemProfileProps) {
   const navigate = useNavigate();
 
-  const [employeesAvailabilityOpen, setEmployeesAvailabilityOpen] = useState(true);
-  const [orgEventsOpen, setOrgEventsOpen] = useState(false);
-  const [systemHistoryOpen, setSystemHistoryOpen] = useState(false);
+  const [localManagementNote, setLocalManagementNote] = useState(
+    system.managementNote?.trim() || ""
+  );
 
-  const managementNote = system.managementNote?.trim() || "";
+  const [noteDraft, setNoteDraft] = useState(localManagementNote);
+  const [noteEditing, setNoteEditing] = useState(false);
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [noteError, setNoteError] = useState<string | null>(null);
+  const [showFullHistory, setShowFullHistory] = useState(false);
+  const noteEditorRef = useRef<HTMLTextAreaElement | null>(null);
+  const managementPanelRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const nextNote = system.managementNote?.trim() || "";
+    setLocalManagementNote(nextNote);
+    setNoteDraft(nextNote);
+    setNoteEditing(false);
+    setNoteError(null);
+  }, [system.managementNote, system.id]);
+
   const todayKey = getTodayKey();
 
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -289,28 +331,86 @@ export default function SystemProfile({
   const budgetUsagePercent = getBudgetUsagePercent(system);
   const budgetTone = system.budgetGap < 0 ? "shortage" : "balanced";
 
-  const shouldShowGroupedList =
-    splitAvailabilityItems.currentOrFuture.length > 0 &&
-    splitAvailabilityItems.historical.length > 0 &&
-    availabilityItems.length >= 5;
+  const hasEventData = availabilityItems.length > 0;
+  const hasAnyManagementContent = Boolean(localManagementNote) || hasEventData;
+  const visibleHistoricalItems = showFullHistory
+    ? splitAvailabilityItems.historical
+    : splitAvailabilityItems.historical.slice(0, 4);
+  const hasMoreHistoricalItems = splitAvailabilityItems.historical.length > 4;
+
+  useEffect(() => {
+    if (!noteEditing) {
+      return;
+    }
+
+    noteEditorRef.current?.focus();
+  }, [noteEditing]);
+
+  function openNoteEditor() {
+    setNoteEditing(true);
+    setNoteError(null);
+    managementPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function handleSaveNote() {
+    const nextNote = noteDraft.trim();
+
+    if (nextNote === localManagementNote) {
+      setNoteEditing(false);
+      setNoteError(null);
+      return;
+    }
+
+    setNoteSaving(true);
+    setNoteError(null);
+
+    try {
+      await systemService.updateSystem(system.id, {
+        name: system.name,
+        requiredCapacityMonths: system.requiredCapacityMonths,
+        allocatedBudget: system.allocatedBudget,
+        managementNote: nextNote || undefined
+      });
+
+      setLocalManagementNote(nextNote);
+      setNoteEditing(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "שמירת הערת המערכת נכשלה.";
+      setNoteError(message);
+    } finally {
+      setNoteSaving(false);
+    }
+  }
+
+  function handleCancelNoteEdit() {
+    setNoteDraft(localManagementNote);
+    setNoteEditing(false);
+    setNoteError(null);
+  }
 
   function renderAvailabilityItems(items: AvailabilityListItem[]) {
     return items.map((item) => {
       const event = item.event;
       const duration = getApproxDurationLabel(event.startDate, event.endDate);
       const description = event.description?.trim();
+      const toneClass = getEventToneClass(event, todayKey);
 
       return (
-        <article className="availability-timeline-item" key={item.key}>
-          <p className="availability-item-name">{item.fullName}</p>
+        <article className="management-stream-item timeline-item" key={item.key}>
+          <div className="management-item-content">
+            <p className="management-item-title-row">
+              <span className="management-item-title">{item.fullName}</span>
+              <span className={`management-item-marker ${toneClass}`} aria-hidden="true" />
+            </p>
+            <p className="management-item-label">{getEventTypeLabel(event)}</p>
 
-          <p className="availability-item-meta">
-            {getEventTypeLabel(event)} · {formatRange(event.startDate, event.endDate)}
-          </p>
+            <p className="management-item-meta">
+              {formatRange(event.startDate, event.endDate)}
+              {duration ? ` · ${duration}` : ""}
+            </p>
 
-          {duration && <p className="availability-item-duration">{duration}</p>}
-
-          {description && <p className="availability-item-description">{description}</p>}
+            {description && <p className="management-item-description">{description}</p>}
+          </div>
         </article>
       );
     });
@@ -338,29 +438,18 @@ export default function SystemProfile({
 
                 <div className="system-profile-title-row">
                   <h1>{system.name}</h1>
-
                   <span className={`system-status-pill ${tone}`}>{statusLabel}</span>
                 </div>
 
                 <p>
                   {system.assignedEmployeesCount} עובדים משויכים
-                  <span className="system-profile-meta-separator" aria-hidden="true">
-                    •
-                  </span>
-                  פער קיבולת: <strong>{Math.abs(system.gap)}</strong>
+                  <span className="system-profile-meta-separator" aria-hidden="true">•</span>
+                  עודף קיבולת: <strong>{Math.abs(system.gap)}</strong>
                 </p>
               </div>
             </div>
 
             <div className="system-profile-actions">
-              <button
-                type="button"
-                className="secondary-btn system-profile-action"
-                onClick={onBack}
-              >
-                חזרה לרשימה
-              </button>
-
               <button
                 type="button"
                 className="primary-btn system-profile-action"
@@ -381,65 +470,115 @@ export default function SystemProfile({
 
           {loading && <div className="system-note-box">טוען פרטי מערכת...</div>}
 
-          {managementNote && <div className="system-note-box">{managementNote}</div>}
+          {localManagementNote && (
+            <div className="system-note-box enhanced-note-box">
+              <span className="system-note-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="10" x2="12" y2="16" />
+                  <circle cx="12" cy="7" r="1" />
+                </svg>
+              </span>
+              <span className="system-note-text">{localManagementNote}</span>
+              <button
+                type="button"
+                className="note-edit-btn note-edit-btn--banner"
+                onClick={openNoteEditor}
+                aria-label="עריכת הערת מערכת"
+                title="עריכת הערת מערכת"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" />
+                  <path d="M14.06 4.19l3.75 3.75" />
+                </svg>
+              </button>
+            </div>
+          )}
 
           <section className="system-profile-kpis">
             <div className="system-profile-kpi">
-              <span>קיבולת נדרשת</span>
-              <strong>{system.requiredCapacityMonths}</strong>
+              <div className="system-profile-kpi-layout">
+                <div className="system-profile-kpi-copy">
+                  <span>חודשי אדם נדרשים</span>
+                  <strong>{system.requiredCapacityMonths}</strong>
+                </div>
+
+                <span className="system-profile-kpi-icon" aria-hidden="true">
+                  <ClipboardList size={23} strokeWidth={2} />
+                </span>
+              </div>
             </div>
 
             <div className="system-profile-kpi">
-              <span>קיבולת מוקצית</span>
-              <strong>{system.allocatedMonths}</strong>
+              <div className="system-profile-kpi-layout">
+                <div className="system-profile-kpi-copy">
+                  <span>חודשי אדם מוקצים</span>
+                  <strong>{system.allocatedMonths}</strong>
+                </div>
+
+                <span className="system-profile-kpi-icon" aria-hidden="true">
+                  <WalletCards size={23} strokeWidth={2} />
+                </span>
+              </div>
             </div>
 
             <div className="system-profile-kpi">
-              <span>{system.gap > 0 ? "מחסור" : system.gap < 0 ? "עודף" : "פער"}</span>
-              <strong className={tone}>{Math.abs(system.gap)}</strong>
+              <div className="system-profile-kpi-layout">
+                <div className="system-profile-kpi-copy">
+                  <span>{system.gap > 0 ? "מחסור" : system.gap < 0 ? "עודף" : "פער"}</span>
+                  <strong className={tone}>{Math.abs(system.gap)}</strong>
+                </div>
+
+                <span className="system-profile-kpi-icon" aria-hidden="true">
+                  <AlertTriangle size={23} strokeWidth={2} />
+                </span>
+              </div>
             </div>
 
             <div className="system-profile-kpi">
-              <span>עובדים משויכים</span>
-              <strong>{system.assignedEmployeesCount}</strong>
+              <div className="system-profile-kpi-layout">
+                <div className="system-profile-kpi-copy">
+                  <span>עובדים משוייכים</span>
+                  <strong>{system.assignedEmployeesCount}</strong>
+                </div>
+
+                <span className="system-profile-kpi-icon" aria-hidden="true">
+                  <UsersRound size={23} strokeWidth={2} />
+                </span>
+              </div>
             </div>
           </section>
 
           <section className="system-budget-panel">
             <div className="system-budget-header">
-              <div>
-                <h2>תמונת מצב תקציבית</h2>
-                <p>תקציב מוקצה, שימוש בפועל ויתרה נוכחית.</p>
-              </div>
-
-              <span className={`system-budget-status ${budgetTone}`}>
-                {system.budgetGap < 0 ? "חריגה תקציבית" : "תקציב תקין"}
-              </span>
+              <h2>תמונת מצב תקציבית</h2>
             </div>
 
-            <div className="system-budget-content">
-              <div className="system-budget-kpis">
-                <div className="system-budget-kpi">
-                  <span>הוקצה</span>
-                  <strong>{formatCurrency(system.allocatedBudget)}</strong>
-                </div>
-
-                <div className="system-budget-kpi">
-                  <span>שימוש בפועל</span>
-                  <strong>{formatCurrency(system.usedBudget)}</strong>
-                </div>
-
-                <div className="system-budget-kpi">
-                  <span>{system.budgetGap < 0 ? "חריגה" : "יתרה"}</span>
-                  <strong className={budgetTone}>{formatCurrency(Math.abs(system.budgetGap))}</strong>
-                </div>
+            <div className="system-budget-unified" dir="rtl">
+              <div className="system-budget-cell system-budget-value-cell">
+                <span>הוקצה</span>
+                <strong>{formatCurrency(system.allocatedBudget)}</strong>
               </div>
 
-              <div className="system-budget-progress">
+              <div className="system-budget-cell system-budget-value-cell">
+                <span>שימוש בפועל</span>
+                <strong>{formatCurrency(system.usedBudget)}</strong>
+              </div>
+
+              <div className="system-budget-cell system-budget-value-cell">
+                <span>{system.budgetGap < 0 ? "חריגה" : "יתרה"}</span>
+                <strong className={budgetTone}>{formatCurrency(Math.abs(system.budgetGap))}</strong>
+              </div>
+
+              <div className="system-budget-cell system-budget-progress-cell">
                 <div className="system-budget-progress-label">
                   <span>ניצול תקציב</span>
                   <strong>{budgetUsagePercent}%</strong>
                 </div>
+
+                <span className={`system-budget-status ${budgetTone}`}>
+                  {system.budgetGap < 0 ? "חריגה תקציבית" : "תקציב תקין"}
+                </span>
 
                 <div className="system-budget-track">
                   <div
@@ -469,18 +608,16 @@ export default function SystemProfile({
                   {system.assignedEmployees.map((employee) => (
                     <div className="assigned-employee-row" key={employee.employeeId}>
                       <div className="assigned-employee-details">
-                        <strong className="assigned-employee-name-row">
+                        <p className="assigned-employee-name-row">
                           <span>{employee.fullName}</span>
                           {activeEmployeeIds.has(employee.employeeId) && (
                             <span
                               className="assigned-employee-active-indicator"
                               title="שינוי זמינות פעיל"
                               aria-label="שינוי זמינות פעיל"
-                            >
-                              ⏱
-                            </span>
+                            />
                           )}
-                        </strong>
+                        </p>
 
                         <span>
                           {employee.actualMonths} חודשי עבודה | {employee.professionalCategory}
@@ -501,99 +638,140 @@ export default function SystemProfile({
               )}
             </section>
 
-            <section className="system-profile-panel insight-panel">
+            <section className="system-profile-panel insight-panel" ref={managementPanelRef}>
               <div className="system-profile-panel-header">
                 <div>
-                  <h2>תמונת ניהול</h2>
-                  <p>הקשר ניהולי משלים עבור זמינות ושינויים ברמת המערכת.</p>
+                  <h2>מידע ניהולי</h2>
+                  <p>הערות, אירועים ושינויים המשפיעים על המערכת</p>
                 </div>
               </div>
 
-              <div className="system-management-section">
+              <div className="management-stream-scroll">
+                {localManagementNote && (
+                  <section className="management-stream-group">
+                    <div className="management-note-head">
+                      <h3>הערת מערכת פעילה</h3>
+
+                      {!noteEditing && (
+                        <button
+                          type="button"
+                          className="note-edit-btn"
+                          onClick={openNoteEditor}
+                          aria-label="עריכת הערת מערכת"
+                          title="עריכת הערת מערכת"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" />
+                            <path d="M14.06 4.19l3.75 3.75" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+
+                    {!noteEditing && (
+                      <article className="management-stream-item note-item">
+                        <div className="management-item-content">
+                          <p className="management-item-title-row">
+                            <span className="management-item-description">{localManagementNote}</span>
+                            <span className="management-item-marker note" aria-hidden="true" />
+                          </p>
+                        </div>
+                      </article>
+                    )}
+
+                    {noteEditing && (
+                      <div className="note-editor-box">
+                        <textarea
+                          value={noteDraft}
+                          onChange={(event) => setNoteDraft(event.target.value)}
+                          className="note-editor-input"
+                          rows={4}
+                          disabled={noteSaving}
+                          ref={noteEditorRef}
+                        />
+
+                        {noteError && <p className="system-management-error">{noteError}</p>}
+
+                        <div className="note-editor-actions">
+                          <button
+                            type="button"
+                            className="small-outline-btn"
+                            onClick={handleCancelNoteEdit}
+                            disabled={noteSaving}
+                          >
+                            ביטול
+                          </button>
+
+                          <button
+                            type="button"
+                            className="small-solid-btn"
+                            onClick={() => void handleSaveNote()}
+                            disabled={noteSaving}
+                          >
+                            {noteSaving ? "שומר..." : "שמירה"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {!eventsLoading && !eventsError && splitAvailabilityItems.currentOrFuture.length > 0 && (
+                  <section className="management-stream-group">
+                    <h3>
+                      כעת ובקרוב
+                      <small>{availabilityEmployeesCount} עובדים מושפעים</small>
+                    </h3>
+
+                    <div className="management-stream-list">
+                      {renderAvailabilityItems(splitAvailabilityItems.currentOrFuture)}
+                    </div>
+                  </section>
+                )}
+
+                {!eventsLoading && !eventsError && splitAvailabilityItems.historical.length > 0 && (
+                  <section className="management-stream-group">
+                    <h3>אירועים קודמים</h3>
+
+                    <div className="management-stream-list">
+                      {renderAvailabilityItems(visibleHistoricalItems)}
+                    </div>
+
+                    {hasMoreHistoricalItems && (
+                      <button
+                        type="button"
+                        className="management-history-toggle"
+                        onClick={() => setShowFullHistory((prev) => !prev)}
+                      >
+                        <span>{showFullHistory ? "הסתרת היסטוריה" : "הצגת היסטוריה מלאה"}</span>
+                        <svg
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                          focusable="false"
+                          className={showFullHistory ? "expanded" : ""}
+                        >
+                          <polyline points="9 6 15 12 9 18" />
+                        </svg>
+                      </button>
+                    )}
+                  </section>
+                )}
+
+                {!eventsLoading && !eventsError && hasEventData && (
+                  <section className="management-stream-group">
+                    <h3>אירועים כלל־משרדיים</h3>
+                  </section>
+                )}
+
                 {eventsLoading && <p className="empty-text">טוען שינויי זמינות...</p>}
 
                 {!eventsLoading && eventsError && (
                   <p className="system-management-error">{eventsError}</p>
                 )}
 
-                {!eventsLoading && !eventsError && (
-                  <>
-                    {availabilityItems.length === 0 ? (
-                      <p className="empty-text">לא נמצאו שינויי זמינות לעובדים המשויכים.</p>
-                    ) : (
-                      <div className="system-collapsible-row-group">
-                        <button
-                          type="button"
-                          className="system-collapsible-header"
-                          onClick={() => setEmployeesAvailabilityOpen((prev) => !prev)}
-                          aria-expanded={employeesAvailabilityOpen}
-                        >
-                          <span className="system-collapsible-title">
-                            שינויים בזמינות עובדים
-                            <small>{availabilityEmployeesCount} עובדים מושפעים</small>
-                          </span>
-                          <span className="system-collapsible-chevron">
-                            {employeesAvailabilityOpen ? "▾" : "▸"}
-                          </span>
-                        </button>
-
-                        {employeesAvailabilityOpen && (
-                          <div className="system-collapsible-body availability-list-scroll">
-                            {shouldShowGroupedList ? (
-                              <>
-                                {splitAvailabilityItems.currentOrFuture.length > 0 && (
-                                  <section className="availability-group">
-                                    <h3 className="availability-group-title">כעת ובקרוב</h3>
-                                    <div className="availability-timeline-list">
-                                      {renderAvailabilityItems(splitAvailabilityItems.currentOrFuture)}
-                                    </div>
-                                  </section>
-                                )}
-
-                                {splitAvailabilityItems.historical.length > 0 && (
-                                  <section className="availability-group">
-                                    <h3 className="availability-group-title">אירועים קודמים</h3>
-                                    <div className="availability-timeline-list">
-                                      {renderAvailabilityItems(splitAvailabilityItems.historical)}
-                                    </div>
-                                  </section>
-                                )}
-                              </>
-                            ) : (
-                              <div className="availability-timeline-list">
-                                {renderAvailabilityItems(availabilityItems)}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
+                {!eventsLoading && !eventsError && !hasAnyManagementContent && (
+                  <p className="empty-text">אין כרגע אירועים או הערות המשפיעים על המערכת.</p>
                 )}
-              </div>
-
-              <div className="system-management-section">
-                <button
-                  type="button"
-                  className="system-collapsible-header secondary"
-                  onClick={() => setOrgEventsOpen((prev) => !prev)}
-                  aria-expanded={orgEventsOpen}
-                >
-                  <span className="system-collapsible-title">אירועים כלל־משרדיים</span>
-                  <span className="system-collapsible-chevron">{orgEventsOpen ? "▾" : "▸"}</span>
-                </button>
-              </div>
-
-              <div className="system-management-section">
-                <button
-                  type="button"
-                  className="system-collapsible-header secondary"
-                  onClick={() => setSystemHistoryOpen((prev) => !prev)}
-                  aria-expanded={systemHistoryOpen}
-                >
-                  <span className="system-collapsible-title">היסטוריית מערכת</span>
-                  <span className="system-collapsible-chevron">{systemHistoryOpen ? "▾" : "▸"}</span>
-                </button>
               </div>
             </section>
           </div>
