@@ -3,6 +3,7 @@ import ManagementHome from "../../components/Management/ManagementHome";
 import ManagementNavigation from "../../components/Management/ManagementNavigation";
 import ManagementSectionPlaceholder from "../../components/Management/ManagementSectionPlaceholder";
 import ProfessionalCategoriesSection from "../../components/Management/categories/ProfessionalCategoriesSection";
+import ProfessionalSubcategoriesSection from "../../components/Management/subcategories/ProfessionalSubcategoriesSection";
 
 import "./CategoriesPage.css";
 
@@ -103,6 +104,8 @@ export default function CategoriesPage() {
 
       {selectedSection?.id === "categories" ? (
         <ProfessionalCategoriesSection onReturnHome={returnHome} />
+      ) : selectedSection?.id === "subcategories" ? (
+        <ProfessionalSubcategoriesSection onReturnHome={returnHome} />
       ) : selectedSection ? (
         <ManagementSectionPlaceholder
           section={selectedSection}

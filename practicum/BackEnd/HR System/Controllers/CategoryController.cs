@@ -145,4 +145,150 @@ public class CategoryController : ControllerBase
             return StatusCode(500, "Unexpected error occurred while deleting category.");
         }
     }
+
+    [HttpGet("subcategories")]
+    public async Task<ActionResult<List<CategorySubcategoryDto>>> GetSubcategories(
+        [FromQuery] string? search,
+        [FromQuery] string? parentCategoryId)
+    {
+        if (!string.IsNullOrWhiteSpace(parentCategoryId) && !ObjectId.TryParse(parentCategoryId, out _))
+        {
+            return BadRequest("Category id is invalid.");
+        }
+
+        var rows = await _categoryService.GetSubcategoriesAsync(search, parentCategoryId);
+        return Ok(rows);
+    }
+
+    [HttpPost("subcategories")]
+    public async Task<ActionResult<CategorySubcategoryDto>> CreateSubcategory([FromBody] CategorySubcategoryCreateDto dto)
+    {
+        if (dto is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        if (!ObjectId.TryParse(dto.ParentCategoryId, out _))
+        {
+            return BadRequest("Category id is invalid.");
+        }
+
+        var name = dto.Name?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest("Subcategory name is required.");
+        }
+
+        try
+        {
+            var result = await _categoryService.CreateSubcategoryAsync(new CategorySubcategoryCreateDto
+            {
+                ParentCategoryId = dto.ParentCategoryId,
+                Name = name
+            });
+
+            if (!result.Found || result.Subcategory is null)
+            {
+                return NotFound("Category not found.");
+            }
+
+            return Ok(result.Subcategory);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch
+        {
+            return StatusCode(500, "Unexpected error occurred while creating subcategory.");
+        }
+    }
+
+    [HttpPut("subcategories/{subcategoryId}")]
+    public async Task<ActionResult<CategorySubcategoryDto>> UpdateSubcategory(
+        string subcategoryId,
+        [FromBody] CategorySubcategoryUpdateDto dto)
+    {
+        if (!ObjectId.TryParse(subcategoryId, out _))
+        {
+            return BadRequest("Subcategory id is invalid.");
+        }
+
+        if (dto is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        if (!ObjectId.TryParse(dto.ParentCategoryId, out _))
+        {
+            return BadRequest("Category id is invalid.");
+        }
+
+        var name = dto.Name?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest("Subcategory name is required.");
+        }
+
+        try
+        {
+            var result = await _categoryService.UpdateSubcategoryAsync(subcategoryId, new CategorySubcategoryUpdateDto
+            {
+                ParentCategoryId = dto.ParentCategoryId,
+                Name = name
+            });
+
+            if (!result.Found)
+            {
+                return NotFound("Subcategory not found.");
+            }
+
+            if (result.Conflict)
+            {
+                return Conflict(result.ConflictMessage);
+            }
+
+            return Ok(result.Subcategory);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch
+        {
+            return StatusCode(500, "Unexpected error occurred while updating subcategory.");
+        }
+    }
+
+    [HttpDelete("subcategories/{subcategoryId}")]
+    public async Task<IActionResult> DeactivateSubcategory(string subcategoryId)
+    {
+        if (!ObjectId.TryParse(subcategoryId, out _))
+        {
+            return BadRequest("Subcategory id is invalid.");
+        }
+
+        try
+        {
+            var result = await _categoryService.DeactivateSubcategoryAsync(subcategoryId);
+
+            if (!result.Found)
+            {
+                return NotFound("Subcategory not found.");
+            }
+
+            if (result.Conflict)
+            {
+                return Conflict(result.ConflictMessage);
+            }
+
+            return NoContent();
+        }
+        catch
+        {
+            return StatusCode(500, "Unexpected error occurred while deactivating subcategory.");
+        }
+    }
 }

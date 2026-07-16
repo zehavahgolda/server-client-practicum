@@ -319,6 +319,102 @@
   gap: 8px;
 }
 
+.management-page .management-subcategories-toolbar {
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
+}
+
+.management-page .management-subcategories-filter select {
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+}
+
+.management-page .management-subcategories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.management-page .management-subcategories-row {
+  border: 1px solid color-mix(in srgb, var(--border-color) 88%, white);
+  border-radius: 12px;
+  background: var(--surface-bg);
+  padding: 11px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.management-page .management-subcategories-row:hover {
+  border-color: color-mix(in srgb, var(--status-surplus) 36%, var(--border-color));
+  background: color-mix(in srgb, var(--surface-bg) 84%, var(--status-surplus-soft));
+}
+
+.management-page .management-subcategories-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.management-page .management-subcategories-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.management-page .management-subcategories-parent {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.management-page .management-subcategories-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.management-page .management-dialog-subcategory {
+  width: min(620px, 100%);
+}
+
+.management-page .management-form-subcategory {
+  border-top: 0;
+  padding-top: 6px;
+}
+
+.management-page .management-form-subcategory-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.management-page .management-form-subcategory-field span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.management-page .management-form-subcategory-field input,
+.management-page .management-form-subcategory-field select {
+  min-height: 42px;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--input-bg);
+}
+
 .management-page .professional-category-row {
   border: 1px solid color-mix(in srgb, var(--border-color) 88%, white);
   border-radius: 12px;
@@ -435,6 +531,10 @@
   }
 
   .management-page .management-reserved-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .management-page .management-subcategories-toolbar {
     grid-template-columns: 1fr;
   }
 

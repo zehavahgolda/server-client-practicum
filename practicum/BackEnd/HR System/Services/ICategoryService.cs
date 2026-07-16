@@ -9,5 +9,9 @@ namespace HR_System.Services
         Task<CategoryDto> CreateCategoryAsync(CategoryCreateDto dto);
         Task<CategoryDto?> UpdateCategoryAsync(string id, CategoryUpdateDto dto);
         Task<bool> SoftDeleteCategoryAsync(string id);
+        Task<List<CategorySubcategoryDto>> GetSubcategoriesAsync(string? search = null, string? parentCategoryId = null);
+        Task<CategorySubcategoryMutationResult> CreateSubcategoryAsync(CategorySubcategoryCreateDto dto);
+        Task<CategorySubcategoryMutationResult> UpdateSubcategoryAsync(string subcategoryId, CategorySubcategoryUpdateDto dto);
+        Task<CategorySubcategoryMutationResult> DeactivateSubcategoryAsync(string subcategoryId);
     }
 }
