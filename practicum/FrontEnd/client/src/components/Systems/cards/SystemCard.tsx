@@ -3,37 +3,37 @@ import { formatCurrency } from "../../../utils/numberFormatters";
 
 import "./SystemCard.css";
 
-// מאפייני כרטיס מערכת בודדת.
 interface SystemCardProps {
   system: System;
   selected?: boolean;
   onClick: () => void;
 }
 
-type SystemCardTone = "shortage" | "excess" | "balanced" | "neutral";
-type CapacityTone = "shortage" | "excess" | "balanced";
+type SystemCardTone =
+  | "shortage"
+  | "excess"
+  | "balanced";
 
-// קובע את מצב החודשים בלבד לפי פער הקיבולת.
-function getCapacityTone(system: System): CapacityTone {
-  if (system.gap > 0) return "shortage";
-  if (system.gap < 0) return "excess";
-  return "balanced";
-}
+type CapacityTone =
+  | "shortage"
+  | "excess"
+  | "balanced";
 
-// קובע את המצב הכולל של הכרטיס.
+type BudgetTone =
+  | "shortage"
+  | "balanced"
+  | "neutral";
+
+// מצב פער חודשי העבודה של המערכת.
 //
-// ירוק יוצג רק כאשר:
-// 1. הוגדר תקציב.
-// 2. אין חריגה תקציבית.
-// 3. אין מחסור בחודשי עבודה.
-export function getSystemCardTone(system: System): SystemCardTone {
-  const hasBudget = system.allocatedBudget > 0;
-  const budgetIsHealthy = hasBudget && system.budgetGap >= 0;
-  const capacityIsHealthy = system.gap <= 0;
-
-  if (!hasBudget) return "neutral";
-
-  if (!budgetIsHealthy || !capacityIsHealthy) {
+// לפי מבנה הנתונים הקיים:
+// gap > 0  = חסרים חודשי עבודה
+// gap < 0  = הוקצו יותר חודשי עבודה מהנדרש
+// gap === 0 = הקצאה מאוזנת
+function getCapacityTone(
+  system: System
+): CapacityTone {
+  if (system.gap > 0) {
     return "shortage";
   }
 
@@ -44,16 +44,31 @@ export function getSystemCardTone(system: System): SystemCardTone {
   return "balanced";
 }
 
-// מחזיר תיאור קצר למצב החודשים שמופיע באזור המדדים התחתון.
-function getCapacityLabel(system: System) {
-  if (system.gap > 0) return "חוסר";
-  if (system.gap < 0) return "עודף תקין";
-  return "מאוזן";
+// מצב הפס העליון של הכרטיס.
+//
+// הפס מייצג אך ורק את מצב הקיבולת,
+// כדי לשמור על התאמה בין:
+// - קבוצת המערכת
+// - הפס העליון בכרטיס
+// - מדד הפער
+//
+// מצב התקציב מוצג בנפרד באזור התקציב.
+export function getSystemCardTone(
+  system: System
+): SystemCardTone {
+  return getCapacityTone(system);
 }
 
-// קובע טון תקציבי לפי מצב התקציב והחריגה.
-function getBudgetTone(system: System) {
-  if (!system.allocatedBudget || system.allocatedBudget <= 0) {
+// מצב אזור התקציב.
+// מבחינה עיצובית כל המצבים נשארים בגוונים ניטרליים,
+// אך הטקסט ממשיך להציג אם קיימת יתרה או חריגה.
+function getBudgetTone(
+  system: System
+): BudgetTone {
+  if (
+    !system.allocatedBudget ||
+    system.allocatedBudget <= 0
+  ) {
     return "neutral";
   }
 
@@ -64,7 +79,6 @@ function getBudgetTone(system: System) {
   return "balanced";
 }
 
-// מציג כרטיס מערכת עם נתוני קיבולת ותקציב תמציתיים.
 export default function SystemCard({
   system,
   selected = false,
@@ -78,26 +92,41 @@ export default function SystemCard({
   return (
     <button
       type="button"
-      className={`system-card ${tone} ${selected ? "selected" : ""}`}
+      className={`system-card ${tone} ${
+        selected ? "selected" : ""
+      }`}
       onClick={onClick}
     >
       <div className="system-card-top">
         <div className="system-card-title">
           <strong>{system.name}</strong>
-          <span>{system.assignedEmployeesCount} עובדים משויכים</span>
+
+          <span>
+            {system.assignedEmployeesCount} עובדים משויכים
+          </span>
         </div>
       </div>
 
-      <div className={`system-budget-mini ${budgetTone}`}>
+      <div
+        className={`system-budget-mini ${budgetTone}`}
+      >
         {hasBudget ? (
           <>
             <span>
-              תקציב: {formatCurrency(system.allocatedBudget)}
+              תקציב:{" "}
+              {formatCurrency(
+                system.allocatedBudget
+              )}
             </span>
 
             <span>
-              {system.budgetGap < 0 ? "חריגה" : "יתרה"}:{" "}
-              {formatCurrency(Math.abs(system.budgetGap))}
+              {system.budgetGap < 0
+                ? "חריגה"
+                : "יתרה"}
+              :{" "}
+              {formatCurrency(
+                Math.abs(system.budgetGap)
+              )}
             </span>
           </>
         ) : (
@@ -110,18 +139,28 @@ export default function SystemCard({
       <div className="system-card-metrics">
         <div>
           <span>נדרש</span>
-          <strong>{system.requiredCapacityMonths}</strong>
+
+          <strong>
+            {system.requiredCapacityMonths}
+          </strong>
         </div>
 
         <div>
           <span>מוקצה</span>
-          <strong>{system.allocatedMonths}</strong>
+
+          <strong>
+            {system.allocatedMonths}
+          </strong>
         </div>
 
-        <div className={`system-gap-metric ${capacityTone}`}>
+        <div
+          className={`system-gap-metric ${capacityTone}`}
+        >
           <span>פער</span>
-          <strong>{Math.abs(system.gap)}</strong>
-          <small>{getCapacityLabel(system)}</small>
+
+          <strong>
+            {Math.abs(system.gap)}
+          </strong>
         </div>
       </div>
     </button>

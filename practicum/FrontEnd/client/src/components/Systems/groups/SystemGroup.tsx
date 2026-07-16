@@ -1,6 +1,9 @@
 import { useState } from "react";
+
 import type { System } from "../../../types";
+
 import SystemCard from "../cards/SystemCard";
+
 import "./SystemGroup.css";
 
 // מאפייני קבוצת מערכות בתצוגה מקובצת.
@@ -16,17 +19,28 @@ interface SystemGroupProps {
 
 // מחשב סך חודשי קיבולת נדרשים בקבוצה.
 function sumRequired(systems: System[]) {
-  return systems.reduce((sum, system) => sum + system.requiredCapacityMonths, 0);
+  return systems.reduce(
+    (sum, system) =>
+      sum + system.requiredCapacityMonths,
+    0
+  );
 }
 
 // מחשב סך חודשי קיבולת מוקצים בקבוצה.
 function sumAllocated(systems: System[]) {
-  return systems.reduce((sum, system) => sum + system.allocatedMonths, 0);
+  return systems.reduce(
+    (sum, system) =>
+      sum + system.allocatedMonths,
+    0
+  );
 }
 
 // מחשב פער מצטבר לכלל המערכות בקבוצה.
 function sumGap(systems: System[]) {
-  return systems.reduce((sum, system) => sum + system.gap, 0);
+  return systems.reduce(
+    (sum, system) => sum + system.gap,
+    0
+  );
 }
 
 // מציג קבוצת מערכות נפתחת עם סיכום ופריטי מערכת.
@@ -46,30 +60,47 @@ export default function SystemGroup({
   const allocated = sumAllocated(systems);
   const gap = sumGap(systems);
 
-  if (systems.length === 0) return null;
+  if (systems.length === 0) {
+    return null;
+  }
 
   return (
     <section className={`system-group ${tone}`}>
       <button
         type="button"
         className="system-group-header"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() =>
+          setOpen((previousOpen) => !previousOpen)
+        }
+        aria-expanded={open}
       >
         <div className="system-group-title-wrap">
-          <span className="system-group-color-line" />
+          <span
+            className="system-group-color-line"
+            aria-hidden="true"
+          />
+
           <div>
             <h3>{title}</h3>
+
             <p>
-              {systems.length} מערכות · נדרש {required} מוקצה {allocated}
+              {systems.length} מערכות · נדרש{" "}
+              {required} מוקצה {allocated}
             </p>
           </div>
         </div>
 
         <div className="system-group-left">
-          <span className={`system-group-gap ${tone}`}>
+          <span
+            className={`system-group-gap ${tone}`}
+          >
             פער {gap}
           </span>
-          <span className="system-group-toggle">
+
+          <span
+            className="system-group-toggle"
+            aria-hidden="true"
+          >
             {open ? "▲" : "▼"}
           </span>
         </div>
@@ -77,15 +108,21 @@ export default function SystemGroup({
 
       {open && (
         <div className="system-group-body">
-          <p className="system-group-subtitle">{subtitle}</p>
+          <p className="system-group-subtitle">
+            {subtitle}
+          </p>
 
           <div className="systems-cards-grid group-grid">
             {systems.map((system) => (
               <SystemCard
                 key={system.id}
                 system={system}
-                selected={selectedSystemId === system.id}
-                onClick={() => onSystemClick(system.id)}
+                selected={
+                  selectedSystemId === system.id
+                }
+                onClick={() =>
+                  onSystemClick(system.id)
+                }
               />
             ))}
           </div>

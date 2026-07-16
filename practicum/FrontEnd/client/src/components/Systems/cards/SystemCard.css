@@ -1,5 +1,8 @@
+/* SystemCard.css - centered metrics */
+
 .system-card {
   position: relative;
+
   width: 100%;
   height: 148px;
 
@@ -7,7 +10,6 @@
   border: 1px solid var(--border-color);
   border-radius: 10px;
 
-  /* מרווח קטן מעל התוכן עבור פס הסטטוס העליון */
   padding: 13px 10px 10px;
 
   text-align: right;
@@ -22,9 +24,10 @@
   overflow: hidden;
 }
 
-/* פס סטטוס אופקי בחלק העליון של הכרטיס */
+/* פס עליון המייצג את מצב קיבולת כוח האדם בלבד */
 .system-card::after {
   content: "";
+
   position: absolute;
   top: 0;
   right: 0;
@@ -37,24 +40,19 @@
   background: var(--text-secondary);
 }
 
-/* מחסור = אדום */
+/* מחסור בחודשי עבודה */
 .system-card.shortage::after {
   background: var(--gap-negative);
 }
 
-/* עודף = כתום */
+/* הקצאה מעבר לנדרש */
 .system-card.excess::after {
   background: var(--gap-positive);
 }
 
-/* מאוזן = ירוק */
+/* הקצאה תואמת לנדרש */
 .system-card.balanced::after {
   background: var(--gap-neutral);
-}
-
-/* ללא תקציב / מצב לא מוגדר */
-.system-card.neutral::after {
-  background: var(--text-secondary);
 }
 
 .system-card:hover {
@@ -63,12 +61,11 @@
   box-shadow:
     0 10px 20px rgba(15, 23, 42, 0.11);
 
-  border-color:
-    color-mix(
-      in srgb,
-      var(--status-surplus) 45%,
-      var(--border-color)
-    );
+  border-color: color-mix(
+    in srgb,
+    var(--status-surplus) 45%,
+    var(--border-color)
+  );
 }
 
 .system-card.selected {
@@ -84,7 +81,6 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 6px;
-
   min-width: 0;
 }
 
@@ -92,7 +88,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-
   min-width: 0;
 }
 
@@ -115,7 +110,6 @@
   text-overflow: ellipsis;
 }
 
-/* תגיות סטטוס — משתמשות במשתני הפער הגלובליים */
 .system-status-pill.shortage {
   background: var(--gap-negative-soft);
   color: var(--gap-negative);
@@ -131,7 +125,7 @@
   color: var(--gap-neutral);
 }
 
-/* תקציב — אפור אחיד לפי דרישת המנהלת */
+/* אזור התקציב נשאר ניטרלי מבחינה עיצובית */
 .system-budget-mini {
   margin: 8px 0 5px;
   padding: 6px 8px;
@@ -158,7 +152,6 @@
   gap: 8px;
 }
 
-/* כל מצבי התקציב נשארים אפורים */
 .system-budget-mini.balanced,
 .system-budget-mini.shortage,
 .system-budget-mini.neutral {
@@ -173,28 +166,118 @@
 }
 
 .system-card-metrics {
+  width: 100%;
+
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
   align-items: stretch;
+
+  direction: rtl;
 }
 
 .system-card-metrics > div {
   min-width: 0;
-  padding: 2px 4px;
+  min-height: 48px;
+
+  padding: 3px 4px;
+
+  display: grid;
+  grid-template-rows: auto auto;
+  place-items: center;
+  place-content: center;
 
   text-align: center;
 
-  border-left: 1px dashed var(--border-color);
+  border-left:
+    1px dashed var(--border-color);
 }
 
 .system-card-metrics > div:last-child {
   border-left: none;
 }
 
-.system-card-metrics span {
+.system-card-metrics > div > span,
+.system-card-metrics > div > strong {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
   display: block;
-  margin-bottom: 2px;
+
+  justify-self: center;
+  align-self: center;
+
+  text-align: center;
+  line-height: 1;
+}
+
+.system-card-metrics > div > span {
+  margin-bottom: 3px;
 
   color: var(--text-secondary);
   font-size: 9px;
+}
+
+.system-card-metrics > div > strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.system-card-metrics
+  > .system-gap-metric
+  > span {
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.system-card-metrics
+  > .system-gap-metric
+  > strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.system-card-metrics
+  > .system-gap-metric.shortage
+  > span,
+.system-card-metrics
+  > .system-gap-metric.shortage
+  > strong {
+  color: var(--gap-negative);
+}
+
+.system-card-metrics
+  > .system-gap-metric.excess
+  > span,
+.system-card-metrics
+  > .system-gap-metric.excess
+  > strong {
+  color: var(--gap-positive);
+}
+
+.system-card-metrics
+  > .system-gap-metric.balanced
+  > span,
+.system-card-metrics
+  > .system-gap-metric.balanced
+  > strong {
+  color: var(--gap-neutral);
+}
+
+@media (max-width: 640px) {
+  .system-card {
+    height: auto;
+    min-height: 148px;
+    padding-top: 13px;
+  }
+
+  .system-budget-mini span {
+    gap: 5px;
+  }
+
+  .system-card-metrics > div {
+    min-height: 44px;
+  }
 }

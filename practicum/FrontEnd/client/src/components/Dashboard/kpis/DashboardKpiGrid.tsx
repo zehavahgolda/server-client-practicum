@@ -236,7 +236,7 @@ export default function DashboardKpiGrid() {
         />
 
         <DashboardKpiCard
-          title="פער קיבולת כולל"
+          title="חודשי אדם"
           value={formatMetricValue(
             metrics.totalRequiredCapacity - metrics.totalAllocatedCapacity
           )}

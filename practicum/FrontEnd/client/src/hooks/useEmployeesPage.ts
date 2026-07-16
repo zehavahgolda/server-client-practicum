@@ -1,21 +1,40 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
+
 import { employeeService } from "../services/employeeService";
+
 import type { EmployeeEvent } from "../types/employeeEvent";
-import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
+import type {
+  EmployeeListItem,
+  EmployeeUpsertPayload
+} from "../types";
 
 import { getActiveYear } from "../utils/yearOptions";
 
-// Hook תזמור ברמת עמוד העובדים: חיבור נתונים, פילטרים, מודלים ופעולות משתמש.
+// Hook תזמור ברמת עמוד העובדים:
+// חיבור נתונים, פילטרים, מודלים ופעולות משתמש.
 export function useEmployeesPage() {
   const activeYear = getActiveYear();
 
   const [searchParams] = useSearchParams();
-  const availabilityFilter = searchParams.get("availability");
-  const employeeIdFromUrl = searchParams.get("employeeId");
+
+  const availabilityFilter =
+    searchParams.get("availability");
+
+  const employeeIdFromUrl =
+    searchParams.get("employeeId");
+
+  const professionalCategoryFromUrl =
+    searchParams
+      .get("professionalCategory")
+      ?.trim() || "";
 
   // המסך מציג כרגע רק עובדים פעילים.
   const employeesHook = useEmployees({
@@ -42,30 +61,63 @@ export function useEmployeesPage() {
     updateActualMonths
   } = employeesHook;
 
-  // אם הגיע מזהה עובד ב-URL, טוען אוטומטית את פרטי העובד לפתיחת פרופיל ישירה.
+  // אם הגיע מזהה עובד ב-URL,
+  // טוען אוטומטית את פרטי העובד לפתיחת פרופיל ישירה.
   useEffect(() => {
     if (!employeeIdFromUrl) {
       return;
     }
 
     void loadEmployeeDetails(employeeIdFromUrl);
-  }, [employeeIdFromUrl, loadEmployeeDetails]);
+  }, [
+    employeeIdFromUrl,
+    loadEmployeeDetails
+  ]);
 
-  const [employeesForFilterOptions, setEmployeesForFilterOptions] =
-    useState<EmployeeListItem[]>([]);
+  const [
+    employeesForFilterOptions,
+    setEmployeesForFilterOptions
+  ] = useState<EmployeeListItem[]>([]);
 
-  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
-  const [employeeModalMode, setEmployeeModalMode] = useState<"create" | "edit">("create");
-  const [allocationModalOpen, setAllocationModalOpen] = useState(false);
-  const [allocationUpdateModalOpen, setAllocationUpdateModalOpen] = useState(false);
-  const [employeeEventModalOpen, setEmployeeEventModalOpen] = useState(false);
-  const [selectedEmployeeEvent, setSelectedEmployeeEvent] = useState<EmployeeEvent | null>(null);
+  const [
+    employeeModalOpen,
+    setEmployeeModalOpen
+  ] = useState(false);
 
-  const [savingEmployee, setSavingEmployee] =
-    useState(false);
+  const [
+    employeeModalMode,
+    setEmployeeModalMode
+  ] = useState<"create" | "edit">("create");
 
-  const [savingAllocation, setSavingAllocation] =
-    useState(false);
+  const [
+    allocationModalOpen,
+    setAllocationModalOpen
+  ] = useState(false);
+
+  const [
+    allocationUpdateModalOpen,
+    setAllocationUpdateModalOpen
+  ] = useState(false);
+
+  const [
+    employeeEventModalOpen,
+    setEmployeeEventModalOpen
+  ] = useState(false);
+
+  const [
+    selectedEmployeeEvent,
+    setSelectedEmployeeEvent
+  ] = useState<EmployeeEvent | null>(null);
+
+  const [
+    savingEmployee,
+    setSavingEmployee
+  ] = useState(false);
+
+  const [
+    savingAllocation,
+    setSavingAllocation
+  ] = useState(false);
 
   const [
     savingAllocationUpdate,
@@ -78,10 +130,11 @@ export function useEmployeesPage() {
 
     async function loadFilterOptions() {
       try {
-        const data = await employeeService.getEmployees({
-          year: filters.year ?? activeYear,
-          isActive: true
-        });
+        const data =
+          await employeeService.getEmployees({
+            year: filters.year ?? activeYear,
+            isActive: true
+          });
 
         if (!cancelled) {
           setEmployeesForFilterOptions(data);
@@ -98,34 +151,66 @@ export function useEmployeesPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters.year, activeYear]);
+  }, [
+    filters.year,
+    activeYear
+  ]);
 
-  // מחיל סינון זמינות שמגיע מה-URL על רשימת העובדים הנוכחית.
+  // מחיל את כל הסינונים שהגיעו מה-URL.
+  //
+  // סינון הקטגוריה מתבצע כאן ישירות,
+  // כדי שהקישור מהדשבורד יציג בוודאות רק את הקטגוריה שנבחרה,
+  // גם אם טעינת הפילטרים מהשרת עדיין לא הסתיימה.
   const filteredEmployees = useMemo(() => {
+    let result = employees;
+
+    if (professionalCategoryFromUrl) {
+      result = result.filter((employee) => {
+        const employeeCategory =
+          employee.professionalCategory?.trim() ||
+          "לא מוגדר";
+
+        return (
+          employeeCategory ===
+          professionalCategoryFromUrl
+        );
+      });
+    }
+
     if (availabilityFilter === "overloaded") {
-      return employees.filter(
-        (employee) => employee.remainingMonths < 0
+      result = result.filter(
+        (employee) =>
+          employee.remainingMonths < 0
       );
     }
 
     if (availabilityFilter === "low") {
-      return employees.filter(
-        (employee) => employee.remainingMonths <= 1
+      result = result.filter(
+        (employee) =>
+          employee.remainingMonths <= 1
       );
     }
 
-    return employees;
-  }, [employees, availabilityFilter]);
+    return result;
+  }, [
+    employees,
+    availabilityFilter,
+    professionalCategoryFromUrl
+  ]);
 
   // מחשב מדדי תצוגה למסך העובדים לאחר סינון.
   const viewMeta = useMemo(
     () => ({
       total: filteredEmployees.length,
+
       lowCapacity: filteredEmployees.filter(
-        (employee) => employee.remainingMonths <= 1
+        (employee) =>
+          employee.remainingMonths <= 1
       ).length,
+
       overloaded: filteredEmployees.filter(
-        (employee) => employee.remainingMonths < 0
+        (employee) =>
+          employee.remainingMonths < 0
       ).length
     }),
     [filteredEmployees]
@@ -142,7 +227,9 @@ export function useEmployeesPage() {
             )
             .filter(Boolean)
         )
-      ].sort((a, b) => a.localeCompare(b, "he")),
+      ].sort((a, b) =>
+        a.localeCompare(b, "he")
+      ),
     [employeesForFilterOptions]
   );
 
@@ -157,7 +244,9 @@ export function useEmployeesPage() {
             )
             .filter(Boolean)
         )
-      ].sort((a, b) => a.localeCompare(b, "he")),
+      ].sort((a, b) =>
+        a.localeCompare(b, "he")
+      ),
     [employeesForFilterOptions]
   );
 
@@ -264,8 +353,13 @@ export function useEmployeesPage() {
     }
   }
 
-  function openCreateEmployeeEventModal(employeeId: string) {
-    if (!selectedEmployee || selectedEmployee.id !== employeeId) {
+  function openCreateEmployeeEventModal(
+    employeeId: string
+  ) {
+    if (
+      !selectedEmployee ||
+      selectedEmployee.id !== employeeId
+    ) {
       return;
     }
 
@@ -287,6 +381,7 @@ export function useEmployeesPage() {
     categories,
     managers,
     allocationOptions,
+    professionalCategoryFromUrl,
     employeeModalOpen,
     employeeModalMode,
     allocationModalOpen,

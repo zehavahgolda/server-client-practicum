@@ -20,14 +20,23 @@
   padding: 12px 18px;
   font-family: inherit;
   cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   text-align: right;
+
+  transition: background-color 0.18s ease;
 }
 
 .system-group-header:hover {
   background: var(--surface-alt);
+}
+
+.system-group-header:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
 }
 
 .system-group-title-wrap {
@@ -36,24 +45,29 @@
   gap: 10px;
 }
 
+/* פס הצבע של הקבוצה */
 .system-group-color-line {
   width: 4px;
   height: 46px;
+  flex-shrink: 0;
   border-radius: 999px;
-  background: var(--status-surplus);
 }
 
+/* מחסור – אדום */
 .system-group.shortage .system-group-color-line {
   background: var(--status-danger);
 }
 
+/* מאוזן – ירוק */
 .system-group.balanced .system-group-color-line {
-  background: var(--status-surplus);
-}
-
-.system-group.excess .system-group-color-line {
   background: var(--status-success);
 }
+
+/* עודף – כתום */
+.system-group.excess .system-group-color-line {
+  background: var(--status-warning);
+}
+
 .system-group-header h3 {
   margin: 0;
   font-size: 22px;
@@ -83,30 +97,36 @@
   font-weight: 700;
 }
 
+/* תגית מחסור – אדום */
 .system-group-gap.shortage {
   background: var(--status-danger-soft);
   color: var(--status-danger);
 }
 
+/* תגית מאוזן – ירוק */
 .system-group-gap.balanced {
-  background: var(--status-surplus-soft);
-  color: var(--status-surplus);
-}
-
-.system-group-gap.excess {
   background: var(--status-success-soft);
   color: var(--status-success);
+}
+
+/* תגית עודף – כתום */
+.system-group-gap.excess {
+  background: var(--status-warning-soft);
+  color: var(--status-warning);
 }
 
 .system-group-toggle {
   width: 34px;
   height: 34px;
+  flex-shrink: 0;
   border-radius: 999px;
   background: var(--surface-alt);
   color: var(--text-primary);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   font-size: 14px;
 }
 

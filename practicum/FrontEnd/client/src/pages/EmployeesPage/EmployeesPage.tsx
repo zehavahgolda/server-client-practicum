@@ -1,7 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { useEmployeesPage } from "../../hooks/useEmployeesPage";
+import { useEmployeeEvents } from "../../hooks/useEmployeeEvents";
+
+import { getCategoryColor } from "../../constants/categoryColors";
 
 import EmployeeFilters from "../../components/Employees/filters/EmployeeFilters";
 import EmployeeBoard from "../../components/Employees/EmployeeBoard";
@@ -11,12 +18,18 @@ import EmployeeFormModal from "../../components/Employees/modals/EmployeeFormMod
 import AllocationModal from "../../components/Employees/allocations/AllocationModal";
 import AllocationUpdateModal from "../../components/Employees/allocations/AllocationUpdateModal";
 import EmployeeEventFormModal from "../../components/Employees/events/EmployeeEventFormModal";
-import { useEmployeeEvents } from "../../hooks/useEmployeeEvents";
-import type { EmployeeDetails, EmployeeEventCreatePayload } from "../../types";
+
+import type {
+  EmployeeDetails,
+  EmployeeEventCreatePayload
+} from "../../types";
 
 import "./EmployeesPage.css";
 
-type EmployeeViewMode = "all" | "status" | "category";
+type EmployeeViewMode =
+  | "all"
+  | "status"
+  | "category";
 
 function getVisibleEmployees(
   page: ReturnType<typeof useEmployeesPage>
@@ -24,29 +37,39 @@ function getVisibleEmployees(
   return page.selectedEmployee
     ? page.filteredEmployees.filter(
         (employee) =>
-          employee.id !== page.selectedEmployee?.id
+          employee.id !==
+          page.selectedEmployee?.id
       )
     : page.filteredEmployees;
 }
 
 function getStatusGroups(
-  employees: ReturnType<typeof getVisibleEmployees>
+  employees: ReturnType<
+    typeof getVisibleEmployees
+  >
 ) {
   return {
     available: employees.filter(
-      (employee) => employee.remainingMonths > 0
+      (employee) =>
+        employee.remainingMonths > 0
     ),
+
     balanced: employees.filter(
-      (employee) => employee.remainingMonths === 0
+      (employee) =>
+        employee.remainingMonths === 0
     ),
+
     overloaded: employees.filter(
-      (employee) => employee.remainingMonths < 0
+      (employee) =>
+        employee.remainingMonths < 0
     )
   };
 }
 
 function getCategoryGroups(
-  employees: ReturnType<typeof getVisibleEmployees>
+  employees: ReturnType<
+    typeof getVisibleEmployees
+  >
 ) {
   const groups = new Map<
     string,
@@ -65,22 +88,23 @@ function getCategoryGroups(
     const subCategory =
       employee.professionalSubCategory?.trim();
 
-    const groupKey = category;
-
-    if (!groups.has(groupKey)) {
-      groups.set(groupKey, {
+    if (!groups.has(category)) {
+      groups.set(category, {
         title: category,
         subtitle: "",
         employees: []
       });
     }
 
-    const group = groups.get(groupKey);
+    const group = groups.get(category);
 
     if (group) {
       group.employees.push(employee);
 
-      if (subCategory && !group.subtitle) {
+      if (
+        subCategory &&
+        !group.subtitle
+      ) {
         const subCategories = new Set(
           employees
             .filter(
@@ -104,28 +128,52 @@ function getCategoryGroups(
               ]
                 .slice(0, 3)
                 .join(", ")}${
-                subCategories.size > 3 ? "..." : ""
+                subCategories.size > 3
+                  ? "..."
+                  : ""
               }`
             : subCategory;
       }
     }
   });
 
-  return [...groups.values()].sort((a, b) =>
-    a.title.localeCompare(b.title, "he")
+  return [...groups.values()].sort(
+    (firstGroup, secondGroup) =>
+      firstGroup.title.localeCompare(
+        secondGroup.title,
+        "he"
+      )
   );
 }
 
-// עמוד עובדים: מציג רשימה, פרופיל, פילטרים ומודלים לפעולות ניהול.
+// עמוד עובדים: מציג רשימה, פרופיל,
+// פילטרים ומודלים לפעולות ניהול.
 export default function EmployeesPage() {
   const page = useEmployeesPage();
   const [searchParams] = useSearchParams();
-  const [viewMode, setViewMode] = useState<EmployeeViewMode>("all");
+
+  const [viewMode, setViewMode] =
+    useState<EmployeeViewMode>("all");
+
   const {
     createEvent,
     updateEvent
-  } = useEmployeeEvents(page.selectedEmployee?.id ?? null);
-  const [savingEmployeeEvent, setSavingEmployeeEvent] = useState(false);
+  } = useEmployeeEvents(
+    page.selectedEmployee?.id ?? null
+  );
+
+  const [
+    savingEmployeeEvent,
+    setSavingEmployeeEvent
+  ] = useState(false);
+
+  const {
+    setEmployeeEventModalOpen,
+    setSelectedEmployeeEvent
+  } = page;
+
+  const requestedCategory =
+    page.professionalCategoryFromUrl;
 
   useEffect(() => {
     const requestedView =
@@ -139,17 +187,30 @@ export default function EmployeesPage() {
       setViewMode(requestedView);
     }
 
-    const requestedCategory = searchParams
-      .get("professionalCategory")
-      ?.trim();
-
     if (requestedCategory) {
-      page.setFilters((previousFilters) => ({
-        ...previousFilters,
-        professionalCategory: requestedCategory
-      }));
+      page.setFilters(
+        (previousFilters) => {
+          if (
+            previousFilters
+              .professionalCategory ===
+            requestedCategory
+          ) {
+            return previousFilters;
+          }
+
+          return {
+            ...previousFilters,
+            professionalCategory:
+              requestedCategory
+          };
+        }
+      );
     }
-  }, [searchParams, page.setFilters]);
+  }, [
+    searchParams,
+    requestedCategory,
+    page.setFilters
+  ]);
 
   const visibleEmployees = useMemo(
     () => getVisibleEmployees(page),
@@ -168,33 +229,44 @@ export default function EmployeesPage() {
 
   const employeeSummary = useMemo(
     () => ({
-      available: page.filteredEmployees.filter(
-        (employee) =>
-          employee.remainingMonths > 0
-      ).length,
+      available:
+        page.filteredEmployees.filter(
+          (employee) =>
+            employee.remainingMonths > 0
+        ).length,
 
-      balanced: page.filteredEmployees.filter(
-        (employee) =>
-          employee.remainingMonths === 0
-      ).length,
+      balanced:
+        page.filteredEmployees.filter(
+          (employee) =>
+            employee.remainingMonths === 0
+        ).length,
 
-      overloaded: page.filteredEmployees.filter(
-        (employee) =>
-          employee.remainingMonths < 0
-      ).length
+      overloaded:
+        page.filteredEmployees.filter(
+          (employee) =>
+            employee.remainingMonths < 0
+        ).length
     }),
     [page.filteredEmployees]
   );
 
-  async function handleEmployeeEventSubmit(payload: EmployeeEventCreatePayload) {
+  async function handleEmployeeEventSubmit(
+    payload: EmployeeEventCreatePayload
+  ) {
     if (!page.selectedEmployee?.id) {
       return;
     }
 
     setSavingEmployeeEvent(true);
+
     try {
-      if (page.selectedEmployeeEvent?.id) {
-        await updateEvent(page.selectedEmployeeEvent.id, payload);
+      if (
+        page.selectedEmployeeEvent?.id
+      ) {
+        await updateEvent(
+          page.selectedEmployeeEvent.id,
+          payload
+        );
       } else {
         await createEvent(payload);
       }
@@ -206,11 +278,13 @@ export default function EmployeesPage() {
     }
   }
 
-  function handleManageAvailability(employee: EmployeeDetails) {
-    page.openCreateEmployeeEventModal(employee.id);
+  function handleManageAvailability(
+    employee: EmployeeDetails
+  ) {
+    page.openCreateEmployeeEventModal(
+      employee.id
+    );
   }
-
-  const { setEmployeeEventModalOpen, setSelectedEmployeeEvent } = page;
 
   return (
     <main
@@ -249,12 +323,16 @@ export default function EmployeesPage() {
           onClose={() =>
             page.setSelectedEmployee(null)
           }
-          onEdit={page.openEditEmployeeModal}
+          onEdit={
+            page.openEditEmployeeModal
+          }
           onAddAllocation={() =>
             page.setAllocationModalOpen(true)
           }
           onUpdateAllocation={() =>
-            page.setAllocationUpdateModalOpen(true)
+            page.setAllocationUpdateModalOpen(
+              true
+            )
           }
         />
       )}
@@ -266,7 +344,9 @@ export default function EmployeesPage() {
             page.selectedEmployee
           }
           loading={page.loadingList}
-          lowCapacity={page.viewMeta.lowCapacity}
+          lowCapacity={
+            page.viewMeta.lowCapacity
+          }
           onSelectEmployee={
             page.loadEmployeeDetails
           }
@@ -352,21 +432,43 @@ export default function EmployeesPage() {
             </header>
 
             <div className="employees-groups-stack category-groups-stack">
-              {categoryGroups.map((group) => (
-                <EmployeeGroup
-                  key={group.title}
-                  title={group.title}
-                  subtitle={group.subtitle}
-                  tone="available"
-                  employees={group.employees}
-                  selectedEmployeeId={
-                    page.selectedEmployee?.id
-                  }
-                  onSelectEmployee={
-                    page.loadEmployeeDetails
-                  }
-                />
-              ))}
+              {categoryGroups.map(
+                (group) => {
+                  const isRequestedCategory =
+                    Boolean(
+                      requestedCategory &&
+                        group.title ===
+                          requestedCategory
+                    );
+
+                  return (
+                    <EmployeeGroup
+                      key={`${group.title}-${
+                        requestedCategory ||
+                        "all"
+                      }`}
+                      title={group.title}
+                      subtitle={group.subtitle}
+                      tone="category"
+                      accentColor={getCategoryColor(
+                        group.title
+                      )}
+                      employees={
+                        group.employees
+                      }
+                      selectedEmployeeId={
+                        page.selectedEmployee?.id
+                      }
+                      defaultOpen={
+                        isRequestedCategory
+                      }
+                      onSelectEmployee={
+                        page.loadEmployeeDetails
+                      }
+                    />
+                  );
+                }
+              )}
             </div>
           </section>
         )}
@@ -391,24 +493,46 @@ export default function EmployeesPage() {
         open={page.employeeModalOpen}
         mode={page.employeeModalMode}
         employee={page.selectedEmployee}
-        saving={page.savingEmployee || page.loadingCreate}
-        onClose={() => page.setEmployeeModalOpen(false)}
-        onManageAvailability={handleManageAvailability}
-        onSubmit={page.handleEmployeeSubmit}
+        saving={
+          page.savingEmployee ||
+          page.loadingCreate
+        }
+        onClose={() =>
+          page.setEmployeeModalOpen(false)
+        }
+        onManageAvailability={
+          handleManageAvailability
+        }
+        onSubmit={
+          page.handleEmployeeSubmit
+        }
       />
 
       {page.selectedEmployee && (
         <EmployeeEventFormModal
-          open={page.employeeEventModalOpen}
-          employeeId={page.selectedEmployee.id}
-          event={page.selectedEmployeeEvent}
-          saving={savingEmployeeEvent}
+          open={
+            page.employeeEventModalOpen
+          }
+          employeeId={
+            page.selectedEmployee.id
+          }
+          event={
+            page.selectedEmployeeEvent
+          }
+          saving={
+            savingEmployeeEvent
+          }
           onClose={() => {
-            if (savingEmployeeEvent) return;
+            if (savingEmployeeEvent) {
+              return;
+            }
+
             setSelectedEmployeeEvent(null);
             setEmployeeEventModalOpen(false);
           }}
-          onSubmit={handleEmployeeEventSubmit}
+          onSubmit={
+            handleEmployeeEventSubmit
+          }
         />
       )}
 
@@ -416,7 +540,9 @@ export default function EmployeesPage() {
         open={
           page.allocationUpdateModalOpen
         }
-        options={page.allocationOptions}
+        options={
+          page.allocationOptions
+        }
         saving={
           page.savingAllocationUpdate
         }

@@ -2,23 +2,10 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useEmployees } from "../../../hooks/useEmployees";
+import { getCategoryColor } from "../../../constants/categoryColors";
 
 import DashboardChartCard from "../charts/DashboardChartCard";
 import DashboardDonutChart from "../charts/DashboardDonutChart";
-
-// פלטת צבעים להצגת קטגוריות עובדים בדונאט.
-const categoryColors = [
-  "#1f6db3",
-  "#149584",
-  "#7550b9",
-  "#cb6a0b",
-  "#d1495b",
-  "#4f8f5b",
-  "#2563a8",
-  "#15998c",
-  "#7652bc",
-  "#c7670d"
-];
 
 // ווידג'ט המציג התפלגות עובדים לפי קטגוריה מקצועית.
 export default function EmployeesByCategoryWidget() {
@@ -26,15 +13,20 @@ export default function EmployeesByCategoryWidget() {
   const { employees } = useEmployees({ year: 2026 });
 
   // מחשב את מספר העובדים בכל קטגוריה,
-  // ממיין מהקטגוריה הגדולה לקטנה ומוסיף צבע תצוגה.
+  // ממיין מהקטגוריה הגדולה לקטנה
+  // ומעניק לכל קטגוריה צבע קבוע לפי שמה.
   const employeesByCategory = useMemo(() => {
     const counts = new Map<string, number>();
 
     employees.forEach((employee) => {
       const category =
-        employee.professionalCategory?.trim() || "לא מוגדר";
+        employee.professionalCategory?.trim() ||
+        "לא מוגדר";
 
-      counts.set(category, (counts.get(category) ?? 0) + 1);
+      counts.set(
+        category,
+        (counts.get(category) ?? 0) + 1
+      );
     });
 
     return Array.from(counts.entries())
@@ -56,31 +48,44 @@ export default function EmployeesByCategoryWidget() {
           );
         }
       )
-      .map(([label, value], index) => ({
+      .map(([label, value]) => ({
         label,
         value,
-        color:
-          categoryColors[index % categoryColors.length]
+        color: getCategoryColor(label)
       }));
   }, [employees]);
+
+  // פתיחת תמונת המצב הכוללת של הקטגוריות.
+  function openAllCategories() {
+    navigate("/employees?view=category");
+  }
+
+  // פתיחת הקטגוריה שעליה המשתמש לחץ.
+  function openSelectedCategory(
+    categoryName: string
+  ) {
+    navigate(
+      `/employees?view=category&professionalCategory=${encodeURIComponent(
+        categoryName
+      )}`
+    );
+  }
 
   return (
     <DashboardChartCard
       title="עובדים לפי קטגוריה"
-      onClick={() =>
-        navigate("/employees?view=category")
-      }
+      onClick={openAllCategories}
     >
       <DashboardDonutChart
         items={employeesByCategory}
         centerValue={employees.length}
+        centerLabel="עובדים"
         variant="categories"
+        footerLines={[
+          "לחיצה על קטגוריה פותחת אותה · לחיצה על הכרטיס מציגה את כולן"
+        ]}
         onItemClick={(item) =>
-          navigate(
-            `/employees?view=category&professionalCategory=${encodeURIComponent(
-              item.label
-            )}`
-          )
+          openSelectedCategory(item.label)
         }
       />
     </DashboardChartCard>

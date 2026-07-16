@@ -6,6 +6,8 @@
 }
 
 .employee-group {
+  --employee-group-accent: var(--status-surplus);
+
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
   border-radius: 14px;
@@ -20,14 +22,23 @@
   padding: 10px 16px;
   font-family: inherit;
   cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   text-align: right;
+
+  transition: background-color 0.18s ease;
 }
 
 .employee-group-header:hover {
   background: var(--surface-alt);
+}
+
+.employee-group-header:focus-visible {
+  outline: 2px solid var(--employee-group-accent);
+  outline-offset: -2px;
 }
 
 .employee-group-title-wrap {
@@ -42,18 +53,33 @@
   height: 42px;
   flex-shrink: 0;
   border-radius: 999px;
+  background: var(--employee-group-accent);
 }
 
-.employee-group.available .employee-group-color-line {
-  background: var(--employee-available);
+/* צבעי משמעות בקיבוץ לפי זמינות */
+.employee-group.available {
+  --employee-group-accent: var(--employee-available);
 }
 
-.employee-group.balanced .employee-group-color-line {
-  background: var(--employee-balanced);
+.employee-group.balanced {
+  --employee-group-accent: var(--employee-balanced);
 }
 
-.employee-group.overloaded .employee-group-color-line {
-  background: var(--employee-overloaded);
+.employee-group.overloaded {
+  --employee-group-accent: var(--employee-overloaded);
+}
+
+/*
+  בקיבוץ לפי קטגוריה הצבע מתקבל מתוך EmployeeGroup.tsx
+  באמצעות המשתנה --employee-group-accent.
+
+  זהו צבע ברירת המחדל למקרה שלא התקבל צבע מותאם.
+*/
+.employee-group.category {
+  --employee-group-accent: var(
+    --employee-group-accent,
+    var(--status-surplus)
+  );
 }
 
 .employee-group-header h2 {
@@ -91,9 +117,11 @@
   border-radius: 999px;
   background: var(--surface-alt);
   color: var(--text-primary);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   font-size: 14px;
 }
 
@@ -104,6 +132,7 @@
 
 .employee-group-summary {
   margin: 10px 16px 0;
+
   display: flex;
   align-items: center;
   justify-content: flex-start;

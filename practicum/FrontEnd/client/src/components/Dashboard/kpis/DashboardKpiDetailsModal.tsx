@@ -29,34 +29,43 @@ interface DashboardKpiSystemCardProps {
   onOpenProfile: (system: System) => void;
 }
 
-type SystemTone = "shortage" | "balanced";
+type SystemTone =
+  | "shortage"
+  | "balanced"
+  | "excess";
 
-function getConfig(mode: DashboardKpiModalMode) {
+function getConfig(
+  mode: DashboardKpiModalMode
+) {
   switch (mode) {
     case "budget":
       return {
         title: "תמונת מצב תקציבית",
-        description: "רשימת המערכות ומצב ניצול התקציב.",
+        description:
+          "רשימת המערכות ומצב ניצול התקציב.",
         showBudget: true
       };
 
     case "missing-months":
       return {
         title: "חודשי עבודה חסרים",
-        description: "מערכות שבהן ההקצאה נמוכה מהדרישה.",
+        description:
+          "מערכות שבהן ההקצאה נמוכה מהדרישה.",
         showBudget: false
       };
 
     case "capacity-gap":
       return {
         title: "פערי קיבולת",
-        description: "ממויין לפי הפער הגדול ביותר.",
+        description:
+          "ממויין לפי הפער הגדול ביותר.",
         showBudget: false
       };
 
     default:
       return {
-        title: "מערכות הדורשות שיבוץ כוח אדם",
+        title:
+          "מערכות הדורשות שיבוץ כוח אדם",
         description:
           "בחרי מערכת כדי לשבץ עובדים, לערוך או לפתוח פרופיל.",
         showBudget: false
@@ -64,16 +73,20 @@ function getConfig(mode: DashboardKpiModalMode) {
   }
 }
 
-function getSystemTone(system: System): SystemTone {
-  return system.gap > 0 ? "shortage" : "balanced";
-}
-
-function getBudgetTone(system: System): SystemTone {
-  if (!system.allocatedBudget || system.allocatedBudget <= 0) {
-    return "balanced";
+// מצב הקיבולת של המערכת.
+// הפס העליון בכרטיס מייצג רק את מצב כוח האדם.
+function getSystemTone(
+  system: System
+): SystemTone {
+  if (system.gap > 0) {
+    return "shortage";
   }
 
-  return system.budgetGap < 0 ? "shortage" : "balanced";
+  if (system.gap < 0) {
+    return "excess";
+  }
+
+  return "balanced";
 }
 
 function DashboardKpiSystemCard({
@@ -84,8 +97,9 @@ function DashboardKpiSystemCard({
   onOpenProfile
 }: DashboardKpiSystemCardProps) {
   const tone = getSystemTone(system);
-  const budgetTone = getBudgetTone(system);
   const hasShortage = system.gap > 0;
+  const hasBudget =
+    system.allocatedBudget > 0;
 
   return (
     <article
@@ -93,16 +107,23 @@ function DashboardKpiSystemCard({
         "employee-card",
         "dashboard-kpi-system-card",
         tone,
-        showBudget ? "dashboard-kpi-system-card--budget" : ""
+        showBudget
+          ? "dashboard-kpi-system-card--budget"
+          : ""
       ]
         .filter(Boolean)
         .join(" ")}
       dir="rtl"
       role="button"
       tabIndex={0}
-      onClick={() => onOpenProfile(system)}
+      onClick={() =>
+        onOpenProfile(system)
+      }
       onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
           event.preventDefault();
           onOpenProfile(system);
         }
@@ -114,34 +135,55 @@ function DashboardKpiSystemCard({
             <strong>{system.name}</strong>
 
             <span>
-              {system.assignedEmployeesCount} עובדים משויכים
+              {system.assignedEmployeesCount}{" "}
+              עובדים משויכים
             </span>
 
-            <small>{system.managementNote ?? ""}</small>
+            <small>
+              {system.managementNote ?? ""}
+            </small>
           </div>
         </div>
 
         {showBudget && (
-          <div
-            className={`dashboard-kpi-system-budget ${budgetTone}`}
-          >
-            <div>
-              <span>תקציב:</span>
+          <div className="dashboard-kpi-system-budget">
+            {hasBudget ? (
+              <>
+                <div>
+                  <span>תקציב:</span>
 
-              <strong>
-                {system.allocatedBudget.toLocaleString("he-IL")} ₪
-              </strong>
-            </div>
+                  <strong>
+                    {system.allocatedBudget.toLocaleString(
+                      "he-IL"
+                    )}{" "}
+                    ₪
+                  </strong>
+                </div>
 
-            <div>
-              <span>
-                {system.budgetGap < 0 ? "חריגה:" : "יתרה:"}
-              </span>
+                <div>
+                  <span>
+                    {system.budgetGap < 0
+                      ? "חריגה:"
+                      : "יתרה:"}
+                  </span>
 
-              <strong>
-                {Math.abs(system.budgetGap).toLocaleString("he-IL")} ₪
-              </strong>
-            </div>
+                  <strong>
+                    {Math.abs(
+                      system.budgetGap
+                    ).toLocaleString(
+                      "he-IL"
+                    )}{" "}
+                    ₪
+                  </strong>
+                </div>
+              </>
+            ) : (
+              <div>
+                <span>
+                  תקציב לא הוגדר
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -150,12 +192,20 @@ function DashboardKpiSystemCard({
         <div className="employee-card-metrics dashboard-kpi-system-metrics">
           <div>
             <span>נדרש</span>
-            <strong>{system.requiredCapacityMonths}</strong>
+
+            <strong>
+              {
+                system.requiredCapacityMonths
+              }
+            </strong>
           </div>
 
           <div>
             <span>מוקצה</span>
-            <strong>{system.allocatedMonths}</strong>
+
+            <strong>
+              {system.allocatedMonths}
+            </strong>
           </div>
 
           <div>
@@ -163,7 +213,11 @@ function DashboardKpiSystemCard({
 
             <strong
               className={
-                hasShortage ? "overloaded" : "balanced"
+                tone === "shortage"
+                  ? "overloaded"
+                  : tone === "excess"
+                    ? "excess"
+                    : "balanced"
               }
             >
               {Math.abs(system.gap)}
@@ -172,7 +226,12 @@ function DashboardKpiSystemCard({
 
           <div>
             <span>עובדים</span>
-            <strong>{system.assignedEmployeesCount}</strong>
+
+            <strong>
+              {
+                system.assignedEmployeesCount
+              }
+            </strong>
           </div>
         </div>
       </div>
@@ -191,7 +250,7 @@ function DashboardKpiSystemCard({
           {hasShortage && (
             <button
               type="button"
-              className="primary-btn dashboard-kpi-system-action"
+              className="dashboard-kpi-system-action"
               onClick={(event) => {
                 event.stopPropagation();
                 onAssign(system);
@@ -203,7 +262,7 @@ function DashboardKpiSystemCard({
 
           <button
             type="button"
-            className="secondary-btn dashboard-kpi-system-action"
+            className="dashboard-kpi-system-action"
             onClick={(event) => {
               event.stopPropagation();
               onEdit(system);
@@ -214,7 +273,7 @@ function DashboardKpiSystemCard({
 
           <button
             type="button"
-            className="small-outline-btn dashboard-kpi-system-action"
+            className="dashboard-kpi-system-action"
             onClick={(event) => {
               event.stopPropagation();
               onOpenProfile(system);
@@ -237,28 +296,49 @@ export default function DashboardKpiDetailsModal({
   onEdit,
   onOpenProfile
 }: DashboardKpiDetailsModalProps) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] =
+    useState("");
 
   const config = getConfig(mode);
-  const isBudgetMode = mode === "budget";
+  const isBudgetMode =
+    mode === "budget";
 
   const visibleSystems = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedSearch = search
+      .trim()
+      .toLowerCase();
 
     return [...systems]
       .filter(
         (system) =>
           !normalizedSearch ||
-          system.name.toLowerCase().includes(normalizedSearch)
+          system.name
+            .toLowerCase()
+            .includes(normalizedSearch)
       )
-      .sort((firstSystem, secondSystem) => {
-        if (isBudgetMode) {
-          return firstSystem.budgetGap - secondSystem.budgetGap;
-        }
+      .sort(
+        (
+          firstSystem,
+          secondSystem
+        ) => {
+          if (isBudgetMode) {
+            return (
+              firstSystem.budgetGap -
+              secondSystem.budgetGap
+            );
+          }
 
-        return secondSystem.gap - firstSystem.gap;
-      });
-  }, [systems, search, isBudgetMode]);
+          return (
+            secondSystem.gap -
+            firstSystem.gap
+          );
+        }
+      );
+  }, [
+    systems,
+    search,
+    isBudgetMode
+  ]);
 
   if (!open) {
     return null;
@@ -280,11 +360,13 @@ export default function DashboardKpiDetailsModal({
           .filter(Boolean)
           .join(" ")}
         dir="rtl"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
       >
         <button
           type="button"
-          className="modal-close-btn"
+          className="modal-close-btn dashboard-kpi-modal-close"
           onClick={onClose}
           aria-label="סגירת חלון"
         >
@@ -294,7 +376,10 @@ export default function DashboardKpiDetailsModal({
         <header className="dashboard-kpi-modal-header">
           <div>
             <h2>{config.title}</h2>
-            <p>{config.description}</p>
+
+            <p>
+              {config.description}
+            </p>
           </div>
 
           <span className="dashboard-kpi-modal-count">
@@ -306,7 +391,11 @@ export default function DashboardKpiDetailsModal({
           <input
             type="search"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) =>
+              setSearch(
+                event.target.value
+              )
+            }
             placeholder="חיפוש מערכת..."
             aria-label="חיפוש מערכת"
           />
@@ -315,23 +404,32 @@ export default function DashboardKpiDetailsModal({
         <div
           className={[
             "dashboard-kpi-list",
-            isBudgetMode ? "dashboard-kpi-list--budget" : ""
+            isBudgetMode
+              ? "dashboard-kpi-list--budget"
+              : ""
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          {visibleSystems.map((system) => (
-            <DashboardKpiSystemCard
-              key={system.id}
-              system={system}
-              showBudget={config.showBudget}
-              onAssign={onAssign}
-              onEdit={onEdit}
-              onOpenProfile={onOpenProfile}
-            />
-          ))}
+          {visibleSystems.map(
+            (system) => (
+              <DashboardKpiSystemCard
+                key={system.id}
+                system={system}
+                showBudget={
+                  config.showBudget
+                }
+                onAssign={onAssign}
+                onEdit={onEdit}
+                onOpenProfile={
+                  onOpenProfile
+                }
+              />
+            )
+          )}
 
-          {visibleSystems.length === 0 && (
+          {visibleSystems.length ===
+            0 && (
             <div className="empty-text">
               אין מערכות להצגה.
             </div>

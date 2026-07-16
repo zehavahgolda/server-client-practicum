@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -86,7 +85,8 @@ export default function SystemsStatusWidget() {
           `סה"כ ${systems.length} מערכות`
         ]}
         onItemClick={(item) => {
-          const normalized = item.label.trim();
+          const normalized =
+            item.label.trim();
 
           if (normalized === "במחסור") {
             navigate(
