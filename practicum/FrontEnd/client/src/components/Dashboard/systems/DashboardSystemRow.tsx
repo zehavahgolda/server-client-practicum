@@ -36,9 +36,18 @@ export default function DashboardSystemRow({
 }: DashboardSystemRowProps) {
   const hasShortage = system.gap > 0;
   const budgetUsagePercent = getBudgetUsagePercent(system);
+  const budgetGap = (system.allocatedBudget || 0) - (system.usedBudget || 0);
+  const budgetStateClass = budgetGap < 0 ? "danger" : "success";
 
   return (
-    <article className="dashboard-system-row" dir="rtl">
+    <article
+      className={`dashboard-system-row ${
+        hasShortage
+          ? "dashboard-system-row--shortage"
+          : "dashboard-system-row--balanced"
+      } ${showBudget ? "dashboard-system-row--budget" : ""}`}
+      dir="rtl"
+    >
       <div className="dashboard-system-row-main">
         <div className="dashboard-system-row-title">
           <h4>{system.name}</h4>
@@ -51,6 +60,22 @@ export default function DashboardSystemRow({
             {hasShortage ? "מחסור" : "מאוזן / עודף"}
           </span>
         </div>
+
+        {showBudget && (
+          <div
+            className={`dashboard-system-budget-summary ${budgetStateClass}`}
+          >
+            <div>
+              <span>תקציב</span>
+              <strong>{formatCurrency(system.allocatedBudget)}</strong>
+            </div>
+
+            <div>
+              <span>{budgetGap < 0 ? "חריגה" : "יתרה"}</span>
+              <strong>{formatCurrency(Math.abs(budgetGap))}</strong>
+            </div>
+          </div>
+        )}
 
         <div className="dashboard-system-row-metrics">
           <div>
@@ -77,23 +102,12 @@ export default function DashboardSystemRow({
             <strong>{system.assignedEmployeesCount}</strong>
           </div>
 
-          {showBudget && (
-            <>
-              <div>
-                <span>תקציב מוקצה</span>
-                <strong>
-                  {formatCurrency(system.allocatedBudget)}
-                </strong>
-              </div>
-
-              <div>
-                <span>ניצול תקציב</span>
-                <strong className={system.budgetGap < 0 ? "danger" : ""}>
-                  {budgetUsagePercent}%
-                </strong>
-              </div>
-            </>
-          )}
+          <div>
+            <span>ניצול תקציב</span>
+            <strong className={system.budgetGap < 0 ? "danger" : "ok"}>
+              {budgetUsagePercent}%
+            </strong>
+          </div>
         </div>
       </div>
 

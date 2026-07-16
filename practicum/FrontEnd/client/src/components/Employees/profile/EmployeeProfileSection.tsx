@@ -13,7 +13,7 @@ interface EmployeeProfileSectionProps {
   onUpdateAllocation: () => void;
 }
 
-// מעטפת פרופיל העובד: Toolbar פעולות + תצוגת פרטים מלאה.
+// מעטפת מודאל לפרופיל העובד.
 export default function EmployeeProfileSection({
   employee,
   loading,
@@ -23,34 +23,6 @@ export default function EmployeeProfileSection({
   onAddAllocation,
   onUpdateAllocation
 }: EmployeeProfileSectionProps) {
-  if (loading) {
-    return (
-      <div
-        className="modal-overlay employee-profile-modal-overlay"
-        onClick={onClose}
-      >
-        <div
-          className="modal-card employee-profile-modal-card"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <button
-            type="button"
-            className="modal-close-btn"
-            onClick={onClose}
-          >
-            ×
-          </button>
-
-          <section className="employees-profile-board">
-            <div className="system-note-box">
-              טוען פרטי עובד...
-            </div>
-          </section>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className="modal-overlay employee-profile-modal-overlay"
@@ -58,57 +30,39 @@ export default function EmployeeProfileSection({
     >
       <div
         className="modal-card employee-profile-modal-card"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
       >
         <button
           type="button"
           className="modal-close-btn"
           onClick={onClose}
+          aria-label="סגירת פרופיל עובד"
         >
           ×
         </button>
 
-        <section className="employees-profile-board">
-          <div className="employees-profile-toolbar">
-            <button
-              type="button"
-              className="secondary-btn employees-back-btn"
-              onClick={onClose}
-            >
-              סגירת פרופיל
-            </button>
-
-            <div className="detail-actions employees-profile-actions">
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={onEdit}
-              >
-                עריכת עובד
-              </button>
-
-              <button
-                type="button"
-                className="secondary-btn"
-                onClick={onAddAllocation}
-              >
-                + הוספת הקצאה
-              </button>
-
-              {allocationOptionsCount > 0 && (
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={onUpdateAllocation}
-                >
-                  ✎ עדכון חודשים
-                </button>
-              )}
+        {loading ? (
+          <section className="employees-profile-board">
+            <div className="system-note-box">
+              טוען פרטי עובד...
             </div>
-          </div>
-
-          <EmployeeProfile employee={employee} />
-        </section>
+          </section>
+        ) : (
+          <EmployeeProfile
+            employee={employee}
+            allocationOptionsCount={
+              allocationOptionsCount
+            }
+            onClose={onClose}
+            onEdit={onEdit}
+            onAddAllocation={onAddAllocation}
+            onUpdateAllocation={
+              onUpdateAllocation
+            }
+          />
+        )}
       </div>
     </div>
   );

@@ -2,50 +2,81 @@
   position: relative;
   width: 100%;
   height: 148px;
+
   background: var(--surface-bg);
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  padding: 10px;
+
+  /* מרווח קטן מעל התוכן עבור פס הסטטוס העליון */
+  padding: 13px 10px 10px;
+
   text-align: right;
   font-family: inherit;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+
   overflow: hidden;
 }
 
+/* פס סטטוס אופקי בחלק העליון של הכרטיס */
 .system-card::after {
   content: "";
   position: absolute;
   top: 0;
   right: 0;
-  width: 3px;
-  height: 100%;
-  border-radius: 0 10px 10px 0;
+  left: 0;
+
+  width: 100%;
+  height: 3px;
+
+  border-radius: 10px 10px 0 0;
+  background: var(--text-secondary);
 }
 
+/* מחסור = אדום */
 .system-card.shortage::after {
-  background: var(--status-danger);
+  background: var(--gap-negative);
 }
 
+/* עודף = כתום */
 .system-card.excess::after {
-  background: var(--status-success);
+  background: var(--gap-positive);
 }
+
+/* מאוזן = ירוק */
 .system-card.balanced::after {
-  background: var(--status-success);
+  background: var(--gap-neutral);
 }
+
+/* ללא תקציב / מצב לא מוגדר */
 .system-card.neutral::after {
   background: var(--text-secondary);
 }
 
 .system-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.11);
-  border-color: color-mix(in srgb, var(--status-surplus) 45%, var(--border-color));
+
+  box-shadow:
+    0 10px 20px rgba(15, 23, 42, 0.11);
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--status-surplus) 45%,
+      var(--border-color)
+    );
 }
 
 .system-card.selected {
   border-color: var(--status-surplus);
-  box-shadow: 0 0 0 2px var(--status-surplus-soft), var(--shadow-soft);
+
+  box-shadow:
+    0 0 0 2px var(--status-surplus-soft),
+    var(--shadow-soft);
 }
 
 .system-card-top {
@@ -53,93 +84,107 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 6px;
+
+  min-width: 0;
 }
 
 .system-card-title {
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  min-width: 0;
 }
 
 .system-card-title strong {
   color: var(--text-primary);
   font-size: 14px;
   line-height: 1.1;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .system-card-title span {
   color: var(--text-secondary);
   font-size: 10px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* תגיות סטטוס — משתמשות במשתני הפער הגלובליים */
 .system-status-pill.shortage {
-  background: var(--status-danger-soft);
-  color: color-mix(in srgb, var(--status-danger) 82%, black);
+  background: var(--gap-negative-soft);
+  color: var(--gap-negative);
 }
 
 .system-status-pill.excess {
-  background: var(--status-success-soft);
-  color: var(--status-success);
+  background: var(--gap-positive-soft);
+  color: var(--gap-positive);
 }
 
 .system-status-pill.balanced {
-  background: var(--status-surplus-soft);
-  color: var(--status-surplus);
+  background: var(--gap-neutral-soft);
+  color: var(--gap-neutral);
 }
 
+/* תקציב — אפור אחיד לפי דרישת המנהלת */
 .system-budget-mini {
   margin: 8px 0 5px;
   padding: 6px 8px;
-  border-radius: 8px;
+
   display: flex;
   flex-direction: column;
   gap: 2px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  background: #f3f4f6;
+  color: #6b7280;
+
   font-size: 10px;
   font-weight: 600;
   line-height: 1.2;
-  border: 1px solid transparent;
 }
 
 .system-budget-mini span {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.system-budget-mini.balanced {
-  background: #eef9f2;
-  border-color: #cce9d5;
-  color: #166534;
-}
-
-.system-budget-mini.shortage {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #b91c1c;
-}
-
+/* כל מצבי התקציב נשארים אפורים */
+.system-budget-mini.balanced,
+.system-budget-mini.shortage,
 .system-budget-mini.neutral {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #475569;
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
 }
 
 .system-card-divider {
-  border-top: 1px dashed var(--border-color);
   margin: 8px 0 6px;
+  border-top: 1px dashed var(--border-color);
 }
 
 .system-card-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
 }
 
 .system-card-metrics > div {
-  text-align: center;
-  border-left: 1px dashed var(--border-color);
-  padding: 2px 4px;
   min-width: 0;
+  padding: 2px 4px;
+
+  text-align: center;
+
+  border-left: 1px dashed var(--border-color);
 }
 
 .system-card-metrics > div:last-child {
@@ -148,56 +193,8 @@
 
 .system-card-metrics span {
   display: block;
+  margin-bottom: 2px;
+
   color: var(--text-secondary);
   font-size: 9px;
-  margin-bottom: 2px;
-}
-
-.system-card-metrics strong {
-  display: block;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.system-gap-metric span {
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.system-gap-metric strong {
-  font-size: 15px;
-}
-
-.system-gap-metric small {
-  display: block;
-  margin-top: 1px;
-  font-size: 8px;
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.system-gap-metric.shortage span,
-.system-gap-metric.shortage strong,
-.system-gap-metric.shortage small {
-  color: var(--status-danger);
-}
-
-.system-gap-metric.excess span,
-.system-gap-metric.excess strong,
-.system-gap-metric.excess small {
-  color: var(--status-success);
-}
-
-.system-gap-metric.balanced span,
-.system-gap-metric.balanced strong,
-.system-gap-metric.balanced small {
-  color: var(--status-success);
-}
-
-@media (max-width: 640px) {
-  .system-card {
-    height: auto;
-    min-height: 148px;
-  }
 }
