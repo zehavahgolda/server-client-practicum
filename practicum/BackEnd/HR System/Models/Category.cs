@@ -15,5 +15,8 @@ namespace HR_System.Models
 
         [BsonElement("innerCategory")]
         public string? innerCategory { get; set; }
+
+        [BsonElement("isDeleted")]
+        public bool IsDeleted { get; set; }
     }
 }

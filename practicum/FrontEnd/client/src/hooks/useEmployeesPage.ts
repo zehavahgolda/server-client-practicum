@@ -3,10 +3,9 @@ import { useSearchParams } from "react-router-dom";
 
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
+import { employeeService } from "../services/employeeService";
 import type { EmployeeEvent } from "../types/employeeEvent";
 import type { EmployeeListItem, EmployeeUpsertPayload } from "../types";
-
-import { employeeService } from "../services/employeeService";
 
 import { getActiveYear } from "../utils/yearOptions";
 

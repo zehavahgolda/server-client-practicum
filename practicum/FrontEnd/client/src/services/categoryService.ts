@@ -1,24 +1,27 @@
 import httpClient from "./api/httpClient";
-import type { Category, CategoryDetails, CategoryFilters } from "../types";
+import type {
+  CategoryCreatePayload,
+  CategoryDto,
+  CategoryUpdatePayload
+} from "../types";
 
 export const categoryService = {
-  // מחזירה את רשימת הקטגוריות לפי פילטרים אופציונליים.
-  // הפילטרים נשלחים כ-query params כדי לבצע סינון כבר בצד השרת.
-  async getCategories(filters: CategoryFilters = {}): Promise<Category[]> {
-    const response = await httpClient.get<Category[]>("/Category", {
-      params: filters
-    });
+  async getCategories(): Promise<CategoryDto[]> {
+    const response = await httpClient.get<CategoryDto[]>("/Category");
     return response.data || [];
   },
 
-  // מחזירה פרטי קטגוריה מלאה לפי מזהה קטגוריה.
-  // בנוסף מבצעת נרמול לשדות מערכיים כדי להבטיח תמיד מערכים תקינים בקליינט.
-  async getCategoryById(id: string): Promise<CategoryDetails> {
-    const response = await httpClient.get<CategoryDetails>(`/Category/${id}`);
-    return {
-      ...response.data,
-      employees: response.data.employees || [],
-      systemsDistribution: response.data.systemsDistribution || []
-    };
+  async createCategory(payload: CategoryCreatePayload): Promise<CategoryDto> {
+    const response = await httpClient.post<CategoryDto>("/Category", payload);
+    return response.data;
+  },
+
+  async updateCategory(id: string, payload: CategoryUpdatePayload): Promise<CategoryDto> {
+    const response = await httpClient.put<CategoryDto>(`/Category/${id}`, payload);
+    return response.data;
+  },
+
+  async deleteCategory(id: string): Promise<void> {
+    await httpClient.delete(`/Category/${id}`);
   }
 };
