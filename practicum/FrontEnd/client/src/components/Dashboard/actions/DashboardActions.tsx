@@ -32,7 +32,7 @@ export default function DashboardActions() {
       </button> */}
 
       <button type="button" className="dashboard-actions-button primary" onClick={exportExcel}>
-        ייצוא לאקסל
+       ⬇️  ייצוא לאקסל   
       </button>
     </section>
   );
