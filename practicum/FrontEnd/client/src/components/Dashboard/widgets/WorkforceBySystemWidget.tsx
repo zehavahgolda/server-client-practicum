@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import DashboardChartCard from "../charts/DashboardChartCard";
@@ -11,8 +14,9 @@ import { logger } from "../../../services/logging/logger";
 import { systemService } from "../../../services/systemService";
 
 // מודל נתון עבור שורת גרף ביקוש:
-// שם מערכת, ערך ביקוש וצבע תצוגה.
+// מזהה מערכת, שם מערכת, ערך ביקוש וצבע תצוגה.
 interface WorkforceBarItem {
+  systemId: string;
   label: string;
   value: number;
   color: string;
@@ -28,34 +32,46 @@ export default function WorkforceBySystemWidget() {
     setWorkforceBySystem
   ] = useState<WorkforceBarItem[]>([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
-    // טוען מערכות מהשרת, ממיר אותן לערכי ביקוש,
-    // מסנן וממיין את הרשימה.
-    // כל מערכת מקבלת צבע קבוע לפי שמה,
-    // ללא תלות במיקום שלה ברשימה.
+    // טוען את המערכות מהשרת ומכין אותן לגרף.
+    // מזהה המערכת נשמר בכל פריט,
+    // כדי שהלחיצה תפתח את המערכת עצמה.
     async function loadWorkforceBySystem() {
       try {
         const systems =
           await systemService.getSystems();
 
-        const items = systems
-          .map((system) => ({
-            label: system.name,
-            value:
-              system.requiredCapacityMonths || 0
-          }))
-          .filter((item) => item.value > 0)
-          .sort((a, b) => b.value - a.value)
-          .map((item) => ({
-            ...item,
-            color: getDashboardChartColor(
-              item.label
+        const items: WorkforceBarItem[] =
+          systems
+            .map((system) => ({
+              systemId: system.id,
+              label: system.name,
+              value:
+                system.requiredCapacityMonths ||
+                0,
+              color:
+                getDashboardChartColor(
+                  system.name
+                )
+            }))
+            .filter(
+              (item) =>
+                item.value > 0 &&
+                Boolean(item.systemId)
             )
-          }));
+            .sort(
+              (
+                firstItem,
+                secondItem
+              ) =>
+                secondItem.value -
+                firstItem.value
+            );
 
         if (isMounted) {
           setWorkforceBySystem(items);
@@ -66,7 +82,8 @@ export default function WorkforceBySystemWidget() {
           error,
           {
             feature: "dashboard",
-            action: "loadWorkforceBySystem"
+            action:
+              "loadWorkforceBySystem"
           }
         );
 
@@ -87,18 +104,26 @@ export default function WorkforceBySystemWidget() {
     };
   }, []);
 
+  // פותח ישירות את פרופיל המערכת
+  // בעמוד המערכות.
+  function openSystem(
+    systemId: string
+  ) {
+    navigate(
+      `/systems?view=all&systemId=${encodeURIComponent(
+        systemId
+      )}`
+    );
+  }
+
   return (
-    <DashboardChartCard
-      title="ביקוש כוח עבודה לפי מערכת"
-      onClick={() =>
-        navigate("/systems?view=gap")
-      }
-    >
+    <DashboardChartCard title="ביקוש כוח עבודה לפי מערכת">
       {loading ? (
         <p className="empty-text">
           טוען נתונים...
         </p>
-      ) : workforceBySystem.length === 0 ? (
+      ) : workforceBySystem.length ===
+        0 ? (
         <p className="empty-text">
           אין נתוני ביקוש להצגה.
         </p>
@@ -106,11 +131,7 @@ export default function WorkforceBySystemWidget() {
         <DashboardHorizontalBars
           items={workforceBySystem}
           onItemClick={(item) =>
-            navigate(
-              `/systems?view=gap&search=${encodeURIComponent(
-                item.label
-              )}`
-            )
+            openSystem(item.systemId)
           }
         />
       )}

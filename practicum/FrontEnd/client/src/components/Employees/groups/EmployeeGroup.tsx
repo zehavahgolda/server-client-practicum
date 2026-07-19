@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useMemo,
   useState,
   type CSSProperties
 } from "react";
@@ -35,7 +34,7 @@ type EmployeeGroupStyle = CSSProperties & {
   "--employee-group-accent"?: string;
 };
 
-// מציג קבוצת עובדים נפתחת עם סיכום מהיר לפי זמינות.
+// מציג קבוצת עובדים נפתחת עם כרטיסי העובדים השייכים אליה.
 export default function EmployeeGroup({
   title,
   subtitle,
@@ -53,27 +52,6 @@ export default function EmployeeGroup({
   useEffect(() => {
     setOpen(defaultOpen);
   }, [defaultOpen]);
-
-  // מחשב סיכום זמינות עבור גוף הקבוצה.
-  const summary = useMemo(() => {
-    const available = employees.filter(
-      (employee) => employee.remainingMonths > 0
-    ).length;
-
-    const balanced = employees.filter(
-      (employee) => employee.remainingMonths === 0
-    ).length;
-
-    const overloaded = employees.filter(
-      (employee) => employee.remainingMonths < 0
-    ).length;
-
-    return {
-      available,
-      balanced,
-      overloaded
-    };
-  }, [employees]);
 
   if (employees.length === 0) {
     return null;
@@ -126,20 +104,6 @@ export default function EmployeeGroup({
 
       {open && (
         <div className="employee-group-body">
-          <div className="employee-group-summary">
-            <span className="available">
-              {summary.available} זמינים
-            </span>
-
-            <span className="balanced">
-              {summary.balanced} מלאים
-            </span>
-
-            <span className="overloaded">
-              {summary.overloaded} עומס יתר
-            </span>
-          </div>
-
           <div className="employees-cards-grid employee-group-grid">
             {employees.map((employee) => (
               <EmployeeCard

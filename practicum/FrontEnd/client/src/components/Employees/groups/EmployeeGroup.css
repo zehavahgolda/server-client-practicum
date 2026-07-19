@@ -97,69 +97,57 @@
   line-height: 1.2;
 }
 
-.employee-group-header span {
+/*
+  חל רק על מספר העובדים שמתחת לכותרת.
+  הסלקטור הקודם השפיע בטעות גם על עיגול המשולש.
+*/
+.employee-group-title-wrap > div > span {
   display: block;
   margin: 4px 0 0;
   color: var(--text-secondary);
   font-size: 12px;
+  line-height: 1.2;
 }
 
 .employee-group-left {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+
+  margin: 0;
+  padding: 0;
 }
 
 .employee-group-toggle {
   width: 34px;
   height: 34px;
-  flex-shrink: 0;
+  flex: 0 0 34px;
+
+  margin: 0;
+  padding: 0;
+
   border-radius: 999px;
+
   background: var(--surface-alt);
   color: var(--text-primary);
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-grid;
+  place-items: center;
 
   font-size: 14px;
+  line-height: 1;
+  text-align: center;
+
+  transform: none;
 }
 
 .employee-group-body {
   border-top: 1px solid var(--border-color);
   padding: 0 0 12px;
-}
-
-.employee-group-summary {
-  margin: 10px 16px 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.employee-group-summary span {
-  border-radius: 999px;
-  padding: 5px 9px;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.employee-group-summary .available {
-  background: var(--employee-available-soft);
-  color: var(--employee-available);
-}
-
-.employee-group-summary .balanced {
-  background: var(--employee-balanced-soft);
-  color: var(--employee-balanced);
-}
-
-.employee-group-summary .overloaded {
-  background: var(--employee-overloaded-soft);
-  color: var(--employee-overloaded);
 }
 
 /* בתוך קיבוץ: אותה פריסה כמו במסך כל העובדים */
@@ -202,6 +190,8 @@
 
   .employee-group-left {
     width: 100%;
+    height: 34px;
+    flex-basis: auto;
     justify-content: flex-end;
   }
 
