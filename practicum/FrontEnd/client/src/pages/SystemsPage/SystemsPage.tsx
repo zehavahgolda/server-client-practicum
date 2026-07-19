@@ -43,7 +43,7 @@ export default function SystemsPage() {
     [activeYear]
   );
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const riskFilter =
     searchParams.get("risk");
@@ -221,6 +221,28 @@ export default function SystemsPage() {
       });
     });
   }, [selectedSystem?.id]);
+
+  // מסיר רק את סינוני הסטטוס שהגיעו מהדשבורד.
+  // פילטרים ידניים אחרים, כמו שנה וחיפוש, נשארים ללא שינוי.
+  function clearDashboardStatusParams() {
+    const nextSearchParams =
+      new URLSearchParams(searchParams);
+
+    nextSearchParams.delete("status");
+    nextSearchParams.delete("risk");
+
+    setSearchParams(nextSearchParams, {
+      replace: true
+    });
+  }
+
+  // מעבר ל"כל המערכות" מבטל את סינון הסטטוס
+  // שהגיע מהדשבורד ומציג את הרשימה המלאה.
+  function showAllSystems() {
+    setViewMode("all");
+    setUiStatus("all");
+    clearDashboardStatusParams();
+  }
 
   // מאפס את כלל הפילטרים והחיפוש המקומי.
   // ניקוי השנה מחזיר לתצוגת "כל השנים".
@@ -415,9 +437,7 @@ export default function SystemsPage() {
                   ? "active"
                   : ""
               }`}
-              onClick={() =>
-                setViewMode("all")
-              }
+              onClick={showAllSystems}
             >
               כל המערכות
             </button>

@@ -81,9 +81,7 @@ export default function EmployeesByCategoryWidget() {
         centerValue={employees.length}
         centerLabel="עובדים"
         variant="categories"
-        footerLines={[
-          "לחיצה על קטגוריה פותחת אותה · לחיצה על הכרטיס מציגה את כולן"
-        ]}
+      
         onItemClick={(item) =>
           openSelectedCategory(item.label)
         }

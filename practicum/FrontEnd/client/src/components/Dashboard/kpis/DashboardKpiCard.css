@@ -32,13 +32,24 @@
 
 .dashboard-kpi-card--interactive:hover {
   z-index: 2;
-  transform: translateY(-3px) scale(1.025);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 20px rgba(15, 23, 42, 0.11);
+
+  border-color: color-mix(
+    in srgb,
+    var(--status-surplus) 45%,
+    var(--border-color)
+  );
 }
 
 .dashboard-kpi-card--interactive:active {
-  transform: translateY(-1px) scale(1.01);
-  box-shadow: 0 7px 18px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 6px 14px rgba(15, 23, 42, 0.10);
 }
 
 .dashboard-kpi-card--interactive:focus-visible {
@@ -48,25 +59,33 @@
 
 .dashboard-kpi-card h3 {
   margin: 0 0 4px;
+
   font-size: 13px;
   font-weight: 700;
+
   color: var(--text-secondary);
+
   font-family: "Heebo", sans-serif;
 }
 
 .dashboard-kpi-card strong {
   display: block;
+
   font-size: 28px;
   line-height: 1;
   font-weight: 800;
+
   color: var(--text-primary);
+
   font-family: "Heebo", sans-serif;
 }
 
 .dashboard-kpi-card p {
   margin: 6px 0 0;
+
   font-size: 12px;
   color: var(--text-secondary);
+
   font-family: "Heebo", sans-serif;
 }
 
@@ -108,7 +127,7 @@
   }
 
   .dashboard-kpi-card--interactive:hover {
-    transform: translateY(-2px) scale(1.015);
+    transform: translateY(-2px);
   }
 }
 

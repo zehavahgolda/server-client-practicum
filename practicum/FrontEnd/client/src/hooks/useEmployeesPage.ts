@@ -156,26 +156,11 @@ export function useEmployeesPage() {
     activeYear
   ]);
 
-  // מחיל את כל הסינונים שהגיעו מה-URL.
-  //
-  // סינון הקטגוריה מתבצע כאן ישירות,
-  // כדי שהקישור מהדשבורד יציג בוודאות רק את הקטגוריה שנבחרה,
-  // גם אם טעינת הפילטרים מהשרת עדיין לא הסתיימה.
-  const filteredEmployees = useMemo(() => {
+  // רשימה לתצוגת קיבוץ לפי קטגוריה.
+  // קטגוריית הכניסה מהדשבורד אינה מסננת אותה,
+  // ולכן כל הקטגוריות נשארות מוצגות.
+  const categoryViewEmployees = useMemo(() => {
     let result = employees;
-
-    if (professionalCategoryFromUrl) {
-      result = result.filter((employee) => {
-        const employeeCategory =
-          employee.professionalCategory?.trim() ||
-          "לא מוגדר";
-
-        return (
-          employeeCategory ===
-          professionalCategoryFromUrl
-        );
-      });
-    }
 
     if (availabilityFilter === "overloaded") {
       result = result.filter(
@@ -194,7 +179,30 @@ export function useEmployeesPage() {
     return result;
   }, [
     employees,
-    availabilityFilter,
+    availabilityFilter
+  ]);
+
+  // רשימה לתצוגת כל העובדים ולקיבוץ לפי זמינות.
+  // כאן קטגוריית הכניסה מהדשבורד כן נשמרת כפילטר.
+  const filteredEmployees = useMemo(() => {
+    let result = categoryViewEmployees;
+
+    if (professionalCategoryFromUrl) {
+      result = result.filter((employee) => {
+        const employeeCategory =
+          employee.professionalCategory?.trim() ||
+          "לא מוגדר";
+
+        return (
+          employeeCategory ===
+          professionalCategoryFromUrl
+        );
+      });
+    }
+
+    return result;
+  }, [
+    categoryViewEmployees,
     professionalCategoryFromUrl
   ]);
 
@@ -377,6 +385,7 @@ export function useEmployeesPage() {
     filters,
     setFilters,
     filteredEmployees,
+    categoryViewEmployees,
     viewMeta,
     categories,
     managers,

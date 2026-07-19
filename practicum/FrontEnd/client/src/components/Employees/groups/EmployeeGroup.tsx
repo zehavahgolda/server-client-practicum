@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type CSSProperties
 } from "react";
@@ -17,7 +18,9 @@ type EmployeeGroupTone =
   | "overloaded"
   | "category";
 
-// מאפייני קבוצת עובדים: כותרת, רשימה, בחירה וצבע אופציונלי.
+// מאפייני קבוצת עובדים:
+// כותרת, רשימה, בחירה, צבע אופציונלי
+// ומצב פתיחה אוטומטי.
 interface Props {
   title: string;
   subtitle?: string;
@@ -47,25 +50,53 @@ export default function EmployeeGroup({
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
 
-  // מסנכרן את מצב הפתיחה כאשר מגיעים לקטגוריה דרך קישור מהדשבורד.
-  // כך מעבר בין קטגוריות שונות יפתח תמיד את הקבוצה המתאימה.
+  const groupRef =
+    useRef<HTMLElement | null>(null);
+
+  // מסנכרן את מצב הפתיחה כאשר מגיעים
+  // לקטגוריה דרך קישור מהדשבורד.
+  //
+  // אם זו הקטגוריה שנבחרה, הקבוצה נפתחת
+  // והעמוד גולל אליה אוטומטית כדי שהמשתמש
+  // יראה מיד לאן הגיע.
   useEffect(() => {
     setOpen(defaultOpen);
+
+    if (!defaultOpen) {
+      return;
+    }
+
+    const animationFrameId =
+      window.requestAnimationFrame(() => {
+        groupRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest"
+        });
+      });
+
+    return () => {
+      window.cancelAnimationFrame(
+        animationFrameId
+      );
+    };
   }, [defaultOpen]);
 
   if (employees.length === 0) {
     return null;
   }
 
-  const groupStyle: EmployeeGroupStyle | undefined =
-    accentColor
-      ? {
-          "--employee-group-accent": accentColor
-        }
-      : undefined;
+  const groupStyle:
+    | EmployeeGroupStyle
+    | undefined = accentColor
+    ? {
+        "--employee-group-accent": accentColor
+      }
+    : undefined;
 
   return (
     <section
+      ref={groupRef}
       className={`employee-group ${tone}`}
       style={groupStyle}
     >
@@ -73,7 +104,9 @@ export default function EmployeeGroup({
         type="button"
         className="employee-group-header"
         onClick={() =>
-          setOpen((previousOpen) => !previousOpen)
+          setOpen(
+            (previousOpen) => !previousOpen
+          )
         }
         aria-expanded={open}
       >
@@ -88,7 +121,9 @@ export default function EmployeeGroup({
 
             {subtitle && <p>{subtitle}</p>}
 
-            <span>{employees.length} עובדים</span>
+            <span>
+              {employees.length} עובדים
+            </span>
           </div>
         </div>
 
@@ -110,7 +145,8 @@ export default function EmployeeGroup({
                 key={employee.id}
                 employee={employee}
                 selected={
-                  employee.id === selectedEmployeeId
+                  employee.id ===
+                  selectedEmployeeId
                 }
                 onClick={() =>
                   onSelectEmployee(employee.id)

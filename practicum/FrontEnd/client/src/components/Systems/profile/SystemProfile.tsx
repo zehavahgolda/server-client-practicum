@@ -601,7 +601,13 @@ export default function SystemProfile({
             <div className="system-profile-kpi">
               <div className="system-profile-kpi-layout">
                 <div className="system-profile-kpi-copy">
-                  <span>{system.gap > 0 ? "מחסור" : system.gap < 0 ? "עודף" : "פער"}</span>
+                  <span className={tone}>
+                    {system.gap > 0
+                      ? "מחסור"
+                      : system.gap < 0
+                        ? "עודף"
+                        : "פער"}
+                  </span>
                   <strong className={tone}>{Math.abs(system.gap)}</strong>
                 </div>
 

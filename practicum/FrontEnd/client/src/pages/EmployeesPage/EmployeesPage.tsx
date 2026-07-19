@@ -150,7 +150,7 @@ function getCategoryGroups(
 // פילטרים ומודלים לפעולות ניהול.
 export default function EmployeesPage() {
   const page = useEmployeesPage();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [viewMode, setViewMode] =
     useState<EmployeeViewMode>("all");
@@ -175,10 +175,10 @@ export default function EmployeesPage() {
   const requestedCategory =
     page.professionalCategoryFromUrl;
 
-  useEffect(() => {
-    const requestedView =
-      searchParams.get("view");
+  const requestedView =
+    searchParams.get("view");
 
+  useEffect(() => {
     if (
       requestedView === "status" ||
       requestedView === "category" ||
@@ -186,35 +186,26 @@ export default function EmployeesPage() {
     ) {
       setViewMode(requestedView);
     }
-
-    if (requestedCategory) {
-      page.setFilters(
-        (previousFilters) => {
-          if (
-            previousFilters
-              .professionalCategory ===
-            requestedCategory
-          ) {
-            return previousFilters;
-          }
-
-          return {
-            ...previousFilters,
-            professionalCategory:
-              requestedCategory
-          };
-        }
-      );
-    }
-  }, [
-    searchParams,
-    requestedCategory,
-    page.setFilters
-  ]);
+  }, [requestedView]);
 
   const visibleEmployees = useMemo(
     () => getVisibleEmployees(page),
     [page]
+  );
+
+  const categoryVisibleEmployees = useMemo(
+    () =>
+      page.selectedEmployee
+        ? page.categoryViewEmployees.filter(
+            (employee) =>
+              employee.id !==
+              page.selectedEmployee?.id
+          )
+        : page.categoryViewEmployees,
+    [
+      page.categoryViewEmployees,
+      page.selectedEmployee
+    ]
   );
 
   const statusGroups = useMemo(
@@ -223,31 +214,50 @@ export default function EmployeesPage() {
   );
 
   const categoryGroups = useMemo(
-    () => getCategoryGroups(visibleEmployees),
-    [visibleEmployees]
+    () =>
+      getCategoryGroups(
+        categoryVisibleEmployees
+      ),
+    [categoryVisibleEmployees]
   );
+
+  const summaryEmployees =
+    viewMode === "status"
+      ? page.filteredEmployees
+      : page.categoryViewEmployees;
 
   const employeeSummary = useMemo(
     () => ({
       available:
-        page.filteredEmployees.filter(
+        summaryEmployees.filter(
           (employee) =>
             employee.remainingMonths > 0
         ).length,
 
       balanced:
-        page.filteredEmployees.filter(
+        summaryEmployees.filter(
           (employee) =>
             employee.remainingMonths === 0
         ).length,
 
       overloaded:
-        page.filteredEmployees.filter(
+        summaryEmployees.filter(
           (employee) =>
             employee.remainingMonths < 0
         ).length
     }),
-    [page.filteredEmployees]
+    [summaryEmployees]
+  );
+
+  const allEmployeesMeta = useMemo(
+    () => ({
+      lowCapacity:
+        page.categoryViewEmployees.filter(
+          (employee) =>
+            employee.remainingMonths <= 1
+        ).length
+    }),
+    [page.categoryViewEmployees]
   );
 
   async function handleEmployeeEventSubmit(
@@ -286,6 +296,75 @@ export default function EmployeesPage() {
     );
   }
 
+  // מסיר פרמטרים של ניווט התחלתי מהדשבורד,
+  // לאחר שהמשתמשת מתחילה לעבוד ידנית במסך העובדים.
+  function clearDashboardNavigationParams(
+    options: {
+      category?: boolean;
+      availability?: boolean;
+    } = {}
+  ) {
+    const nextSearchParams =
+      new URLSearchParams(searchParams);
+
+    if (options.category) {
+      nextSearchParams.delete(
+        "professionalCategory"
+      );
+    }
+
+    if (options.availability) {
+      nextSearchParams.delete(
+        "availability"
+      );
+    }
+
+    setSearchParams(nextSearchParams, {
+      replace: true
+    });
+  }
+
+  // שינוי פילטר ידני מבטל את קטגוריית הכניסה מהדשבורד.
+  // לאחר מכן הפילטר המקומי הוא מקור האמת היחיד.
+  function handleChangeFilters(
+    update: Parameters<
+      typeof page.setFilters
+    >[0]
+  ) {
+    const nextFilters =
+      typeof update === "function"
+        ? update(page.filters)
+        : update;
+
+    page.setFilters(nextFilters);
+
+    if (requestedCategory) {
+      clearDashboardNavigationParams({
+        category: true
+      });
+    }
+  }
+
+  // מעבר בין צורות התצוגה שומר את קטגוריית
+  // הכניסה מהדשבורד:
+  // בתצוגת קטגוריות היא רק פותחת את הקבוצה המתאימה,
+  // ובתצוגת זמינות היא ממשיכה לסנן לאותה קטגוריה.
+  function handleChangeViewMode(
+    mode: EmployeeViewMode
+  ) {
+    setViewMode(mode);
+  }
+
+  // ניקוי מלא מאפס גם את פילטרי הכניסה שהגיעו מהדשבורד.
+  function handleClearFilters() {
+    page.clearFilters();
+
+    clearDashboardNavigationParams({
+      category: true,
+      availability: true
+    });
+  }
+
   return (
     <main
       className="employees-page-shell"
@@ -299,12 +378,18 @@ export default function EmployeesPage() {
         available={employeeSummary.available}
         balanced={employeeSummary.balanced}
         overloaded={employeeSummary.overloaded}
-        onChangeFilters={page.setFilters}
-        onChangeViewMode={setViewMode}
+        onChangeFilters={
+          handleChangeFilters
+        }
+        onChangeViewMode={
+          handleChangeViewMode
+        }
         onCreateEmployee={
           page.openCreateEmployeeModal
         }
-        onClearFilters={page.clearFilters}
+        onClearFilters={
+          handleClearFilters
+        }
       />
 
       {page.error && (
@@ -339,13 +424,13 @@ export default function EmployeesPage() {
 
       {viewMode === "all" && (
         <EmployeeBoard
-          employees={page.filteredEmployees}
+          employees={page.categoryViewEmployees}
           selectedEmployee={
             page.selectedEmployee
           }
           loading={page.loadingList}
           lowCapacity={
-            page.viewMeta.lowCapacity
+            allEmployeesMeta.lowCapacity
           }
           onSelectEmployee={
             page.loadEmployeeDetails
@@ -425,7 +510,7 @@ export default function EmployeesPage() {
                 </h2>
 
                 <p>
-                  {visibleEmployees.length} עובדים
+                  {categoryVisibleEmployees.length} עובדים
                   מוצגים כעת
                 </p>
               </div>

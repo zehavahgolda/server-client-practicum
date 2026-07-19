@@ -29,7 +29,8 @@ function getTone(
   return "balanced";
 }
 
-// מציג כרטיס עובד עם נתוני קיבולת, סטטוס ופרטים תפעוליים.
+// מציג כרטיס עובד עם נתוני קיבולת,
+// סטטוס ופרטים תפעוליים.
 export default function EmployeeCard({
   employee,
   selected = false,
@@ -65,6 +66,7 @@ export default function EmployeeCard({
       <div className="employee-card-metrics">
         <div>
           <span>מכסה שנתית</span>
+
           <strong>
             {employee.yearlyCapacityMonths}
           </strong>
@@ -72,6 +74,7 @@ export default function EmployeeCard({
 
         <div>
           <span>מוקצה</span>
+
           <strong>
             {employee.allocatedMonths}
           </strong>
@@ -79,6 +82,7 @@ export default function EmployeeCard({
 
         <div>
           <span>יתרה</span>
+
           <strong className={tone}>
             {employee.remainingMonths}
           </strong>
@@ -86,6 +90,7 @@ export default function EmployeeCard({
 
         <div>
           <span>מערכות</span>
+
           <strong>
             {employee.assignedSystemsCount}
           </strong>

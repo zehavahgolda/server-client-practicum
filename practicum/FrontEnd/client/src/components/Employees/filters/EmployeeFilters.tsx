@@ -208,7 +208,7 @@ export default function EmployeeFilters({
               onChangeViewMode("category")
             }
           >
-            קיבוץ לפי קטגוריה
+            קיבוץ לפי תת־קטגוריה
           </button>
         </>
       }
