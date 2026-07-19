@@ -3,41 +3,61 @@ import { useNavigate } from "react-router-dom";
 
 import { useSystems } from "../../../hooks/useSystems";
 
+import {
+  DASHBOARD_STATUS_COLORS
+} from "../../../constants/dashboardChartColors";
+
 import DashboardChartCard from "../charts/DashboardChartCard";
 import DashboardDonutChart from "../charts/DashboardDonutChart";
 
-// מיפוי קבוצות סטטוס עם כינויים אפשריים וצבע תצוגה לכל קבוצה.
-const statusGroups = [
+// סוגי הסטטוס העסקיים של מערכת.
+type DashboardSystemStatus =
+  | "excess"
+  | "balanced"
+  | "shortage";
+
+// הגדרת קבוצות הסטטוס המוצגות בדשבורד.
+const statusGroups: Array<{
+  key: DashboardSystemStatus;
+  label: string;
+  color: string;
+}> = [
   {
+    key: "excess",
     label: "בעודף",
-    aliases: [
-      "Over Capacity",
-      "Excess",
-      "בעודף",
-      "עודף"
-    ],
-    color: "#1f6db3"
+    color: DASHBOARD_STATUS_COLORS.excess
   },
   {
+    key: "shortage",
     label: "במחסור",
-    aliases: [
-      "Under Capacity",
-      "Shortage",
-      "בחוסר",
-      "במחסור",
-      "חוסר"
-    ],
-    color: "#b43135"
+    color: DASHBOARD_STATUS_COLORS.shortage
   },
   {
+    key: "balanced",
     label: "מאוזן",
-    aliases: [
-      "Balanced",
-      "מאוזן"
-    ],
-    color: "#149584"
+    color: DASHBOARD_STATUS_COLORS.balanced
   }
 ];
+
+// קובע את מצב המערכת לפי פער הקיבולת.
+//
+// אותה לוגיקה משמשת גם במסך המערכות:
+// gap > 0   = מחסור
+// gap < 0   = עודף
+// gap === 0 = מאוזן
+function getSystemStatus(
+  gap: number
+): DashboardSystemStatus {
+  if (gap > 0) {
+    return "shortage";
+  }
+
+  if (gap < 0) {
+    return "excess";
+  }
+
+  return "balanced";
+}
 
 // ווידג'ט המציג התפלגות מערכות לפי סטטוס קיבולת.
 export default function SystemsStatusWidget() {
@@ -45,20 +65,16 @@ export default function SystemsStatusWidget() {
   const { systems } = useSystems();
 
   // מחשב כמה מערכות שייכות לכל קבוצת סטטוס.
+  //
+  // החישוב מתבצע לפי gap ולא לפי טקסט capacityStatus,
+  // כדי לשמור על התאמה מלאה למסך המערכות.
   const systemsByStatus = useMemo(
     () =>
       statusGroups.map((group) => {
-        const value = systems.reduce(
-          (count, system) => {
-            const status =
-              system.capacityStatus?.trim() || "";
-
-            return group.aliases.includes(status)
-              ? count + 1
-              : count;
-          },
-          0
-        );
+        const value = systems.filter(
+          (system) =>
+            getSystemStatus(system.gap) === group.key
+        ).length;
 
         return {
           label: group.label,
@@ -69,12 +85,40 @@ export default function SystemsStatusWidget() {
     [systems]
   );
 
+  // פותח את תמונת המצב הכוללת לפי סטטוס.
+  function openStatusOverview() {
+    navigate("/systems?view=status");
+  }
+
+  // פותח את קבוצת הסטטוס שנבחרה.
+  function openSelectedStatus(
+    label: string
+  ) {
+    const normalizedLabel = label.trim();
+
+    if (normalizedLabel === "במחסור") {
+      navigate(
+        "/systems?view=status&status=shortage"
+      );
+      return;
+    }
+
+    if (normalizedLabel === "מאוזן") {
+      navigate(
+        "/systems?view=status&status=balanced"
+      );
+      return;
+    }
+
+    navigate(
+      "/systems?view=status&status=excess"
+    );
+  }
+
   return (
     <DashboardChartCard
       title="מערכות לפי סטטוס"
-      onClick={() =>
-        navigate("/systems?view=status")
-      }
+      onClick={openStatusOverview}
     >
       <DashboardDonutChart
         items={systemsByStatus}
@@ -84,28 +128,9 @@ export default function SystemsStatusWidget() {
         footerLines={[
           `סה"כ ${systems.length} מערכות`
         ]}
-        onItemClick={(item) => {
-          const normalized =
-            item.label.trim();
-
-          if (normalized === "במחסור") {
-            navigate(
-              "/systems?view=status&status=shortage"
-            );
-            return;
-          }
-
-          if (normalized === "מאוזן") {
-            navigate(
-              "/systems?view=status&status=balanced"
-            );
-            return;
-          }
-
-          navigate(
-            "/systems?view=status&status=excess"
-          );
-        }}
+        onItemClick={(item) =>
+          openSelectedStatus(item.label)
+        }
       />
     </DashboardChartCard>
   );

@@ -1,36 +1,28 @@
-// פלטה מרכזית של 12 גווני כחול עבור קטגוריות מקצועיות.
-// אם יש יותר מ־12 קטגוריות, הצבעים חוזרים על עצמם.
+// פלטת צבעים קבועה עבור קטגוריות עובדים.
+// לכל קטגוריה יינתן תמיד אותו צבע לפי שמה.
+
 export const CATEGORY_COLORS = [
-  "#174A7E",
-  "#1F5F99",
-  "#256FB5",
-  "#2F80C9",
-  "#3A8FD8",
-  "#479DE2",
-  "#56AAE8",
-  "#68B6ED",
-  "#7AC2F1",
-  "#2389A8",
-  "#2A7698",
-  "#315F8C"
+  "#1D4ED8",
+  "#2563EB",
+  "#3B82F6",
+  "#60A5FA",
+  "#38BDF8",
+  "#0EA5E9",
+  "#0284C7",
+  "#0369A1",
+  "#075985",
+  "#1E40AF",
+  "#1E3A8A",
+  "#312E81"
 ] as const;
 
-// יוצר מספר קבוע מתוך שם הקטגוריה,
-// כדי שאותה קטגוריה תקבל תמיד אותו צבע.
-function createStableCategoryHash(
-  categoryName: string
-): number {
+// יוצר מספר קבוע מתוך שם הקטגוריה.
+function createHash(value: string): number {
   let hash = 0;
 
-  for (
-    let index = 0;
-    index < categoryName.length;
-    index += 1
-  ) {
+  for (let index = 0; index < value.length; index += 1) {
     hash =
-      (hash * 31 +
-        categoryName.charCodeAt(index)) |
-      0;
+      (hash * 31 + value.charCodeAt(index)) | 0;
   }
 
   return Math.abs(hash);
@@ -38,20 +30,14 @@ function createStableCategoryHash(
 
 // מחזיר צבע קבוע לפי שם הקטגוריה.
 export function getCategoryColor(
-  categoryName: string
+  category: string
 ): string {
-  const normalizedCategoryName =
-    categoryName
-      .trim()
-      .toLocaleLowerCase("he");
+  const normalized =
+    category.trim().toLowerCase();
 
-  const safeCategoryName =
-    normalizedCategoryName || "לא מוגדר";
+  const index =
+    createHash(normalized) %
+    CATEGORY_COLORS.length;
 
-  const colorIndex =
-    createStableCategoryHash(
-      safeCategoryName
-    ) % CATEGORY_COLORS.length;
-
-  return CATEGORY_COLORS[colorIndex];
+  return CATEGORY_COLORS[index];
 }
