@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   ClipboardList,
+  Edit3,
   UsersRound,
   WalletCards
 } from "lucide-react";
@@ -563,10 +564,7 @@ export default function SystemProfile({
                 aria-label="עריכת הערת מערכת"
                 title="עריכת הערת מערכת"
               >
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" />
-                  <path d="M14.06 4.19l3.75 3.75" />
-                </svg>
+                <Edit3 size={16} strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
           )}
@@ -742,10 +740,7 @@ export default function SystemProfile({
                           aria-label="עריכת הערת מערכת"
                           title="עריכת הערת מערכת"
                         >
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25z" />
-                            <path d="M14.06 4.19l3.75 3.75" />
-                          </svg>
+                          <Edit3 size={16} strokeWidth={2} aria-hidden="true" />
                         </button>
                       )}
                     </div>

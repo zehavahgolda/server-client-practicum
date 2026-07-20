@@ -2,9 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
 import type {
+  CategoryDto,
   EmployeeDetails,
-  EmployeeUpsertPayload
+  EmployeeUpsertPayload,
+  SubcategoryDto
 } from "../../../types";
+import { categoryService } from "../../../services/categoryService";
+import { subcategoryService } from "../../../services/subcategoryService";
+import "./EmployeeFormModal.css";
 
 const MAX_MONTHS = 12;
 
@@ -73,6 +78,11 @@ export default function EmployeeFormModal({
   onSubmit
 }: EmployeeFormModalProps) {
   const [form, setForm] = useState<EmployeeFormState>(emptyForm);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [subcategories, setSubcategories] = useState<SubcategoryDto[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false);
+  const [managedDataError, setManagedDataError] = useState<string | null>(null);
 
   // מאתחל את הטופס לפי מצב פתיחה: עריכה קיימת או יצירה חדשה.
   useEffect(() => {
@@ -96,6 +106,158 @@ export default function EmployeeFormModal({
     }
   }, [open, mode, employee]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadCategories() {
+      setLoadingCategories(true);
+      setManagedDataError(null);
+
+      try {
+        const data = await categoryService.getCategories();
+        if (cancelled) {
+          return;
+        }
+
+        setCategories(data);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setCategories([]);
+        setManagedDataError(
+          error instanceof Error
+            ? error.message
+            : "שגיאה בטעינת קטגוריות מנוהלות"
+        );
+      } finally {
+        if (!cancelled) {
+          setLoadingCategories(false);
+        }
+      }
+    }
+
+    void loadCategories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const selectedCategory = useMemo(() => {
+    const normalizedSelected = form.professionalCategory.trim().toLowerCase();
+
+    if (!normalizedSelected) {
+      return null;
+    }
+
+    return categories.find(
+      (category) => category.name.trim().toLowerCase() === normalizedSelected
+    ) ?? null;
+  }, [categories, form.professionalCategory]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const categoryId = selectedCategory?.id;
+    if (!categoryId) {
+      setSubcategories([]);
+      setLoadingSubcategories(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadSubcategories() {
+      setLoadingSubcategories(true);
+
+      try {
+        const data = await subcategoryService.getSubcategories({
+          parentCategoryId: categoryId
+        });
+
+        if (cancelled) {
+          return;
+        }
+
+        setSubcategories(data);
+      } catch {
+        if (cancelled) {
+          return;
+        }
+
+        setSubcategories([]);
+      } finally {
+        if (!cancelled) {
+          setLoadingSubcategories(false);
+        }
+      }
+    }
+
+    void loadSubcategories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, selectedCategory?.id]);
+
+  const isLegacyCategory = useMemo(() => {
+    const value = form.professionalCategory.trim().toLowerCase();
+    if (!value) {
+      return false;
+    }
+
+    return !categories.some(
+      (category) => category.name.trim().toLowerCase() === value
+    );
+  }, [categories, form.professionalCategory]);
+
+  const isLegacySubcategory = useMemo(() => {
+    const value = form.professionalSubCategory.trim().toLowerCase();
+    if (!value) {
+      return false;
+    }
+
+    if (!selectedCategory) {
+      return true;
+    }
+
+    return !subcategories.some(
+      (subcategory) => subcategory.name.trim().toLowerCase() === value
+    );
+  }, [selectedCategory, subcategories, form.professionalSubCategory]);
+
+  useEffect(() => {
+    if (!selectedCategory) {
+      return;
+    }
+
+    const currentSubcategory = form.professionalSubCategory.trim();
+    if (!currentSubcategory) {
+      return;
+    }
+
+    const stillValid = subcategories.some(
+      (subcategory) =>
+        subcategory.name.trim().toLowerCase() ===
+        currentSubcategory.toLowerCase()
+    );
+
+    if (!stillValid) {
+      setForm((previousForm) => ({
+        ...previousForm,
+        professionalSubCategory: ""
+      }));
+    }
+  }, [selectedCategory?.id, subcategories]);
+
   // מחשב סך הקצאות מתוכננות לצורך התרעת חריגה בקיבולת בעריכה.
   const plannedAllocationTotal = useMemo(() => {
     if (mode !== "edit" || !employee) {
@@ -115,6 +277,11 @@ export default function EmployeeFormModal({
   const isPlannedOverCapacity =
     mode === "edit" &&
     plannedAllocationTotal > capacityMonths;
+
+  const canSubmitManagedValues =
+    Boolean(form.professionalCategory.trim()) &&
+    (!loadingCategories && categories.length > 0 || mode === "edit") &&
+    (!form.professionalSubCategory.trim() || selectedCategory || mode === "edit");
 
   if (!open) {
     return null;
@@ -142,6 +309,14 @@ export default function EmployeeFormModal({
       return;
     }
 
+    if (managedDataError && mode === "create") {
+      return;
+    }
+
+    if (!canSubmitManagedValues) {
+      return;
+    }
+
     if (
       Number.isNaN(year) ||
       Number.isNaN(yearlyCapacityMonths) ||
@@ -151,11 +326,15 @@ export default function EmployeeFormModal({
       return;
     }
 
+    const normalizedSubcategory = form.professionalSubCategory.trim();
+
     await onSubmit({
       fullName,
       professionalCategory,
       professionalSubCategory:
-        form.professionalSubCategory.trim() || undefined,
+        mode === "edit"
+          ? normalizedSubcategory
+          : normalizedSubcategory || undefined,
       managerName,
       year,
       yearlyCapacityMonths
@@ -223,20 +402,38 @@ export default function EmployeeFormModal({
 
               <label>
                 קטגוריה מקצועית
-                <input
-                  value={
-                    form.professionalCategory
-                  }
+                <select
+                  value={form.professionalCategory}
                   onChange={(event) =>
                     setForm((previousForm) => ({
                       ...previousForm,
                       professionalCategory:
-                        event.target.value
+                        event.target.value,
+                      professionalSubCategory:
+                        previousForm.professionalCategory.trim().toLowerCase() ===
+                        event.target.value.trim().toLowerCase()
+                          ? previousForm.professionalSubCategory
+                          : ""
                     }))
                   }
                   required
-                  disabled={saving}
-                />
+                  disabled={saving || loadingCategories}
+                >
+                  <option value="">בחירת קטגוריה מקצועית</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                  {mode === "edit" && isLegacyCategory && form.professionalCategory.trim() && (
+                    <option value={form.professionalCategory}>
+                      {form.professionalCategory}
+                    </option>
+                  )}
+                </select>
+                {mode === "edit" && isLegacyCategory && (
+                  <small className="employee-form-legacy-warning">ערך קיים שאינו מנוהל</small>
+                )}
               </label>
 
               <label>
@@ -257,10 +454,8 @@ export default function EmployeeFormModal({
 
               <label>
                 תת תחום
-                <input
-                  value={
-                    form.professionalSubCategory
-                  }
+                <select
+                  value={form.professionalSubCategory}
                   onChange={(event) =>
                     setForm((previousForm) => ({
                       ...previousForm,
@@ -268,10 +463,28 @@ export default function EmployeeFormModal({
                         event.target.value
                     }))
                   }
-                  disabled={saving}
-                />
+                  disabled={saving || !selectedCategory || loadingSubcategories}
+                >
+                  <option value="">ללא תת תחום</option>
+                  {subcategories.map((subcategory) => (
+                    <option key={subcategory.id} value={subcategory.name}>
+                      {subcategory.name}
+                    </option>
+                  ))}
+                  {mode === "edit" && isLegacySubcategory && form.professionalSubCategory.trim() && (
+                    <option value={form.professionalSubCategory}>
+                      {form.professionalSubCategory}
+                    </option>
+                  )}
+                </select>
+                {mode === "edit" && isLegacySubcategory && (
+                  <small className="employee-form-legacy-warning">ערך קיים שאינו מנוהל</small>
+                )}
               </label>
             </div>
+            {managedDataError && (
+              <p className="employee-form-managed-error">{managedDataError}</p>
+            )}
           </section>
 
           <section className="modal-section">
@@ -293,8 +506,7 @@ export default function EmployeeFormModal({
                     <line x1="8" y1="3" x2="8" y2="7" />
                     <line x1="16" y1="3" x2="16" y2="7" />
                   </svg>
-                  ניהול זמינות ואירועים
-                  <span aria-hidden="true">←</span>
+                  ניהול הערות זמינות
                 </button>
               )}
             </div>
@@ -397,7 +609,7 @@ export default function EmployeeFormModal({
             <button
               type="submit"
               className="primary-btn"
-              disabled={saving}
+              disabled={saving || !canSubmitManagedValues}
             >
               {saving
                 ? "שומר..."

@@ -1,50 +1,124 @@
 .employee-form-capacity-header-row {
 	display: flex;
+	flex-direction: row-reverse;
 	align-items: center;
 	justify-content: space-between;
-	gap: 8px;
-	margin-bottom: 4px;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+.employee-modal-card {
+	border: 1px solid color-mix(in srgb, var(--border-color) 82%, var(--status-surplus) 18%);
+	box-shadow: 0 16px 34px color-mix(in srgb, #0f172a 14%, transparent);
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--surface-bg) 96%, #ffffff 4%) 0%, var(--surface-bg) 100%);
+}
+
+.employee-modal-card .modal-header {
+	margin-bottom: 12px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
+}
+
+.employee-modal-card .modal-header h3 {
+	font-size: 27px;
+	letter-spacing: 0.2px;
+}
+
+.employee-modal-card .modal-form {
+	border-top: 0;
+	padding-top: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.employee-modal-card .modal-section {
+	border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
+	border-radius: 12px;
+	padding: 11px;
+	margin-top: 0;
+	background: color-mix(in srgb, var(--surface-alt) 44%, var(--surface-bg));
+}
+
+.employee-modal-card .modal-section-title {
+	font-size: 19px;
+	font-weight: 800;
+	margin-bottom: 8px;
 }
 
 .employee-form-availability-link {
-	border: 1px solid color-mix(in srgb, var(--status-surplus) 25%, transparent);
-	background: color-mix(in srgb, var(--status-surplus) 6%, transparent);
-	color: var(--status-surplus);
-	padding: 3px 8px;
-	font-size: 11px;
-	font-weight: 600;
+	min-height: 48px;
+	border: 1px solid color-mix(in srgb, var(--status-surplus) 28%, var(--border-color));
+	background: var(--surface-bg);
+	color: var(--text-primary);
+	padding: 10px 16px;
+	font-size: 15px;
+	font-weight: 800;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	gap: 10px;
 	white-space: nowrap;
-	border-radius: 999px;
-	line-height: 1.2;
+	border-radius: 14px;
+	line-height: 1;
+	transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .employee-form-availability-link svg {
-	width: 12px;
-	height: 12px;
+	width: 20px;
+	height: 20px;
 	fill: none;
 	stroke: currentColor;
-	stroke-width: 2;
+	stroke-width: 2.1;
 	stroke-linecap: round;
 	stroke-linejoin: round;
+	flex-shrink: 0;
 }
 
 .employee-form-availability-link:hover {
-	background: color-mix(in srgb, var(--status-surplus) 12%, transparent);
-	color: color-mix(in srgb, var(--status-surplus) 86%, black);
+	background: color-mix(in srgb, var(--surface-alt) 82%, var(--surface-bg));
+	border-color: var(--status-surplus);
+	color: var(--status-surplus);
+	box-shadow: 0 6px 14px color-mix(in srgb, var(--status-surplus) 16%, transparent);
+	transform: translateY(-1px);
+}
+
+.employee-form-availability-link:focus-visible {
+	outline: none;
+	border-color: var(--status-surplus);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--status-surplus) 22%, transparent);
 }
 
 .employee-form-availability-link:disabled {
-	opacity: 0.55;
+	opacity: 0.6;
 	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
+}
+
+.employee-form-legacy-warning {
+	display: inline-block;
+	margin-top: 5px;
+	color: var(--status-danger);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.employee-form-managed-error {
+	margin: 8px 0 0;
+	color: var(--status-danger);
+	font-size: 13px;
+	font-weight: 700;
 }
 
 @media (max-width: 640px) {
 	.employee-form-capacity-header-row {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+
+	.employee-form-availability-link {
+		align-self: flex-start;
 	}
 }

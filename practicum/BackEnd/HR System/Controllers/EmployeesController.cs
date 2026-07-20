@@ -257,6 +257,14 @@ namespace HR_System.Controllers
                     new { id },
                     id);
             }
+            catch (BusinessValidationException ex)
+            {
+                _logger.LogWarning(
+                    "CreateEmployee validation failed: {ValidationMessage}",
+                    ex.Message);
+
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(
@@ -299,6 +307,15 @@ namespace HR_System.Controllers
                 }
 
                 return NoContent();
+            }
+            catch (BusinessValidationException ex)
+            {
+                _logger.LogWarning(
+                    "UpdateEmployee validation failed. EmployeeId: {EmployeeId}, ValidationMessage: {ValidationMessage}",
+                    id,
+                    ex.Message);
+
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

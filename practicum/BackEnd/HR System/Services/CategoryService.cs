@@ -2,6 +2,7 @@
 using HR_System.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 
 namespace HR_System.Services
 {
@@ -102,6 +103,310 @@ namespace HR_System.Services
             );
 
             return result.ModifiedCount > 0;
+        }
+
+        public async Task<CategoryBootstrapAnalysisReportDto> AnalyzeEmployeeCategoryBootstrapAsync()
+        {
+            var employees = await _employeesCollection
+                .Find(employee => employee.IsActive)
+                .ToListAsync();
+
+            var categoryBuckets = new Dictionary<string, List<Employee>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var employee in employees)
+            {
+                var categoryRaw = employee.ProfessionalCategory?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(categoryRaw))
+                {
+                    continue;
+                }
+
+                var categoryKey = Normalize(categoryRaw);
+                if (!categoryBuckets.ContainsKey(categoryKey))
+                {
+                    categoryBuckets[categoryKey] = new List<Employee>();
+                }
+
+                categoryBuckets[categoryKey].Add(employee);
+            }
+
+            var categories = new List<CategoryBootstrapCategoryCandidateDto>();
+            var pairs = new Dictionary<string, CategoryBootstrapPairCandidateDto>(StringComparer.OrdinalIgnoreCase);
+            var conflicts = new List<CategoryBootstrapConflictDto>();
+
+            foreach (var bucket in categoryBuckets)
+            {
+                var categoryVariants = bucket.Value
+                    .Select(employee => employee.ProfessionalCategory?.Trim() ?? string.Empty)
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .GroupBy(value => value)
+                    .Select(group => new CategoryBootstrapVariantDto
+                    {
+                        Value = group.Key,
+                        UsageCount = group.Count()
+                    })
+                    .OrderByDescending(variant => variant.UsageCount)
+                    .ThenBy(variant => variant.Value)
+                    .ToList();
+
+                var categoryCanonical = ChooseCanonicalCandidate(categoryVariants);
+
+                var subcategoryBuckets = bucket.Value
+                    .Select(employee => employee.ProfessionalSubCategory?.Trim() ?? string.Empty)
+                    .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .GroupBy(value => Normalize(value))
+                    .ToList();
+
+                var subcategoryCandidates = new List<CategoryBootstrapSubcategoryCandidateDto>();
+
+                foreach (var subBucket in subcategoryBuckets)
+                {
+                    var variants = subBucket
+                        .GroupBy(value => value)
+                        .Select(group => new CategoryBootstrapVariantDto
+                        {
+                            Value = group.Key,
+                            UsageCount = group.Count()
+                        })
+                        .OrderByDescending(variant => variant.UsageCount)
+                        .ThenBy(variant => variant.Value)
+                        .ToList();
+
+                    var subCanonical = ChooseCanonicalCandidate(variants);
+
+                    subcategoryCandidates.Add(new CategoryBootstrapSubcategoryCandidateDto
+                    {
+                        CanonicalCandidate = subCanonical,
+                        UsageCount = variants.Sum(variant => variant.UsageCount),
+                        Variants = variants
+                    });
+
+                    var pairKey = $"{Normalize(categoryCanonical)}::{Normalize(subCanonical)}";
+                    if (!pairs.TryGetValue(pairKey, out var pair))
+                    {
+                        pair = new CategoryBootstrapPairCandidateDto
+                        {
+                            CategoryCanonical = categoryCanonical,
+                            SubcategoryCanonical = subCanonical,
+                            UsageCount = 0
+                        };
+
+                        pairs[pairKey] = pair;
+                    }
+
+                    pair.UsageCount += variants.Sum(variant => variant.UsageCount);
+
+                    var subCanonicalForms = variants
+                        .Select(v => CanonicalShape(v.Value))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    if (subCanonicalForms.Count > 1)
+                    {
+                        conflicts.Add(new CategoryBootstrapConflictDto
+                        {
+                            ConflictType = "subcategory-ambiguous",
+                            ConflictKey = $"{categoryCanonical}::{subCanonical}",
+                            CanonicalCandidates = variants.Select(v => v.Value).Distinct().ToList(),
+                            Reason = "Multiple shape variants detected for subcategory; admin approval required."
+                        });
+                    }
+                }
+
+                var categoryCanonicalForms = categoryVariants
+                    .Select(v => CanonicalShape(v.Value))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (categoryCanonicalForms.Count > 1)
+                {
+                    conflicts.Add(new CategoryBootstrapConflictDto
+                    {
+                        ConflictType = "category-ambiguous",
+                        ConflictKey = categoryCanonical,
+                        CanonicalCandidates = categoryVariants.Select(v => v.Value).Distinct().ToList(),
+                        Reason = "Multiple shape variants detected for category; admin approval required."
+                    });
+                }
+
+                categories.Add(new CategoryBootstrapCategoryCandidateDto
+                {
+                    CanonicalCandidate = categoryCanonical,
+                    UsageCount = categoryVariants.Sum(variant => variant.UsageCount),
+                    Variants = categoryVariants,
+                    Subcategories = subcategoryCandidates
+                        .OrderBy(sub => sub.CanonicalCandidate)
+                        .ToList()
+                });
+            }
+
+            var categoryAmbiguityGroups = categories
+                .GroupBy(category => BuildAmbiguityKey(category.CanonicalCandidate))
+                .Where(group => !string.IsNullOrWhiteSpace(group.Key) && group.Count() > 1)
+                .ToList();
+
+            foreach (var ambiguityGroup in categoryAmbiguityGroups)
+            {
+                conflicts.Add(new CategoryBootstrapConflictDto
+                {
+                    ConflictType = "category-ambiguity-group",
+                    ConflictKey = ambiguityGroup.Key,
+                    CanonicalCandidates = ambiguityGroup
+                        .Select(category => category.CanonicalCandidate)
+                        .Distinct()
+                        .OrderBy(value => value)
+                        .ToList(),
+                    Reason = "Potentially equivalent category values detected (spacing/punctuation variation). Approval is required."
+                });
+            }
+
+            foreach (var category in categories)
+            {
+                var subcategoryAmbiguityGroups = category.Subcategories
+                    .GroupBy(subcategory => BuildAmbiguityKey(subcategory.CanonicalCandidate))
+                    .Where(group => !string.IsNullOrWhiteSpace(group.Key) && group.Count() > 1)
+                    .ToList();
+
+                foreach (var ambiguityGroup in subcategoryAmbiguityGroups)
+                {
+                    conflicts.Add(new CategoryBootstrapConflictDto
+                    {
+                        ConflictType = "subcategory-ambiguity-group",
+                        ConflictKey = $"{category.CanonicalCandidate}::{ambiguityGroup.Key}",
+                        CanonicalCandidates = ambiguityGroup
+                            .Select(subcategory => subcategory.CanonicalCandidate)
+                            .Distinct()
+                            .OrderBy(value => value)
+                            .ToList(),
+                        Reason = "Potentially equivalent subcategory values detected (spacing/punctuation variation). Approval is required."
+                    });
+                }
+            }
+
+            return new CategoryBootstrapAnalysisReportDto
+            {
+                GeneratedAtUtc = DateTime.UtcNow,
+                EmployeesScanned = employees.Count,
+                Categories = categories.OrderBy(category => category.CanonicalCandidate).ToList(),
+                Pairs = pairs.Values
+                    .OrderBy(pair => pair.CategoryCanonical)
+                    .ThenBy(pair => pair.SubcategoryCanonical)
+                    .ToList(),
+                Conflicts = conflicts
+                    .OrderBy(conflict => conflict.ConflictType)
+                    .ThenBy(conflict => conflict.ConflictKey)
+                    .ToList()
+            };
+        }
+
+        public async Task<CategoryBootstrapExecuteResultDto> ExecuteApprovedCategoryBootstrapAsync(CategoryBootstrapExecuteRequestDto request)
+        {
+            var result = new CategoryBootstrapExecuteResultDto();
+
+            if (request is null || request.ApprovedCategories is null)
+            {
+                return result;
+            }
+
+            var allCategories = await _categoriesCollection
+                .Find(category => !category.IsDeleted)
+                .ToListAsync();
+
+            var categoriesByNormalizedName = allCategories
+                .ToDictionary(category => Normalize(category.Name), category => category, StringComparer.OrdinalIgnoreCase);
+
+            var approvedCategories = request.ApprovedCategories
+                .Where(item => !string.IsNullOrWhiteSpace(item.CategoryName))
+                .ToList();
+
+            result.ApprovedCategoriesCount = approvedCategories.Count;
+            result.ApprovedSubcategoriesCount = approvedCategories.Sum(category => (category.SubcategoryNames ?? new List<string>()).Count);
+
+            foreach (var approvedCategory in approvedCategories)
+            {
+                var normalizedCategoryName = Normalize(approvedCategory.CategoryName);
+                if (string.IsNullOrWhiteSpace(normalizedCategoryName))
+                {
+                    result.UnresolvedCategoriesCount++;
+                    result.UnresolvedItems.Add("Category with empty normalized value was skipped.");
+                    continue;
+                }
+
+                if (!categoriesByNormalizedName.TryGetValue(normalizedCategoryName, out var categoryEntity))
+                {
+                    categoryEntity = new Category
+                    {
+                        Name = approvedCategory.CategoryName.Trim(),
+                        IsDeleted = false,
+                        Subcategories = new List<CategorySubcategory>()
+                    };
+
+                    await _categoriesCollection.InsertOneAsync(categoryEntity);
+
+                    categoriesByNormalizedName[normalizedCategoryName] = categoryEntity;
+
+                    result.CreatedCategoriesCount++;
+                    result.CreatedCategories.Add(categoryEntity.Name);
+                }
+                else
+                {
+                    result.SkippedCategoriesCount++;
+                    result.SkippedCategories.Add(categoryEntity.Name);
+                }
+
+                var subcategoryNames = (approvedCategory.SubcategoryNames ?? new List<string>())
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (subcategoryNames.Count == 0)
+                {
+                    continue;
+                }
+
+                categoryEntity.Subcategories ??= new List<CategorySubcategory>();
+
+                var existingSubcategories = categoryEntity.Subcategories
+                    .Where(subcategory => !subcategory.IsDeleted)
+                    .ToDictionary(subcategory => Normalize(subcategory.Name), subcategory => subcategory, StringComparer.OrdinalIgnoreCase);
+
+                var createdAnySubcategory = false;
+
+                foreach (var subcategoryName in subcategoryNames)
+                {
+                    var normalizedSubcategory = Normalize(subcategoryName);
+                    if (existingSubcategories.ContainsKey(normalizedSubcategory))
+                    {
+                        result.SkippedSubcategoriesCount++;
+                        result.SkippedSubcategories.Add($"{categoryEntity.Name}::{subcategoryName}");
+                        continue;
+                    }
+
+                    var newSubcategory = new CategorySubcategory
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        Name = subcategoryName,
+                        IsDeleted = false
+                    };
+
+                    categoryEntity.Subcategories.Add(newSubcategory);
+                    existingSubcategories[normalizedSubcategory] = newSubcategory;
+
+                    result.CreatedSubcategoriesCount++;
+                    result.CreatedSubcategories.Add($"{categoryEntity.Name}::{subcategoryName}");
+                    createdAnySubcategory = true;
+                }
+
+                if (createdAnySubcategory)
+                {
+                    await _categoriesCollection.ReplaceOneAsync(
+                        category => category.Id == categoryEntity.Id,
+                        categoryEntity);
+                }
+            }
+
+            return result;
         }
 
         public async Task<List<CategorySubcategoryDto>> GetSubcategoriesAsync(string? search = null, string? parentCategoryId = null)
@@ -340,6 +645,27 @@ namespace HR_System.Services
         private static string Normalize(string? value)
         {
             return (value ?? string.Empty).Trim().ToLowerInvariant();
+        }
+
+        private static string CanonicalShape(string value)
+        {
+            return Regex.Replace(value.Trim().ToLowerInvariant(), "\\s+", " ");
+        }
+
+        private static string BuildAmbiguityKey(string value)
+        {
+            var canonical = CanonicalShape(value);
+            return Regex.Replace(canonical, "[^\\p{L}\\p{Nd}]", string.Empty);
+        }
+
+        private static string ChooseCanonicalCandidate(List<CategoryBootstrapVariantDto> variants)
+        {
+            return variants
+                .OrderByDescending(variant => variant.UsageCount)
+                .ThenBy(variant => variant.Value.Length)
+                .ThenBy(variant => variant.Value)
+                .FirstOrDefault()?.Value
+                ?? string.Empty;
         }
 
         private static CategorySubcategoryDto MapSubcategoryToDto(CategorySubcategory subcategory, Category category)

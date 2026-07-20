@@ -14,6 +14,7 @@ namespace HR_System.Services
     {
         private readonly IMongoCollection<Employee> _employeesCollection;
         private readonly IMongoCollection<SystemModel> _systemsCollection;
+        private readonly IMongoCollection<Category> _categoriesCollection;
         private readonly IMapper _mapper;
         private readonly ILogger<EmployeeService> _logger;
 
@@ -24,6 +25,7 @@ namespace HR_System.Services
         {
             _employeesCollection = database.GetCollection<Employee>("employees");
             _systemsCollection = database.GetCollection<SystemModel>("systems");
+            _categoriesCollection = database.GetCollection<Category>("Categories");
             _mapper = mapper;
             _logger = logger;
         }
@@ -53,9 +55,9 @@ namespace HR_System.Services
 
                 var filtered = employees.AsEnumerable();
 
-                // true  - �� ������.
-                // false - �� �� ������.
-                // null  - �� �������.
+                // true  - �� ������.
+                // false - �� �� ������.
+                // null  - �� �������.
                 if (isActive.HasValue)
                 {
                     filtered = filtered.Where(employee =>
@@ -444,6 +446,11 @@ namespace HR_System.Services
                     throw new ArgumentNullException(nameof(dto));
                 }
 
+                await ValidateManagedCategoryPairOrThrowAsync(
+                    dto.ProfessionalCategory,
+                    dto.ProfessionalSubCategory,
+                    allowLegacyUnmanagedPair: false);
+
                 var employee = _mapper.Map<Employee>(dto);
                 await _employeesCollection.InsertOneAsync(employee);
 
@@ -478,6 +485,41 @@ namespace HR_System.Services
 
                     return false;
                 }
+
+                var existingEmployee = await _employeesCollection
+                    .Find(employee => employee.Id == id)
+                    .FirstOrDefaultAsync();
+
+                if (existingEmployee is null)
+                {
+                    _logger.LogWarning(
+                        "Employee update rejected because employee was not found. EmployeeId: {EmployeeId}",
+                        id);
+
+                    return false;
+                }
+
+                var finalCategory = dto.ProfessionalCategory ?? existingEmployee.ProfessionalCategory;
+                var finalSubcategory = dto.ProfessionalSubCategory ?? existingEmployee.ProfessionalSubCategory;
+
+                var categoryChanged = dto.ProfessionalCategory is not null &&
+                    !string.Equals(
+                        NormalizeLookupValue(existingEmployee.ProfessionalCategory),
+                        NormalizeLookupValue(dto.ProfessionalCategory),
+                        StringComparison.OrdinalIgnoreCase);
+
+                var subcategoryChanged = dto.ProfessionalSubCategory is not null &&
+                    !string.Equals(
+                        NormalizeLookupValue(existingEmployee.ProfessionalSubCategory),
+                        NormalizeLookupValue(finalSubcategory),
+                        StringComparison.OrdinalIgnoreCase);
+
+                var allowLegacyUnmanagedPair = !categoryChanged && !subcategoryChanged;
+
+                await ValidateManagedCategoryPairOrThrowAsync(
+                    finalCategory,
+                    finalSubcategory,
+                    allowLegacyUnmanagedPair);
 
                 var updateBuilder = Builders<Employee>.Update;
                 var updates = new List<UpdateDefinition<Employee>>();
@@ -950,6 +992,68 @@ namespace HR_System.Services
 
                 throw;
             }
+        }
+
+        private async Task ValidateManagedCategoryPairOrThrowAsync(
+            string? professionalCategory,
+            string? professionalSubCategory,
+            bool allowLegacyUnmanagedPair)
+        {
+            var normalizedCategory = NormalizeLookupValue(professionalCategory);
+            var normalizedSubcategory = NormalizeLookupValue(professionalSubCategory);
+
+            if (string.IsNullOrWhiteSpace(normalizedCategory))
+            {
+                throw new BusinessValidationException("קטגוריה מקצועית היא שדה חובה.");
+            }
+
+            var categories = await _categoriesCollection
+                .Find(category => !category.IsDeleted)
+                .ToListAsync();
+
+            var categoryMatch = categories.FirstOrDefault(category =>
+                string.Equals(
+                    NormalizeLookupValue(category.Name),
+                    normalizedCategory,
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (categoryMatch is null)
+            {
+                if (allowLegacyUnmanagedPair)
+                {
+                    return;
+                }
+
+                throw new BusinessValidationException("הקטגוריה המקצועית אינה קיימת ברשימת הקטגוריות המנוהלות.");
+            }
+
+            if (string.IsNullOrWhiteSpace(normalizedSubcategory))
+            {
+                return;
+            }
+
+            var subcategoryMatch = (categoryMatch.Subcategories ?? new List<CategorySubcategory>())
+                .FirstOrDefault(subcategory =>
+                    !subcategory.IsDeleted &&
+                    string.Equals(
+                        NormalizeLookupValue(subcategory.Name),
+                        normalizedSubcategory,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (subcategoryMatch is null)
+            {
+                if (allowLegacyUnmanagedPair)
+                {
+                    return;
+                }
+
+                throw new BusinessValidationException("תת הקטגוריה אינה פעילה או אינה שייכת לקטגוריה המקצועית שנבחרה.");
+            }
+        }
+
+        private static string NormalizeLookupValue(string? value)
+        {
+            return (value ?? string.Empty).Trim().ToLowerInvariant();
         }
 
         private static double GetAllocatedMonths(Employee employee) =>

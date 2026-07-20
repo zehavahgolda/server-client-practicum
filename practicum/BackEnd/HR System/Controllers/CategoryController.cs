@@ -291,4 +291,43 @@ public class CategoryController : ControllerBase
             return StatusCode(500, "Unexpected error occurred while deactivating subcategory.");
         }
     }
+
+    [HttpGet("bootstrap/analysis")]
+    public async Task<ActionResult<CategoryBootstrapAnalysisReportDto>> AnalyzeBootstrap()
+    {
+        try
+        {
+            var report = await _categoryService.AnalyzeEmployeeCategoryBootstrapAsync();
+            return Ok(report);
+        }
+        catch
+        {
+            return StatusCode(500, "Unexpected error occurred while analyzing bootstrap data.");
+        }
+    }
+
+    [HttpPost("bootstrap/execute-approved")]
+    public async Task<ActionResult<CategoryBootstrapExecuteResultDto>> ExecuteApprovedBootstrap(
+        [FromBody] CategoryBootstrapExecuteRequestDto request)
+    {
+        if (request is null)
+        {
+            return BadRequest("Request body is required.");
+        }
+
+        if (request.ApprovedCategories is null || request.ApprovedCategories.Count == 0)
+        {
+            return BadRequest("At least one approved category is required.");
+        }
+
+        try
+        {
+            var result = await _categoryService.ExecuteApprovedCategoryBootstrapAsync(request);
+            return Ok(result);
+        }
+        catch
+        {
+            return StatusCode(500, "Unexpected error occurred while executing approved bootstrap.");
+        }
+    }
 }
