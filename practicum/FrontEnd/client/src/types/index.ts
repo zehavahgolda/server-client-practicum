@@ -8,4 +8,5 @@ export * from "./assignment";
 export * from "./employeeEvent";
 export * from "./subcategory";
 export * from "./organizationEvent";
+export * from "./manager";
 

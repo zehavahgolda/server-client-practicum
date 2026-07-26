@@ -37,6 +37,8 @@ builder.Services.AddScoped<ISystemService, SystemService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IChangeService, ChangeService>();
 builder.Services.AddScoped<IOrganizationEventService, OrganizationEventService>();
+builder.Services.AddScoped<IManagerService, ManagerService>();
+builder.Services.AddScoped<IManagerAssignmentUsageResolver, LegacyManagerNameUsageResolver>();
 
 builder.Services.AddCors(options =>
 {

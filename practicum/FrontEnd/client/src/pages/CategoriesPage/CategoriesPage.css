@@ -323,6 +323,165 @@
   grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
 }
 
+.management-page .management-managers-toolbar {
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 220px) auto;
+}
+
+.management-page .management-managers-status-filter select {
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+}
+
+.management-page .management-managers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.management-page .management-managers-row {
+  border: 1px solid color-mix(in srgb, var(--border-color) 88%, white);
+  border-radius: 12px;
+  background: var(--surface-bg);
+  padding: 11px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.management-page .management-managers-row.inactive {
+  background: color-mix(in srgb, var(--surface-alt) 84%, white);
+}
+
+.management-page .management-managers-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.management-page .management-managers-main p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.management-page .management-managers-main small {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.management-page .management-managers-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.management-page .management-managers-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.management-page .management-managers-status.active {
+  background: color-mix(in srgb, var(--status-surplus-soft) 80%, white);
+  color: var(--status-surplus);
+}
+
+.management-page .management-managers-status.inactive {
+  background: color-mix(in srgb, var(--surface-alt) 88%, white);
+  color: var(--text-secondary);
+}
+
+.management-page .management-managers-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.management-page .management-managers-dialog {
+  max-width: 460px;
+}
+
+.management-page .management-managers-picker {
+  max-width: 720px;
+}
+
+.management-page .management-managers-picker-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.management-page .management-managers-picker-search input {
+  min-height: 38px;
+  box-sizing: border-box;
+  border: 1px solid var(--input-border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-family: "Heebo", sans-serif;
+}
+
+.management-page .management-managers-picker-list {
+  max-height: 380px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.management-page .management-managers-picker-row {
+  border: 1px solid color-mix(in srgb, var(--border-color) 88%, white);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  background: var(--surface-bg);
+}
+
+.management-page .management-managers-picker-row.selected {
+  border-color: color-mix(in srgb, var(--status-surplus) 38%, var(--border-color));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--status-surplus) 16%, transparent);
+}
+
+.management-page .management-managers-picker-row.blocked {
+  opacity: 0.66;
+  cursor: not-allowed;
+}
+
+.management-page .management-managers-picker-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.management-page .management-managers-picker-main span,
+.management-page .management-managers-picker-main small {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.management-page .management-managers-picker-empty {
+  min-height: 100px;
+}
+
 .management-page .management-org-events-toolbar {
   grid-template-columns: minmax(220px, 1fr) minmax(180px, 220px) minmax(180px, 220px) auto;
 }

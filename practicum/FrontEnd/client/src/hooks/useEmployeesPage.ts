@@ -7,6 +7,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { useEmployees } from "./useEmployees";
 import { useSystems } from "./useSystems";
+import { useCategories } from "./useCategories";
 
 import { employeeService } from "../services/employeeService";
 
@@ -41,6 +42,9 @@ export function useEmployeesPage() {
     year: activeYear,
     isActive: true
   });
+  const {
+    categories: managedCategories
+  } = useCategories();
 
   const { systems } = useSystems();
 
@@ -224,21 +228,21 @@ export function useEmployeesPage() {
     [filteredEmployees]
   );
 
-  // מפיק רשימת קטגוריות ייחודיות וממוינות לבחירה בפילטר.
+  // מפיק רשימת קטגוריות מנוהלות וממוינות לבחירה בפילטר.
   const categories = useMemo(
     () =>
       [
         ...new Set(
-          employeesForFilterOptions
-            .map((employee) =>
-              employee.professionalCategory?.trim()
+          managedCategories
+            .map((category) =>
+              category.name?.trim()
             )
             .filter(Boolean)
         )
       ].sort((a, b) =>
         a.localeCompare(b, "he")
       ),
-    [employeesForFilterOptions]
+    [managedCategories]
   );
 
   // מפיק רשימת מנהלים ייחודיים וממוינים לבחירה בפילטר.
